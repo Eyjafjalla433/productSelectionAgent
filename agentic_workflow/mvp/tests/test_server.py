@@ -403,13 +403,13 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(parse_control_intent("Export selection").action, "handoff")
         self.assertIsNone(parse_control_intent("I need a clear blue phone case"))
 
-    def test_chinese_session_replies_in_chinese_and_keeps_locale(self):
+    def test_chinese_input_keeps_english_output(self):
         result = self.runtime.chat(self.session_id, "我想要一件蓝色衬衫")
-        self.assertIn("先看看", result["assistant"]["message"])
+        self.assertNotRegex(result["assistant"]["message"], r'[\u3400-\u9fff]')
         compared = self.runtime.chat(self.session_id, "比较第一个")
-        self.assertIn("慢慢看", compared["assistant"]["message"])
-        self.assertEqual(self.runtime.sessions[self.session_id].locale, "zh")
-        self.assertEqual(message_locale("Show me more", "zh"), "zh")
+        self.assertNotRegex(compared["assistant"]["message"], r'[\u3400-\u9fff]')
+        self.assertEqual(self.runtime.sessions[self.session_id].locale, "en")
+        self.assertEqual(message_locale("Show me more", "zh"), "en")
 
     def test_explicit_product_rejection_is_recorded_without_requirement_mutation(self):
         self.runtime.chat(self.session_id, "我想要一件蓝色衬衫")
@@ -418,7 +418,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(rejected["receipt"]["state_changes"], [])
         self.assertEqual(rejected["selection_state"]["rejected_asins"], ["A1"])
         self.assertEqual(rejected["receipt"]["rejected_asins"], ["A1"])
-        self.assertIn("不再推荐", rejected["assistant"]["message"])
+        self.assertIn("stay out", rejected["assistant"]["message"])
 
     def test_chinese_error_message_does_not_claim_empty_catalog(self):
         message = localized_agent_message(

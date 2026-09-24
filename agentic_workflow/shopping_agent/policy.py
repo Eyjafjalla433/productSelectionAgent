@@ -13,7 +13,8 @@ class PolicyDecision:
 
 
 def can_ask(state, max_questions=2):
-    return state.turn < 10 and state.suggestions.get("clarification_count", 0) < max_questions
+    turn_limit = state.suggestions.get('max_turns', 10)
+    return (turn_limit is None or state.turn < turn_limit) and (max_questions is None or state.suggestions.get("clarification_count", 0) < max_questions)
 
 
 def clarify(state, attribute, message, reason, *, constraint_type=None, hard_value_limit=None):
@@ -42,7 +43,7 @@ def missing_detail_question(state, attribute, reason):
         if slot in known | asked | skipped or (slot == 'style' and not apparel):
             continue
         decision = clarify(state, attribute, english, reason)
-        decision.question.update(target_slot=slot, message_zh=chinese)
+        decision.question.update(target_slot=slot)
         return decision
     return clarify(state, attribute, 'What would you like to be different about these options?', reason)
 
@@ -51,14 +52,32 @@ class PreRetrievalPolicy:
     def __init__(self, minimum_evidence=0, minimum_questions=0, max_questions=2):
         if type(minimum_evidence) is not int or minimum_evidence < 0:
             raise ValueError("minimum_evidence must be a nonnegative integer")
-        if type(minimum_questions) is not int or type(max_questions) is not int or not 0 <= minimum_questions <= max_questions:
+        if type(minimum_questions) is not int or minimum_questions < 0 or (max_questions is not None and (type(max_questions) is not int or minimum_questions > max_questions)):
             raise ValueError("question limits must be integers with 0 <= minimum_questions <= max_questions")
         self.minimum_evidence = minimum_evidence
         self.minimum_questions = minimum_questions
         self.max_questions = max_questions
 
     def decide(self, state):
+        if self.max_questions is None and state.suggestions.get('conversation_act'):
+            return PolicyDecision('acknowledge', 'conversation_' + state.suggestions['conversation_act'])
+        if self.max_questions is None and (state.suggestions.get('requested_results') or state.suggestions.get('clarification_stalled') or state.suggestions.get('clarification_streak', 0) >= 2):
+            if not state.hard_constraints.get('category'):
+                return PolicyDecision('acknowledge', 'awaiting_product_context')
+            return PolicyDecision('retrieve', 'clarification_escape')
         if can_ask(state, self.max_questions):
+            conflicts = state.suggestions.get('requirement_conflicts', ())
+            if self.max_questions is None and conflicts:
+                conflict = conflicts[0]
+                old = ' / '.join(map(str, conflict['old']))
+                new = ' / '.join(map(str, conflict['new']))
+                from intent_router.router import COLOR_ALIASES, MATERIAL_ALIASES
+                labels = {v: k for k, v in {**MATERIAL_ALIASES, **COLOR_ALIASES}.items()}
+                old_zh = '、'.join(labels.get(v, str(v)) for v in conflict['old'])
+                new_zh = '、'.join(labels.get(v, str(v)) for v in conflict['new'])
+                question = clarify(state, 'feature', f'You previously wanted {old}. Replace it with {new}, or keep both? You can also keep the original or say "show me first".', 'confirm_requirement_change')
+                question.question.update(target_slot=conflict['slot'], correction=conflict)
+                return question
             if not state.hard_constraints.get("category"):
                 return clarify(state, "category", "What type of product are you looking for?", "missing_category")
             hard = state.hard_constraints
@@ -82,11 +101,13 @@ class PreRetrievalPolicy:
 
 class PostRetrievalPolicy:
     def __init__(self, max_questions=2):
-        if type(max_questions) is not int or max_questions < 0:
+        if max_questions is not None and (type(max_questions) is not int or max_questions < 0):
             raise ValueError("max_questions must be a nonnegative integer")
         self.max_questions = max_questions
 
     def decide(self, state, retrieval, ranking):
+        if self.max_questions is None:
+            return self.conversational_decision(state, retrieval, ranking)
         if not ranking.ranked_candidates:
             if can_ask(state, self.max_questions):
                 attr = "budget" if any(k.startswith("price_") for k in state.hard_constraints) else "other"
@@ -101,3 +122,47 @@ class PostRetrievalPolicy:
         if can_ask(state, self.max_questions) and ((not informed and (retrieval.stats.filtered_count or 0) > 100) or state.suggestions.get("negative_feedback")) and "feature" not in asked:
             return missing_detail_question(state, "feature", "broad_pool_or_negative_feedback")
         return PolicyDecision("recommend", "ranked_eligible_candidates")
+
+    def conversational_decision(self, state, retrieval, ranking):
+        context = state.suggestions
+        # Hard bounds on interrogation, not on the length of the conversation.
+        if context.get('requested_results'):
+            return PolicyDecision('recommend', 'user_requested_results')
+        if context.get('clarification_stalled'):
+            return PolicyDecision('recommend', 'clarification_no_progress')
+        if context.get('clarification_streak', 0) >= 2:
+            return PolicyDecision('recommend', 'clarification_streak_limit')
+        if not context.get('requirements_changed') and not context.get('negative_feedback'):
+            return PolicyDecision('recommend', 'no_new_requirements')
+        if not ranking.ranked_candidates:
+            return clarify(state, 'other', 'I cannot verify a match with these requirements. Is there one you would like to change?', 'empty_eligible_pool')
+        # A results-only turn resets the consecutive counter, but must not
+        # replenish the attention budget for this shopping target. Necessary
+        # conflict/empty-result recovery stays separate from optional narrowing.
+        scope_start = context.get('question_scope_start', 0)
+        narrowing_questions = [q for q in state.asked_questions or ()
+                               if q.get('turn', 0) >= scope_start
+                               and q.get('evidence', {}).get('expected_reduction') is not None]
+        if len(narrowing_questions) >= 3:
+            return PolicyDecision('recommend', 'target_clarification_budget')
+        if len(retrieval.candidates) < 20 or not can_ask(state, None):
+            return PolicyDecision('recommend', 'manageable_candidate_pool')
+        # Reuse the evidence-only diagnostic: estimate reduction over retrieved
+        # candidates, never claim to know the total catalogue match count.
+        from mvp.shadow_policy import shadow_question_board
+        known = set(state.hard_constraints) | set(state.soft_preferences) | set(state.exclusions)
+        asked = {q.get('target_slot') for q in state.asked_questions or ()
+                 if q.get('turn', 0) >= scope_start}
+        board = shadow_question_board([dict(c.product) for c in retrieval.candidates],
+            already_known=known, already_asked=asked | set(context.get('cleared_slots', ())), turns_left=None)
+        best = next((q for q in board if q['attribute'] in {'color', 'material', 'style', 'use_case'}
+                     and q['coverage'] >= 0.6 and q['expected_reduction'] >= 0.3 and q['net_value'] > 0), None)
+        if not best:
+            return PolicyDecision('recommend', 'no_valuable_question')
+        options = [o['value'] for o in best['options']]
+        choices = ' / '.join(options)
+        from intent_router.option_labels import OPTION_LABELS_ZH, question_in_chinese
+        decision = clarify(state, 'feature', f'These options differ in {best["attribute"]}: {choices}. Which do you prefer? You can also say "show me first".', 'candidate_information_gain')
+        decision.question.update(target_slot=best['attribute'],
+            options=options, option_labels={value: value for value in options}, evidence=best)
+        return PolicyDecision('recommend_and_clarify', decision.reason, decision.question)

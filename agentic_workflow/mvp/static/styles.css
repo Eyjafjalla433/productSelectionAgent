@@ -277,3 +277,8 @@ button { color: inherit; }
 .shopping-top-three table { width: 100%; min-width: 550px; border-collapse: collapse; font-size: 13px; }
 .shopping-top-three th, .shopping-top-three td { text-align: left; padding: 12px; border-bottom: 1px solid var(--guide-line); vertical-align: top; }
 .shopper-summary { font-size: 13px; line-height: 1.7; }
+.reply-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.reply-options[hidden] { display: none; }
+.reply-options button { border: 1px solid #6d8a7e; border-radius: 18px; padding: 8px 14px; background: #f5f6ed; color: #183e39; cursor: pointer; }
+.reply-options button:focus-visible { outline: 2px solid #183e39; outline-offset: 3px; }
+.reply-options button:disabled { opacity: .5; cursor: default; }

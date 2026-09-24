@@ -6,7 +6,7 @@ import math
 import re
 from typing import Any, Iterable
 
-from shopping_agent.retrieval import category_matches
+from shopping_agent.retrieval import category_matches, pure_cotton_matches, size_matches, color_matches, style_matches
 from techjam_agent.query import parse_text
 
 
@@ -89,27 +89,41 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 if slot.startswith("feature_")
                 else values
             )
-            if any(_text_match(value, corpus) for value in evidence_values):
+            if any((pure_cotton_matches(product) if slot == 'material' and value == '100% cotton'
+                    else size_matches(product, value) if slot == 'size'
+                    else color_matches(product, value) if slot == 'color'
+                    else style_matches(product, value) if slot == 'style'
+                    else _text_match(value, corpus)) for value in evidence_values):
                 status = "supported"
                 evidence = "store/details" if slot == "brand" else "catalog text"
         signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status, "evidence": evidence})
 
     for slot, raw_values in receipt.get("soft", {}).items():
         values = _values(raw_values)
-        matched = [value for value in values if _text_match(value, full_terms)]
+        matched = [value for value in values if (
+            pure_cotton_matches(product) if slot == 'material' and value == '100% cotton'
+            else size_matches(product, value) if slot == 'size'
+            else color_matches(product, value) if slot == 'color'
+            else style_matches(product, value) if slot == 'style'
+            else False if slot == 'budget_target'
+            else _text_match(value, full_terms))]
         signals.append(
             {
                 "tier": "soft",
                 "slot": slot,
                 "value": raw_values,
-                "status": "supported" if matched else "not_evidenced",
-                "evidence": f"matched: {', '.join(map(str, matched))}" if matched else "not found in catalog text",
+                "status": "unknown" if slot == 'budget_target' and price is None else "supported" if matched else "not_evidenced",
+                "evidence": ("target budget requires a price comparison" if slot == 'budget_target'
+                             else f"matched: {', '.join(map(str, matched))}" if matched else "not found in catalog text"),
             }
         )
 
     for slot, raw_values in receipt.get("excluded", {}).items():
         values = _values(raw_values)
-        conflicts = [value for value in values if _text_match(value, full_terms)]
+        conflicts = [value for value in values if (pure_cotton_matches(product)
+                     if slot == 'material' and value == '100% cotton'
+                     else color_matches(product, value) if slot == 'color'
+                     else style_matches(product, value) if slot == 'style' else _text_match(value, full_terms))]
         signals.append(
             {
                 "tier": "excluded",

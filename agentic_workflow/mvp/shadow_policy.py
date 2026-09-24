@@ -1,9 +1,10 @@
-"""Target-blind, non-operative question diagnostics for the product demo.
+"""Target-blind candidate question scoring shared by diagnostics and policy.
 
 This module does not choose the scored Agent's ``ask_attribute``. It estimates
 which catalog facet would best divide the candidates already returned by the
 real retrieval stage, so a reviewer can compare product-facing and benchmark
-policies without silently changing either one.
+policies. Product conversational mode also uses these evidence scores, with
+explicit coverage thresholds and escape conditions in shopping_agent.policy.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import math
 import re
 from collections import Counter
 from typing import Any, Iterable
+from shopping_agent.retrieval import product_colors, style_matches
 
 
 MATERIALS = (
@@ -24,7 +26,7 @@ COLORS = (
 )
 STYLES = (
     "casual", "formal", "athletic", "vintage", "classic", "elegant",
-    "slim fit", "loose fit", "oversized", "sleeveless", "long sleeve",
+    "slim fit", "loose fit", "regular fit", "sleeveless", "long sleeve",
 )
 USE_CASES = (
     "hiking", "running", "walking", "gym", "winter", "outdoor", "work",
@@ -45,11 +47,29 @@ def _text(product: dict[str, Any]) -> str:
     return " ".join(values).casefold()
 
 
-def _first_phrase(text: str, vocabulary: Iterable[str]) -> str:
+def _single_phrase(text: str, vocabulary: Iterable[str]) -> str:
+    """Overlapping/contradictory facets cannot pretend to be disjoint groups."""
+    values = set()
     for phrase in vocabulary:
-        if re.search(rf"\b{re.escape(phrase)}\b", text):
-            return "gray" if phrase == "grey" else phrase
-    return ""
+        for match in re.finditer(rf'\b{re.escape(phrase)}\b', text):
+            if not re.search(r'\b(?:not|no|without)\s*$', text[:match.start()]):
+                values.add(phrase)
+    return next(iter(values)) if len(values) == 1 else ''
+
+
+def _single_color(product):
+    values = product_colors(product)
+    # Navy belongs to the blue family; do not count the same item twice.
+    values.discard('navy')
+    return next(iter(values)) if len(values) == 1 else ''
+
+
+def _single_style(product):
+    # Share filtering semantics, including structured Fit Type precedence,
+    # fitted/relaxed aliases and negation. Oversized is already loose fit;
+    # counting both would make one product look like two distinct groups.
+    values = {value for value in STYLES if style_matches(product, value)}
+    return next(iter(values)) if len(values) == 1 else ''
 
 
 def _price_band(value: object) -> str:
@@ -75,10 +95,10 @@ def product_facets(product: dict[str, Any]) -> dict[str, str]:
         "category": str(categories[-1]).strip().casefold() if categories else "",
         "brand": str(product.get("store") or "").strip().casefold(),
         "budget": _price_band(product.get("price")),
-        "material": _first_phrase(text, MATERIALS),
-        "color": _first_phrase(text, COLORS),
-        "style": _first_phrase(text, STYLES),
-        "use_case": _first_phrase(text, USE_CASES),
+        "material": _single_phrase(text, MATERIALS),
+        "color": _single_color(product),
+        "style": _single_style(product),
+        "use_case": _single_phrase(text, USE_CASES),
     }
 
 
@@ -107,7 +127,7 @@ def shadow_question_board(
     *,
     already_known: Iterable[str] = (),
     already_asked: Iterable[str] = (),
-    turns_left: int = 0,
+    turns_left: int | None = 0,
     max_options: int = 3,
 ) -> list[dict[str, Any]]:
     """Rank candidate-grounded questions by answerable set reduction.
@@ -121,7 +141,9 @@ def shadow_question_board(
     if total < 2:
         return []
     blocked = {str(value).casefold() for value in (*already_known, *already_asked)}
-    cost = 1.0 / (max(0, int(turns_left)) + 1.0)
+    # Product mode has no arbitrary remaining-turn countdown. Keep a modest
+    # fixed interaction cost instead of pretending user attention is free.
+    cost = 0.2 if turns_left is None else 1.0 / (max(0, int(turns_left)) + 1.0)
     board: list[dict[str, Any]] = []
     for attribute in ("category", "material", "color", "style", "use_case", "budget", "brand"):
         if attribute in blocked:

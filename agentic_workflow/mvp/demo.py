@@ -1,7 +1,7 @@
 """Self-contained fake-catalog demo for the conversational shopping Agent.
 
 Examples:
-    python -m mvp.demo --case dress_zh
+    python -m mvp.demo --case dress_en
     python -m mvp.demo
     python -m mvp.demo --web --port 8000
 """
@@ -22,13 +22,13 @@ from .server import AgentRuntime, ApiError, create_server
 
 DEMO_CATALOG = Path(__file__).resolve().parent / "demo_data" / "catalog.jsonl"
 DEMO_CASES: dict[str, dict[str, Any]] = {
-    "dress_zh": {
-        "label": "中文：50 美元内的蓝色棉质连衣裙",
+    "dress_en": {
+        "label": "Blue cotton dress under $50",
         "prompts": (
-            "我想要一条蓝色棉质连衣裙，价格不超过50美元。",
-            "不要涤纶，适合夏天。",
-            "比较第一个和第二个",
-            "确认最终选择",
+            "I need a blue cotton dress under $50.",
+            "No polyester, and suitable for summer.",
+            "Compare #1 and #2",
+            "Finalize my selection",
         ),
     },
     "running_shoes": {
@@ -171,7 +171,7 @@ class TerminalDemo:
 HELP = """
 Commands:
   /cases                 list scripted cases
-  /run dress_zh          reset and run a complete case
+  /run dress_en          reset and run a complete case
   /select 1 2            shortlist displayed ranks
   /compare 1 2           compare and shortlist ranks
   /reject 2              record negative feedback

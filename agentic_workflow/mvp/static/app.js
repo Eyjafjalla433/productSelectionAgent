@@ -1,5 +1,6 @@
 const ui = {
   chat: document.querySelector("#chat"),
+  replyOptions: document.querySelector("#reply-options"),
   products: document.querySelector("#products"),
   resultsHead: document.querySelector("#results-head"),
   resultSummary: document.querySelector("#result-summary"),
@@ -8,6 +9,8 @@ const ui = {
   shortlistCount: document.querySelector("#shortlist-count"),
   shortlistStatus: document.querySelector("#shortlist-status"),
   clearShortlist: document.querySelector("#clear-shortlist"),
+  undoShortlist: document.querySelector("#undo-shortlist"),
+  redoShortlist: document.querySelector("#redo-shortlist"),
   finalizeSelection: document.querySelector("#finalize-selection"),
   exportSelection: document.querySelector("#export-selection"),
   comparison: document.querySelector("#comparison"),
@@ -54,6 +57,7 @@ const ui = {
 let sessionId = null;
 let sessionUsable = false;
 let currentTurn = 0;
+let maxTurns = null;
 let scenarios = [];
 const shortlisted = new Map();
 let currentSelectionState = { status: "draft", finalized: false };
@@ -104,6 +108,43 @@ function formatValue(value) {
   if (Array.isArray(value)) return value.join(", ");
   if (value && typeof value === "object") return Object.values(value).join(", ");
   return String(value);
+}
+
+function renderReplyOptions(receipt = {}) {
+  ui.replyOptions.replaceChildren();
+  const question = receipt.question;
+  const choices = [];
+  if (question?.correction) {
+    choices.push("Replace", "Keep both", "Keep original");
+  } else if (Array.isArray(question?.options)) {
+    question.options.slice(0, 4).forEach((value) => {
+      if (typeof value === "string") choices.push(value);
+    });
+  }
+  if (question && question.target_slot !== "category") choices.push("Show me first");
+  if (receipt.can_undo_requirements) choices.push("Undo");
+  if (receipt.can_redo_requirements) choices.push("Redo");
+  [...new Set(choices)].forEach((text) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = text;
+    button.addEventListener("click", () => {
+      if (!sessionUsable || ui.submit.disabled || ui.message.value.trim()) return;
+      ui.message.value = text;
+      ui.composer.requestSubmit();
+    });
+    ui.replyOptions.append(button);
+  });
+  ui.replyOptions.hidden = choices.length === 0;
+  syncReplyOptions();
+}
+
+function syncReplyOptions() {
+  const draft = Boolean(ui.message.value.trim());
+  ui.replyOptions.querySelectorAll("button").forEach((button) => {
+    button.disabled = !sessionUsable || ui.submit.disabled || draft;
+    button.title = draft ? "Send or clear your draft first" : "Click to send, or type your own reply";
+  });
 }
 
 function renderState(receipt) {
@@ -283,18 +324,18 @@ function productColor(text) {
   return palette[sum % palette.length];
 }
 
-function renderProducts(products) {
+function renderProducts(products, retained = false) {
   ui.products.replaceChildren();
   if (products.length) {
     const panel = document.createElement('section');
     panel.className = 'shopping-top-three';
     const heading = document.createElement('h3');
-    heading.textContent = products.length >= 3 ? '先看这三款，慢慢比较' : '先看这几款，慢慢比较';
+    heading.textContent = products.length >= 3 ? 'Compare the top three' : 'Take a closer look';
     const note = document.createElement('p');
-    note.textContent = '按搜索相关性排序，不是销量榜。' + (products.some(p => p.price == null) ? '价格未提供，预算是否符合还需核实。' : '');
+    note.textContent = 'Ranked by search relevance, not sales.' + (products.some(p => p.price == null) ? ' Prices are unavailable; budget fit still needs checking.' : '');
     const table = document.createElement('table');
     const head = table.createTHead().insertRow();
-    ['排行 / 商品', '款式特点', '其他信息'].forEach(label => {
+    ['Rank / Product', 'Standout features', 'Other details'].forEach(label => {
       const cell = document.createElement('th'); cell.textContent = label; head.append(cell);
     });
     const body = table.createTBody();
@@ -308,7 +349,10 @@ function renderProducts(products) {
     panel.append(heading, note, table); ui.products.append(panel);
   }
   ui.resultsHead.hidden = products.length === 0;
-  ui.resultSummary.textContent = products.length ? `本次推荐 ${products.length} 款 · 最多 10 款` : "";
+  ui.resultSummary.textContent = products.length
+    ? (retained === "restored_previous_results" ? `Restored ${products.length} previous options`
+      : retained ? `Keeping ${products.length} previous options` : `${products.length} recommendations · Up to 10`)
+    : "";
   products.forEach((product, index) => {
     const card = document.querySelector("#product-template").content.firstElementChild.cloneNode(true);
     card.style.setProperty("--product-color", productColor(product.category));
@@ -363,14 +407,18 @@ function renderProducts(products) {
     shortlistButton.textContent = selected ? "✓ SHORTLISTED" : "+ SHORTLIST";
     shortlistButton.disabled = !selected && shortlisted.size >= 3;
     shortlistButton.addEventListener("click", async () => {
+      if (!sessionUsable || !sessionId) return;
+      const requestSession = sessionId;
       const selected = !shortlisted.has(product.parent_asin);
       shortlistButton.disabled = true;
       try {
-        const state = await api("/api/select", { session_id: sessionId, parent_asin: product.parent_asin, selected });
+        const state = await api("/api/select", { session_id: requestSession, parent_asin: product.parent_asin, selected });
+        if (sessionId !== requestSession) return;
         syncSelection(state, products);
         renderComparison(null);
-        renderProducts(products);
+        renderProducts(products, retained);
       } catch (error) {
+        if (sessionId !== requestSession) return;
         addMessage("agent", `Selection update failed: ${error.message}`);
         shortlistButton.disabled = false;
       }
@@ -428,7 +476,11 @@ function renderProducts(products) {
 }
 
 function renderShortlist() {
-  ui.shortlist.hidden = shortlisted.size === 0;
+  ui.shortlist.hidden = shortlisted.size === 0 && !currentSelectionState.can_undo_selection && !currentSelectionState.can_redo_selection;
+  ui.undoShortlist.hidden = !currentSelectionState.can_undo_selection;
+  ui.redoShortlist.hidden = !currentSelectionState.can_redo_selection;
+  ui.redoShortlist.title = "Load a redo command. Your search requirements will not change.";
+  ui.undoShortlist.title = "Load an undo command. Your search requirements will not change.";
   ui.shortlistCount.textContent = `${shortlisted.size} / 3`;
   const finalized = Boolean(currentSelectionState.finalized && shortlisted.size);
   ui.shortlist.classList.toggle("finalized", finalized);
@@ -445,6 +497,15 @@ function renderShortlist() {
     title.textContent = product.title;
     meta.textContent = `${product.price == null ? "PRICE N/A" : `$${Number(product.price).toFixed(2)}`} · ${product.rating == null ? "NO RATING" : `★ ${product.rating}`}`;
     item.append(title, meta);
+    const needsReview = product.match?.signals?.some(signal =>
+      (signal.tier === "hard" && signal.status !== "supported") ||
+      (signal.tier === "excluded" && signal.status === "conflict"));
+    if (needsReview) {
+      const review = document.createElement("p");
+      review.className = "shortlist-caution";
+      review.textContent = "Saved earlier. Not all current requirements are supported by its listed details.";
+      item.append(review);
+    }
     const draft = product.comparisonDraft;
     if (draft) {
       const label = document.createElement("small");
@@ -478,10 +539,20 @@ function syncSelection(state, products) {
   const desired = new Set(state.selected_asins || []);
   [...shortlisted.keys()].forEach((asin) => {
     if (!desired.has(asin)) shortlisted.delete(asin);
+    else delete shortlisted.get(asin).comparisonDraft;
+  });
+  (state.selected_products || []).forEach((product) => {
+    if (desired.has(product.parent_asin)) {
+      shortlisted.set(product.parent_asin, {...shortlisted.get(product.parent_asin), ...product});
+    }
   });
   (products || []).forEach((product) => {
     if (desired.has(product.parent_asin)) shortlisted.set(product.parent_asin, product);
   });
+  // Preserve the backend's shortlist order, including restored selections.
+  const ordered = [...desired].map(asin => [asin, shortlisted.get(asin)]).filter(([, product]) => product);
+  shortlisted.clear();
+  ordered.forEach(([asin, product]) => shortlisted.set(asin, product));
   renderShortlist();
 }
 
@@ -584,9 +655,11 @@ function renderStoryGuide() {
 }
 
 function resetVisuals() {
+  ui.clearShortlist.disabled = false;
   currentTurn = 0;
   ui.message.placeholder = "e.g. Blue instead — and no budget limit";
-  ui.turnLabel.textContent = "0 / 10";
+  ui.turnLabel.textContent = maxTurns == null ? '0 messages' : `0 / ${maxTurns}`;
+  ui.turnProgress.parentElement.hidden = maxTurns == null;
   ui.turnProgress.style.width = "0%";
   ui.products.replaceChildren();
   ui.resultsHead.hidden = true;
@@ -608,16 +681,19 @@ function resetVisuals() {
   ui.turnAudit.append(auditNote);
   renderState({ hard: {}, soft: {}, excluded: {}, state_changes: [], intent_version: 1 });
   renderReceipt({ timings: [], shown_count: "—", questions_asked: "—" });
+  renderReplyOptions();
 }
 
 async function startSession() {
   sessionUsable = false;
+  sessionId = null;
   setStatus("WARMING UP", "busy");
   ui.submit.disabled = true;
   ui.exportAudit.disabled = true;
   try {
     const data = await api("/api/session", {});
     sessionId = data.session_id;
+    maxTurns = data.max_turns;
     sessionUsable = true;
     scenarios = data.scenarios;
     const modeLabel = data.orchestration_mode === "adaptive" ? "PRODUCT MODE" : "SCORE-COMPAT MODE";
@@ -642,10 +718,12 @@ async function startSession() {
 ui.composer.addEventListener("submit", async (event) => {
   event.preventDefault();
   const message = ui.message.value.trim();
-  if (!message || !sessionId || !sessionUsable) return;
+  if (!message || !sessionId || !sessionUsable || ui.submit.disabled) return;
   addMessage("user", message);
   ui.message.value = "";
   ui.submit.disabled = true;
+  syncReplyOptions();
+  ui.newSession.disabled = true;
   setStatus("THINKING", "busy");
   try {
     const data = await api("/api/chat", { session_id: sessionId, message });
@@ -658,15 +736,16 @@ ui.composer.addEventListener("submit", async (event) => {
     applyComparisonAssist(data.handoff);
     renderComparison(data.handoff);
     addMessage("agent", data.assistant.message, data.assistant.ask_attribute);
-    renderProducts(data.products);
+    renderProducts(data.products, data.receipt?.display_mode || false);
     renderState(data.receipt);
     renderReceipt(data.receipt);
+    renderReplyOptions(data.receipt);
     appendTurnAudit(data);
     const expectedPrompt = storyPrompts()[scenarioStep];
     if (expectedPrompt && message === expectedPrompt) scenarioStep += 1;
     renderStoryGuide();
-    ui.turnLabel.textContent = `${currentTurn} / 10`;
-    ui.turnProgress.style.width = `${currentTurn * 10}%`;
+    ui.turnLabel.textContent = maxTurns == null ? `${currentTurn} messages` : `${currentTurn} / ${maxTurns}`;
+    ui.turnProgress.style.width = maxTurns == null ? '0%' : `${currentTurn / maxTurns * 100}%`;
     setStatus(data.products.length ? `${data.products.length} MATCHES` : "LISTENING", "live");
     if (data.remaining_turns === 0) {
       sessionUsable = false;
@@ -683,7 +762,9 @@ ui.composer.addEventListener("submit", async (event) => {
       setStatus("TRY AGAIN", "");
     }
   } finally {
-    if (sessionUsable && currentTurn < 10) ui.submit.disabled = false;
+    if (sessionUsable && (maxTurns == null || currentTurn < maxTurns)) ui.submit.disabled = false;
+    ui.newSession.disabled = false;
+    syncReplyOptions();
     ui.message.focus();
   }
 });
@@ -694,6 +775,7 @@ ui.message.addEventListener("keydown", (event) => {
     ui.composer.requestSubmit();
   }
 });
+ui.message.addEventListener("input", syncReplyOptions);
 ui.newSession.addEventListener("click", startSession);
 ui.storyNext.addEventListener("click", () => {
   const prompt = storyPrompts()[scenarioStep];
@@ -723,10 +805,12 @@ ui.exportAudit.addEventListener("click", async () => {
   }
 });
 ui.clearShortlist.addEventListener("click", async () => {
-  if (!sessionId) return;
+  if (!sessionUsable || !sessionId) return;
+  const requestSession = sessionId;
   ui.clearShortlist.disabled = true;
   try {
-    const state = await api("/api/select", { session_id: sessionId, clear: true });
+    const state = await api("/api/select", { session_id: requestSession, clear: true });
+    if (sessionId !== requestSession) return;
     syncSelection(state, []);
     renderComparison(null);
     ui.products.querySelectorAll(".shortlist-button").forEach((button) => {
@@ -736,16 +820,19 @@ ui.clearShortlist.addEventListener("click", async () => {
       button.textContent = "+ SHORTLIST";
     });
   } catch (error) {
+    if (sessionId !== requestSession) return;
     addMessage("agent", `Could not clear selection: ${error.message}`);
   } finally {
-    ui.clearShortlist.disabled = false;
+    if (sessionId === requestSession) ui.clearShortlist.disabled = false;
   }
 });
 ui.exportSelection.addEventListener("click", async () => {
-  if (!sessionId || shortlisted.size === 0) return;
+  if (!sessionUsable || !sessionId || shortlisted.size === 0) return;
+  const requestSession = sessionId;
   ui.exportSelection.disabled = true;
   try {
-    const handoff = await api("/api/handoff", { session_id: sessionId });
+    const handoff = await api("/api/handoff", { session_id: requestSession });
+    if (sessionId !== requestSession) return;
     renderComparison(handoff);
     const blob = new Blob([JSON.stringify(handoff, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
@@ -758,9 +845,10 @@ ui.exportSelection.addEventListener("click", async () => {
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
   } catch (error) {
+    if (sessionId !== requestSession) return;
     addMessage("agent", `Selection export failed: ${error.message}`);
   } finally {
-    ui.exportSelection.disabled = shortlisted.size === 0;
+    if (sessionId === requestSession) ui.exportSelection.disabled = shortlisted.size === 0;
   }
 });
 ui.finalizeSelection.addEventListener("click", () => {
@@ -768,4 +856,16 @@ ui.finalizeSelection.addEventListener("click", () => {
   ui.message.value = "Finalize my selection.";
   ui.message.focus();
 });
+function loadSelectionHistoryCommand(direction) {
+  if (!sessionUsable || ui.submit.disabled || !currentSelectionState[`can_${direction}_selection`]) return;
+  if (ui.message.value.trim()) {
+    ui.message.focus();
+    return;
+  }
+  ui.message.value = direction === "undo" ? "Undo selection" : "Redo selection";
+  ui.message.dispatchEvent(new Event("input"));
+  ui.message.focus();
+}
+ui.undoShortlist.addEventListener("click", () => loadSelectionHistoryCommand("undo"));
+ui.redoShortlist.addEventListener("click", () => loadSelectionHistoryCommand("redo"));
 startSession();

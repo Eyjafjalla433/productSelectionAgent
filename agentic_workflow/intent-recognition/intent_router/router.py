@@ -57,7 +57,24 @@ STYLES = (
     "casual", "formal", "vintage", "athletic", "classic", "bohemian", "minimalist",
     "slim fit", "regular fit", "relaxed fit", "crew neck", "v-neck", "long sleeve",
     "short sleeve", "high waisted",
+    "loose fit", "oversized", "sleeveless", "elegant",
 )
+STYLE_ALIASES = {
+    '宽松': 'loose fit', '宽大型': 'oversized', '修身': 'slim fit', '紧身': 'slim fit',
+    '合身': 'regular fit', '休闲': 'casual', '正式': 'formal', '复古': 'vintage',
+    '经典': 'classic', '优雅': 'elegant', '运动风': 'athletic', '极简': 'minimalist',
+    '无袖': 'sleeveless', '长袖': 'long sleeve', '短袖': 'short sleeve',
+    '圆领': 'crew neck', 'v领': 'v-neck',
+}
+USE_CASE_ALIASES = {
+    '上班': 'work', '通勤': 'office', '日常': 'everyday', '平时穿': 'everyday',
+    '旅行': 'travel', '旅游': 'travel', '户外': 'outdoor', '徒步': 'hiking',
+    '跑步': 'running', '散步': 'walking', '健身房': 'gym', '瑜伽': 'yoga',
+    '婚礼': 'wedding', '聚会': 'party', '冬季': 'winter', '夏季': 'summer',
+}
+FEATURE_ALIASES = {'舒服': 'comfortable', '舒适': 'comfortable', '透气': 'breathable',
+                   '轻薄': 'lightweight', '轻便': 'lightweight', '防水': 'waterproof',
+                   '耐穿': 'durable', '保暖': 'warm', '速干': 'quick-drying'}
 AUDIENCES = (
     "women", "woman", "men", "man", "girls", "girl", "boys", "boy", "kids", "kid",
     "unisex", "maternity", "baby",
@@ -76,6 +93,7 @@ PRICE_CAP_RE = re.compile(r"(?:\b(?:under|below|less than|at most|up to|maximum 
 PRICE_FLOOR_RE = re.compile(r"(?:\b(?:over|above|more than|at least|minimum of)\s*\$?\s*(\d+(?:\.\d+)?)|(?:至少|高于|超过)[\s$￥¥]*(\d+(?:\.\d+)?)(?:\s*(?:美元|元|块))?)", re.I)
 PRICE_RANGE_RE = re.compile(r"(?:\bbetween\s*\$?\s*(\d+(?:\.\d+)?)\s*(?:and|-)\s*\$?\s*(\d+(?:\.\d+)?)|[\s$￥¥]*(\d+(?:\.\d+)?)\s*(?:到|至|[-~～])\s*[\s$￥¥]*(\d+(?:\.\d+)?)(?:\s*(?:美元|元|块))?)", re.I)
 PRICE_TARGET_RE = re.compile(r"\b(?:around|about|roughly|budget of|budget is)\s*\$?\s*(\d+(?:\.\d+)?)", re.I)
+PRICE_APPROX_ZH_RE = re.compile(r'(?:预算(?:还是|是)?\s*|\$\s*)(\d+(?:\.\d+)?)\s*(?:美元)?\s*左右|(?:大约|大概|约)\s*\$?\s*(\d+(?:\.\d+)?)\s*美元')
 PRICE_OR_LESS_RE = re.compile(r"\$?\s*(\d+(?:\.\d+)?)\s*(?:or less|or below|or under)", re.I)
 SIZE_WORD_RE = re.compile(r"\b(xxs|xs|xl|xxl|xxxl|small|medium|large|extra large)\b", re.I)
 SIZE_LETTER_RE = re.compile(r"\bsize\s*(s|m|l)\b", re.I)
@@ -168,6 +186,10 @@ class IntentRouter:
         for brand in self.known_brands:
             if f" {brand} " in match_text:
                 _append_unique(slots, "brand", brand)
+        for name, aliases in (('style', STYLE_ALIASES), ('use_case', USE_CASE_ALIASES), ('feature', FEATURE_ALIASES)):
+            for alias, canonical in aliases.items():
+                if alias in text:
+                    _append_unique(slots, name, canonical)
 
         self._extract_price(text, slots)
         self._extract_size(text, slots)
@@ -185,11 +207,14 @@ class IntentRouter:
         price_cap = PRICE_CAP_RE.search(text) or PRICE_OR_LESS_RE.search(text)
         price_floor = PRICE_FLOOR_RE.search(text)
         price_target = PRICE_TARGET_RE.search(text)
+        approximate_target = PRICE_APPROX_ZH_RE.search(text)
+        if approximate_target:
+            slots['budget_target'] = float(next(v for v in approximate_target.groups() if v is not None))
         if price_range:
             values = [value for value in price_range.groups() if value is not None]
             slots["budget_min"] = float(values[0])
             slots["budget_max"] = float(values[1])
-        elif price_cap:
+        elif price_cap and not (approximate_target and price_cap.start() < approximate_target.end() and approximate_target.start() < price_cap.end()):
             slots["budget_max"] = float(next(value for value in price_cap.groups() if value is not None))
         elif price_floor:
             slots["budget_min"] = float(next(value for value in price_floor.groups() if value is not None))
@@ -198,6 +223,8 @@ class IntentRouter:
 
     @staticmethod
     def _extract_size(text: str, slots: defaultdict[str, list[str] | float]) -> None:
+        for match in re.finditer(r'(?:尺码|尺寸)(?:是|要|为)?\s*(xxxl|xxl|xxs|xl|xs|s|m|l)(?:码)?(?![a-z])', text, re.I):
+            _append_unique(slots, 'size', match.group(1).lower())
         for match in SIZE_WORD_RE.finditer(text):
             _append_unique(slots, "size", match.group(1).lower())
         for match in SIZE_LETTER_RE.finditer(text):
@@ -213,6 +240,8 @@ class IntentRouter:
                 "material": MATERIALS,
                 "color": COLORS,
                 "feature": FEATURES,
+                "style": STYLES,
+                "use_case": USE_CASES,
             }.items():
                 for value in values:
                     if _contains(phrase, value):
@@ -224,6 +253,10 @@ class IntentRouter:
             if re.search(rf"(?:不要|不想要|不含|避免|排除)[^，。；,.]{{0,8}}{re.escape(alias)}", text):
                 name = "color" if alias in COLOR_ALIASES else "material"
                 _append_unique(slots, f"{name}_exclude", canonical)
+        for name, aliases in (('style', STYLE_ALIASES), ('use_case', USE_CASE_ALIASES), ('feature', FEATURE_ALIASES)):
+            for alias, canonical in aliases.items():
+                if re.search(rf'(?:不要|不想要|不想|避免|排除)(?:太|很|特别|过于|任何|带有|的|\s)*{re.escape(alias)}', text):
+                    _append_unique(slots, f'{name}_exclude', canonical)
 
     @staticmethod
     def _extract_disclosed_requirement(text: str, slots: defaultdict[str, list[str] | float]) -> None:

@@ -10,7 +10,8 @@ CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]")
 
 
 def message_locale(message: str, current: str = "en") -> str:
-    return "zh" if CJK_RE.search(message) else current
+    # Submission/demo output language is fixed, independent of input language.
+    return "en"
 
 
 def localized_agent_message(
@@ -22,8 +23,23 @@ def localized_agent_message(
     product_count: int,
 ) -> str:
     if locale != "zh":
+        reason = str(receipt.get('post_reason') or receipt.get('pre_reason') or '')
+        if reason == 'conversation_uncertainty':
+            return ('No rush. Keep these options here and take your time comparing them.' if product_count
+                    else 'No rush. Your preferences are saved, but there are no verified matches yet. We can adjust a requirement whenever you are ready.')
         return fallback
     reason = str(receipt.get("post_reason") or receipt.get("pre_reason") or "")
+    if reason == 'conversation_acknowledgement':
+        return '不客气，想继续挑的时候告诉我就好。'
+    if reason == 'conversation_pause':
+        return '好，你慢慢想，之前的条件我都留着。'
+    if reason == 'conversation_history_noop':
+        return '条件和当前结果保持不变。'
+    if reason == 'conversation_uncertainty':
+        return ('不用急着决定，先留着这几款慢慢比较。想换一批时告诉我就好。' if product_count
+                else '不用急着决定，之前的条件先保留。目前还没有符合条件的候选，想调整哪一点时告诉我就好。')
+    if reason == 'awaiting_product_context':
+        return '不着急。想好要找什么时告诉我，我再帮你挑。'
     if any(row.get("stage") == "error" for row in receipt.get("timings", ())):
         return "这次搜索出了点问题，还没拿到可靠的结果。你的需求我保留着，我们可以再试一次。"
     if ask_attribute:

@@ -10,6 +10,7 @@ from .model_provider import ModelProviderError, StructuredModelProvider
 
 
 SYSTEM_PROMPT = """You draft concise shopping comparison points from catalog text.
+Write every generated comparison point in English, regardless of the input language. Keep evidence quotes unchanged.
 Return exactly {"products":[{"parent_asin":"...","pros":[{"text":"...","evidence":"exact catalog quote"}],"cons":[{"text":"...","evidence":"exact catalog quote"}]}]}.
 Use only supplied products. Every evidence value must be an exact quote from that product's supplied title, description, bullet points, details, price, or rating fields. Return at most 3 pros and 3 cons per product. Missing facts are not negative claims. Never change rank, score, requirements, or product IDs. JSON only, no prose."""
 

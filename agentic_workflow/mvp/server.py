@@ -22,11 +22,12 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from .audit import GENESIS_DIGEST, SCHEMA_VERSION, chain_digest
-from .control_intent import ControlIntent, parse_control_intent
+from .control_intent import ControlIntent, parse_control_intent, parse_detail_reference, split_detail_and_requirements
 from .explanations import explain_product, product_advice, summarize_explanations
 from .localization import localized_agent_message, localized_control_message, message_locale
 from .shadow_policy import shadow_question_board
-from .shopping_guide import describe, build_shopping_guide
+from .shopping_guide import describe, build_shopping_guide, preference_tradeoff
+from .product_question import answer_product_question
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -87,7 +88,11 @@ class Session:
     audit_turns: list[dict[str, Any]] = field(default_factory=list)
     audit_head: str = GENESIS_DIGEST
     selections: dict[str, dict[str, Any]] = field(default_factory=dict)
+    selection_history: list[dict[str, dict[str, Any]]] = field(default_factory=list)
+    selection_future: list[dict[str, dict[str, Any]]] = field(default_factory=list)
     last_products: list[dict[str, Any]] = field(default_factory=list)
+    focused_product_id: str | None = None
+    pending_detail_attribute: str | None = None
     comparison_cache_key: str | None = None
     comparison_cache: dict[str, Any] | None = None
     locale: str = "en"
@@ -227,6 +232,11 @@ def build_receipt(trace: dict[str, Any]) -> dict[str, Any]:
         "rejected_asins": state.get("rejected_asins", []),
         "state_evidence": _state_evidence(state),
         "cleared": state.get("suggestions", {}).get("cleared_slots", []),
+        "requirement_undo": state.get("suggestions", {}).get("requirement_undo"),
+        "can_undo_requirements": state.get('suggestions', {}).get('can_undo_requirements', False),
+        "requirement_redo": state.get('suggestions', {}).get('requirement_redo'),
+        "can_redo_requirements": state.get('suggestions', {}).get('can_redo_requirements', False),
+        "conversation_act": state.get('suggestions', {}).get('conversation_act'),
         "intent_changed": state.get("suggestions", {}).get("intent_changed", False),
         "questions_asked": feedback.get("suggestions", {}).get("clarification_count", 0),
         "shown_count": len(feedback.get("shown_asins", ())),
@@ -243,7 +253,7 @@ def build_receipt(trace: dict[str, Any]) -> dict[str, Any]:
             candidate_products,
             already_known=known_attributes,
             already_asked=asked_attributes,
-            turns_left=max(0, 10 - int(trace.get("turn", 1))),
+            turns_left=None if state.get('suggestions', {}).get('max_turns', 10) is None else max(0, state.get('suggestions', {}).get('max_turns', 10) - int(trace.get('turn', 1))),
         )[:3],
         "pre_action": pre.get("action"),
         "pre_reason": pre.get("reason"),
@@ -361,7 +371,7 @@ class AgentRuntime:
             "schema_version": SESSION_SCHEMA_VERSION,
             "session_id": session_id,
             "turn": 1,
-            "max_turns": 10,
+            "max_turns": getattr(self.agent, 'max_turns', 10),
             "orchestration_mode": self.orchestration_mode,
             "model_provider": self.model_provider,
             "model_name": self.model_name,
@@ -508,6 +518,7 @@ class AgentRuntime:
             raise ApiError(HTTPStatus.BAD_REQUEST, "Selection reason must be 300 characters or fewer.", "selection_reason_too_long")
         with self.lock:
             session = self._session(session_id)
+            previous_selection = deepcopy(session.selections)
             if clear:
                 session.selections.clear()
             else:
@@ -527,6 +538,7 @@ class AgentRuntime:
                     }
                 else:
                     session.selections.pop(parent_asin, None)
+            self._remember_selection(session, previous_selection)
             session.comparison_cache_key = None
             session.comparison_cache = None
             session.finalized_at_utc = None
@@ -535,8 +547,26 @@ class AgentRuntime:
             return {"session_id": session_id, **self._selection_state(session)}
 
     @staticmethod
-    def _selection_state(session: Session) -> dict[str, Any]:
+    def _remember_selection(session, previous):
+        if previous != session.selections:
+            session.selection_history.append(previous)
+            del session.selection_history[:-20]
+            session.selection_future.clear()
+
+    def _selection_state(self, session: Session) -> dict[str, Any]:
         current_asins = tuple(session.selections)
+        # Selected items may no longer be in the latest result batch. Return
+        # their bounded cached facts so restoring a shortlist is visible too.
+        selected_products = []
+        receipt = session.audit_turns[-1]['receipt'] if session.audit_turns else {}
+        for asin in current_asins:
+            product = self.agent.get_catalog_product(asin) or {}
+            match = explain_product(product, receipt)
+            selected_products.append({
+                'parent_asin': asin, 'title': str(product.get('title') or 'Catalog details unavailable'),
+                'price': product.get('price'), 'rating': product.get('average_rating'),
+                'match': match, 'advice': product_advice(product, match),
+            })
         finalized = bool(
             current_asins
             and current_asins == session.finalized_asins
@@ -545,7 +575,10 @@ class AgentRuntime:
         return {
             "schema_version": SELECTION_STATE_SCHEMA_VERSION,
             "selected_asins": list(current_asins),
+            "selected_products": selected_products,
             "selection_count": len(current_asins),
+            "can_undo_selection": bool(session.selection_history),
+            "can_redo_selection": bool(session.selection_future),
             "max_selections": MAX_SELECTIONS,
             "rejected_asins": sorted(session.rejected_asins),
             "status": "finalized" if finalized else "ready_for_comparison" if current_asins else "draft",
@@ -690,13 +723,31 @@ class AgentRuntime:
         requested = [rank for rank in control.ranks if rank in by_rank]
         ignored = [rank for rank in control.ranks if rank not in by_rank]
         action = control.action
+        previous_selection = deepcopy(session.selections)
         handoff: dict[str, Any] | None = None
         selection_changed = False
         feedback_changed = False
         rejected_feedback: list[str] = []
         liked_feedback: list[str] = []
 
-        if action in {"select", "compare"}:
+        if action == 'detail':
+            if control.uses_focus:
+                requested = [rank for rank, product in by_rank.items()
+                             if product['parent_asin'] == session.focused_product_id]
+            if len(requested) == 1:
+                rank = requested[0]
+                session.focused_product_id = by_rank[rank]['parent_asin']
+                session.pending_detail_attribute = None
+                product = self.agent.get_catalog_product(by_rank[rank]['parent_asin']) or {}
+                detail = answer_product_question(product, rank, control.attribute, session.locale)
+            else:
+                session.focused_product_id = None
+                session.pending_detail_attribute = control.attribute
+                if control.uses_focus:
+                    detail = '你指的是哪一款？告诉我当前列表的序号就好。' if session.locale == 'zh' else 'Which product do you mean? Please give its rank in the current list.'
+                else:
+                    detail = '当前结果里没有这个序号，请按页面上的序号再问我。' if session.locale == 'zh' else 'That rank is not in the current results. Please use a displayed rank.'
+        elif action in {"select", "compare"}:
             added: list[int] = []
             already_selected: list[int] = []
             capped: list[int] = []
@@ -765,6 +816,33 @@ class AgentRuntime:
             selection_changed = bool(session.selections)
             session.selections.clear()
             detail = "Cleared the shortlist."
+        elif action == 'undo_selection':
+            if session.selection_history:
+                session.selection_future.append(previous_selection)
+                session.selections = session.selection_history.pop()
+                selection_changed = True
+                detail = "I've undone the last shortlist edit. Your search preferences are unchanged; the restored choices are not finalized."
+            else:
+                detail = "There isn't a shortlist edit to undo for your current requirements. Your choices are unchanged."
+        elif action == 'redo_selection':
+            if session.selection_future:
+                session.selection_history.append(previous_selection)
+                session.selections = session.selection_future.pop()
+                selection_changed = True
+                detail = "I've redone the shortlist edit. Your search preferences are unchanged; the restored choices are not finalized."
+            else:
+                detail = "There isn't a shortlist edit to redo. Your choices are unchanged."
+        elif action == 'retain':
+            detail = "Understood. I've left your shortlist and search preferences unchanged."
+        elif action == 'hold':
+            session.finalized_at_utc = None
+            session.finalized_turn = None
+            session.finalized_asins = ()
+            session.comparison_cache_key = None
+            session.comparison_cache = None
+            detail = ("I haven't finalized anything. I can't automatically confirm a shortlist based on that condition; your choices and search preferences are unchanged."
+                      if control.attribute == 'conditional' else
+                      "No rush. I'll keep your choices as a draft so you can continue comparing. Your search preferences are unchanged.")
         elif action == "finalize":
             if session.selections:
                 session.finalized_at_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -783,6 +861,11 @@ class AgentRuntime:
 
         feedback_state = None
         if feedback_changed:
+            session.selection_history.clear()
+            session.selection_future.clear()
+        elif action in {'select', 'compare', 'remove', 'clear'}:
+            self._remember_selection(session, previous_selection)
+        if feedback_changed:
             feedback_state = self.agent.record_product_feedback(
                 session_id,
                 source_turn=turn,
@@ -797,7 +880,7 @@ class AgentRuntime:
             session.finalized_asins = ()
         if action in {"compare", "handoff", "finalize"}:
             handoff = self.selection_handoff(session_id)
-        detail = localized_control_message(
+        detail = detail if action == 'detail' else localized_control_message(
             locale=session.locale,
             action=action,
             selection_count=len(session.selections),
@@ -826,7 +909,7 @@ class AgentRuntime:
             {
                 "state_changes": [],
                 "pre_action": "control",
-                "pre_reason": f"selection_{action}",
+                "pre_reason": 'product_detail' if action == 'detail' else f"selection_{action}",
                 "post_action": None,
                 "post_reason": None,
                 "timings": [{"stage": "0_control", "elapsed_ms": 0.0}],
@@ -842,6 +925,11 @@ class AgentRuntime:
                 "selection_count": len(session.selections),
                 "rejected_asins": sorted(session.rejected_asins),
                 "selection_reset": False,
+                "question": None,
+                "display_mode": "retained_previous_results",
+                "new_product_count": 0,
+                "repeat_count": len(session.last_products),
+                "focused_product_id": session.focused_product_id,
             }
         )
         if feedback_state is not None:
@@ -883,7 +971,7 @@ class AgentRuntime:
             "schema_version": CHAT_SCHEMA_VERSION,
             "turn": turn,
             "next_turn": session.next_turn,
-            "remaining_turns": max(0, 11 - session.next_turn),
+            "remaining_turns": None if getattr(self.agent, 'max_turns', 10) is None else max(0, getattr(self.agent, 'max_turns', 10) + 1 - session.next_turn),
             "assistant": assistant,
             "products": products,
             "receipt": receipt,
@@ -907,13 +995,37 @@ class AgentRuntime:
         with self.lock:
             session = self._session(session_id)
             session.locale = message_locale(message, session.locale)
-            if session.next_turn > 10:
-                raise ApiError(HTTPStatus.CONFLICT, "This conversation has reached the ten-turn limit.", "turn_limit")
+            turn_limit = getattr(self.agent, 'max_turns', 10)
+            if turn_limit is not None and session.next_turn > turn_limit:
+                raise ApiError(HTTPStatus.CONFLICT, "This conversation has reached its configured turn limit.", "turn_limit")
             turn = session.next_turn
-            control = parse_control_intent(message)
+            compound = split_detail_and_requirements(message)
+            detail_answer = None
+            detail_context = None
+            requirement_message = message
+            if compound:
+                detail_control, requirement_message = compound
+                targets = [p for p in session.last_products if
+                           (p['parent_asin'] == session.focused_product_id if detail_control.uses_focus
+                            else p['rank'] in detail_control.ranks)]
+                if len(targets) == 1:
+                    target = targets[0]
+                    source = self.agent.get_catalog_product(target['parent_asin']) or {}
+                    detail_answer = answer_product_question(source, target['rank'], detail_control.attribute, session.locale)
+                    detail_answer = (f'刚才列表里的「{target["title"]}」，' if session.locale == 'zh'
+                                     else f'About "{target["title"]}" in the previous list: ') + detail_answer
+                    detail_context = {'parent_asin': target['parent_asin'], 'rank': target['rank'],
+                                      'attribute': detail_control.attribute}
+                else:
+                    detail_answer = ('还不能确定你问的是刚才哪款；我先处理后面的需求调整。' if session.locale == 'zh'
+                                     else 'I could not identify that item in the previous list; I will process your other request.')
+            control = None if compound else (parse_detail_reference(message, session.pending_detail_attribute) or parse_control_intent(message))
             if control is not None:
+                if control.action != 'detail':
+                    session.pending_detail_attribute = None
                 return self._control_turn(session_id, session, message, turn, control)
-            response = self.agent.respond(session_id, message, turn, 10)
+            session.pending_detail_attribute = None
+            response = self.agent.respond(session_id, requirement_message, turn, 10)
             get_trace = getattr(self.agent, "get_trace", None)
             trace = (
                 get_trace(session_id, turn)
@@ -949,6 +1061,18 @@ class AgentRuntime:
                 )
 
             receipt = build_receipt(trace)
+            if compound:
+                receipt['compound_request'] = {'detail_context': detail_context, 'requirements_message': requirement_message}
+            restored_result = _event_map(trace).get('5_restore_results')
+            if restored_result:
+                receipt['display_mode'] = 'restored_previous_results'
+                receipt['restored_from_turn'] = restored_result['source_turn']
+            if receipt.get('conversation_act') and receipt.get('pre_action') == 'acknowledge':
+                products = deepcopy(session.last_products)
+                receipt['display_mode'] = 'retained_previous_results'
+            elif receipt.get('pre_reason') == 'confirm_requirement_change' and _state_snapshot(receipt) == session.previous_state:
+                products = deepcopy(session.last_products)
+                receipt['display_mode'] = 'retained_previous_results'
             was_finalized = bool(session.finalized_at_utc)
             category = str(receipt.get("hard", {}).get("category") or "").strip().casefold()
             intent_reset = bool(receipt.get("intent_changed"))
@@ -971,6 +1095,9 @@ class AgentRuntime:
 
             current_state = _state_snapshot(receipt)
             receipt["state_changes"] = _state_changes(session.previous_state, current_state)
+            if receipt['state_changes'] or intent_reset:
+                session.selection_history.clear()
+                session.selection_future.clear()
             session.previous_state = current_state
             finalization_invalidated = bool(was_finalized and receipt["state_changes"])
             if finalization_invalidated:
@@ -994,11 +1121,16 @@ class AgentRuntime:
                 catalog_product = self.agent.get_catalog_product(product["parent_asin"]) or {}
                 product["match"] = explain_product(catalog_product, receipt)
                 product["advice"] = product_advice(catalog_product, product["match"])
-                product["shopper_notes"] = describe(product)
+                product["shopper_notes"] = describe(product, catalog_product)
             receipt["result_quality"] = summarize_explanations(
                 product["match"] for product in products
             )
             session.last_products = deepcopy(products)
+            if detail_context:
+                session.focused_product_id = detail_context['parent_asin']
+            if session.focused_product_id not in {p['parent_asin'] for p in products}:
+                session.focused_product_id = None
+            receipt['focused_product_id'] = session.focused_product_id
 
             assistant = {
                 "message": localized_agent_message(
@@ -1011,8 +1143,24 @@ class AgentRuntime:
                 "ask_attribute": response.get("ask_attribute"),
                 "usage": response.get("usage", {}),
             }
-            if session.locale == 'zh' and products and not response.get('ask_attribute'):
+            if session.locale == 'zh' and products and not response.get('ask_attribute') and not receipt.get('conversation_act'):
                 assistant['message'] = build_shopping_guide(products)['intro']
+            if products and not response.get('ask_attribute') and not receipt.get('conversation_act'):
+                tradeoff = preference_tradeoff(products, session.locale)
+                if tradeoff:
+                    assistant['message'] += ' ' + tradeoff
+            if session.locale == 'zh' and receipt.get('requirement_undo'):
+                prefix = '已撤销刚才的需求修改。' if receipt['requirement_undo'] == 'applied' else '还没有可以撤销的需求修改。'
+                if receipt.get('display_mode') == 'restored_previous_results':
+                    assistant['message'] = f'之前的 {len(products)} 款已按原顺序恢复，可以接着比较。'
+                assistant['message'] = prefix + assistant['message']
+            if session.locale == 'zh' and receipt.get('requirement_redo'):
+                prefix = '已恢复刚才撤销的需求修改。' if receipt['requirement_redo'] == 'applied' else '目前没有可以重做的需求修改。'
+                if receipt.get('display_mode') == 'restored_previous_results':
+                    assistant['message'] = f'之前的 {len(products)} 款已按原顺序恢复，可以接着比较。'
+                assistant['message'] = prefix + assistant['message']
+            if detail_answer:
+                assistant['message'] = detail_answer + '\n\n' + assistant['message']
             audit_record = {
                 "turn": turn,
                 "user_message": message,
@@ -1042,7 +1190,7 @@ class AgentRuntime:
             "schema_version": CHAT_SCHEMA_VERSION,
             "turn": turn,
             "next_turn": session.next_turn,
-            "remaining_turns": max(0, 11 - session.next_turn),
+            "remaining_turns": None if getattr(self.agent, 'max_turns', 10) is None else max(0, getattr(self.agent, 'max_turns', 10) + 1 - session.next_turn),
             "assistant": assistant,
             "products": products,
             "receipt": receipt,

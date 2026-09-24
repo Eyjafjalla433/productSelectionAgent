@@ -31,6 +31,88 @@ def terms(value):
     return {_singular(t) for t in tokenize(_text(value))}
 
 
+def _color_values(text):
+    from intent_router.router import COLOR_ALIASES, COLORS
+    found = set()
+    text = str(text).lower()
+    for match in re.finditer(r'\b(?:' + '|'.join(COLORS) + r')\b', text):
+        if not re.search(r'\b(?:not|no|without)\s*$', text[:match.start()]):
+            found.add('gray' if match.group() == 'grey' else match.group())
+    for alias, canonical in COLOR_ALIASES.items():
+        for match in re.finditer(re.escape(alias), text):
+            if not re.search(r'(?:不是|非|不含)\s*$', text[:match.start()]):
+                found.add(canonical)
+    return found
+
+
+def product_colors(product):
+    """Prefer the current variant's color field; never borrow another variant."""
+    details = product.get('details') or {}
+    explicit = [str(v).strip() for k, v in details.items()
+                if str(k).strip().casefold() in {'color', 'colour'} and v and str(v).strip()] if isinstance(details, dict) else []
+    if product.get('color'):
+        explicit.append(str(product['color']))
+    sources = explicit or [str(product.get('title') or '')]
+    supported = None
+    for source in sources:
+        actual = _color_values(source)
+        if 'navy' in actual:
+            actual.add('blue')
+        supported = actual if supported is None else supported & actual
+    return supported or set()
+
+
+def color_matches(product, value):
+    wanted = _color_values(value)
+    return bool(wanted) and wanted <= product_colors(product)
+
+
+FIT_PHRASES = {
+    'slim fit': ('slim fit', 'fitted', 'bodycon'),
+    'loose fit': ('loose fit', 'relaxed fit', 'oversized'),
+    'relaxed fit': ('relaxed fit', 'loose fit'),
+    'regular fit': ('regular fit', 'standard fit'),
+}
+
+
+def style_matches(product, value):
+    return bool(style_evidence(product, value))
+
+
+def style_evidence(product, value):
+    """Recognize a small set of explicit fit descriptions, with local negation."""
+    details = product.get('details') or {}
+    explicit = [str(v) for k, v in details.items() if str(k).lower().replace('_', ' ') in {'fit', 'fit type'} and v] if isinstance(details, dict) else []
+    fields = explicit if explicit and str(value) in FIT_PHRASES else [
+        _text(product.get(key)) for key in ('title', 'features', 'description', 'details')]
+    for source in fields:
+        for phrase in FIT_PHRASES.get(str(value), (str(value),)):
+            words = re.findall(r'[a-z0-9]+', phrase.lower())
+            if not words:
+                continue
+            pattern = r'\b' + r'[\s-]+'.join(map(re.escape, words)) + r'\b'
+            for match in re.finditer(pattern, source, re.I):
+                if not re.search(r'\b(?:not|no|without)(?:\s+(?:a|an|too|very))*\s*$', source[:match.start()], re.I):
+                    return source
+    return ''
+
+
+def pure_cotton_matches(product):
+    """Conservative composition evidence; no inference from the word cotton."""
+    text = ' '.join(_text(product.get(key)) for key in ('title', 'features', 'description', 'details')).lower()
+    affirmative = re.search(r'\b(?:100\s*%\s*(?:(?:combed|organic|ring[ -]spun)\s+)*|pure\s+|all[ -])cotton\b|纯棉', text)
+    if not affirmative:
+        return False
+    if re.search(r'\b(?:not|no|without)(?:\s+(?:made|entirely|of|from|just|only))*\s*$|(?:不是|非|不含)\s*$', text[:affirmative.start()]):
+        return False
+    # Listings often mix several color variants. Do not certify one selected
+    # variant when the same record contains contradictory composition evidence.
+    if re.search(r'\b(?:blend(?:ed)?|polyester|spandex|elastane|rayon|viscose|nylon|acrylic|modal|cashmere)\b|混纺|聚酯|氨纶', text):
+        return False
+    percentages = re.findall(r'(\d+(?:\.\d+)?)\s*%\s*cotton\b', text)
+    return all(float(value) == 100 for value in percentages)
+
+
 CATEGORY_TAXONOMY_LABELS = {
     "dress": {"dress", "gown"},
     "shirt": {"shirt", "dress shirt", "casual button down shirt", "blouse"},
@@ -53,6 +135,30 @@ def _normalized_label(value):
     if re.fullmatch(r't[ -]?shirts?', str(value).strip(), re.I):
         return 't shirt'
     return " ".join(_singular(token) for token in tokenize(_text(value)))
+
+
+def size_matches(product, value):
+    """Size-specific evidence; general tokenization intentionally drops S/M/L."""
+    aliases = {'s': ('s', 'small'), 'm': ('m', 'medium'), 'l': ('l', 'large'),
+               'xs': ('xs', 'extra small'), 'xl': ('xl', 'extra large'),
+               'xxl': ('xxl', '2xl'), 'xxs': ('xxs',)}
+    canonical = str(value).strip().casefold()
+    alternatives = next((names for names in aliases.values() if canonical in names), (canonical,))
+    details = product.get('details') or {}
+    if isinstance(details, dict):
+        for key, raw in details.items():
+            if str(key).strip().casefold() in {'size', 'clothing size', 'apparel size'}:
+                if str(raw).strip().casefold() in alternatives:
+                    return True
+    title = str(product.get('title') or '')
+    for alias in alternatives:
+        token = re.escape(alias)
+        if re.search(rf'\b(?:size|us)\s*[:=-]?\s*{token}(?!\w)|\({token}\)', title, re.I):
+            return True
+        named_sizes = {name for names in aliases.values() for name in names}
+        if alias in named_sizes and len(alias) > 1 and re.search(rf'(?<!extra )(?<!\w){token}(?!\w)', title, re.I):
+            return True
+    return False
 
 
 def category_matches(product, value):
@@ -168,6 +274,14 @@ class StateAwareRetriever:
                 required = terms(v)
                 if name == "category":
                     return category_matches(product, v)[0]
+                if name == 'size':
+                    return size_matches(product, v)
+                if name == 'color':
+                    return color_matches(product, v)
+                if name == 'style':
+                    return style_matches(product, v)
+                if name == 'material' and v == '100% cotton':
+                    return pure_cotton_matches(product)
                 if name == "brand":
                     brand_terms = terms(product.get("store")) | terms(product.get("details"))
                     return bool(required) and required <= brand_terms
@@ -178,6 +292,18 @@ class StateAwareRetriever:
             if not any(matches(v) for v in sequence(value)):
                 return False
         for name, values in state.exclusions.items():
+            if name == 'style':
+                if any(style_matches(product, value) for value in values):
+                    return False
+                continue
+            if name == 'color':
+                if any(color_matches(product, value) for value in values):
+                    return False
+                continue
+            if name == 'material' and '100% cotton' in values:
+                if pure_cotton_matches(product):
+                    return False
+                values = [v for v in values if v != '100% cotton']
             if any(terms(v) and terms(v) <= product_terms for v in values):
                 return False
         return True

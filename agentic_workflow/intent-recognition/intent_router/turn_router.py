@@ -29,15 +29,88 @@ class TurnIntentRouter(IntentRouter):
         text = parsed.normalized_query
         pending = pending_question or {}
         updates = []
+        if re.fullmatch(r'(?:please\s+)?(?:retry|try again|search again|重试|再试一次|再搜一次|重新搜索)[.!?。！？]*', text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'requested_results': True,
+                                              'retry_search': True})
+        # Resolve an exact displayed option using the current question only.
+        # Keep free-form/multi-detail replies on the normal extraction path.
+        from .option_labels import OPTION_LABELS_ZH
+        for value, label in pending.get('option_labels', {}).items():
+            if text.rstrip(' .!?。！？') in {label.casefold(), OPTION_LABELS_ZH.get(value, value)} and value in pending.get('options', ()):
+                return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                               filter_constraints={}, slot_updates=(SlotUpdate(pending['target_slot'], 'set',
+                               (value,), pending.get('constraint_type', 'soft'), 1.0, message),))
+        # Uncertainty is a conversation signal, never a literal slot value.
+        # Keep independently stated requirements, but don't press for another
+        # preference in the same turn or silently withdraw existing constraints.
+        parts = re.split(r'\s*[,，;；。!?！？]\s*|\s+(?:but|and)\s+|但是|但', text)
+        uncertain = re.compile(r"(?:(?:i(?:'m| am)\s+)?not sure(?: yet)?|i (?:don't|do not) know|no idea|(?:我)?(?:也|还)?(?:不确定|不知道|没想好)|(?:我)?拿不准)[.。]*")
+        if any(uncertain.fullmatch(part.strip()) for part in parts):
+            remaining = ', '.join(part for part in parts if part.strip() and not uncertain.fullmatch(part.strip()))
+            extra = self.understand_turn(remaining, pending_question=pending) if remaining else None
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=extra.slot_updates if extra else (),
+                           decision_evidence={**parsed.decision_evidence, **(extra.decision_evidence if extra else {}),
+                                              'requested_results': True, 'uncertain_preference': True})
+        show_prefix = re.match(r'(?:先看看|先看结果|直接推荐|别问了|不用问了|跳过|show me first|just show me|skip)(?:\s*[,，;；]\s*(?:(?:but|and)\s+|但|另外)?|\s+(?:but|and)\s+)(.+)$', text)
+        if show_prefix:
+            extra = self.understand_turn(show_prefix.group(1))
+            return replace(parsed, slot_updates=extra.slot_updates,
+                           decision_evidence={**extra.decision_evidence, 'requested_results': True})
+        if RESULT_CONTROL_RE.fullmatch(text) or re.fullmatch(r'(?:先看看|先看结果|直接推荐|别问了|不用问了|跳过|看看更多|再看一些|换一批|skip|just show me|show me first)[.!?。！？]*', text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'requested_results': True,
+                                              'requested_more': bool(re.search(r'\bmore\b|看看更多|再看一些|换一批', text))})
+        if re.fullmatch(r'(?:hello|hi|hey|你好|您好|thanks|thank you|okay|ok|谢谢|好的|好)[.!?。！？]*', text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'conversation_act': None if re.match(r'hello|hi|hey|你好|您好', text) else 'acknowledgement'})
+        if re.fullmatch(r'(?:wait|hold on|one moment|let me think|等一下|稍等|让我想想|我想想)[.!?。！？]*', text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'conversation_act': 'pause'})
+        if re.fullmatch(r"(?:please\s+)?(?:undo(?:\s+(?:that|the last change|my last change|my last requirement))?|撤销(?:刚才的修改|刚才的条件|上一步|上次修改)?|撤回刚才的修改)[.!?。！？]*", text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'requirement_control': 'undo'})
+
+        if re.fullmatch(r'(?:please\s+)?(?:redo(?:\s+(?:that|the last change))?|重做(?:刚才的修改|上一步)?|恢复刚才的修改|还是恢复刚才的修改)[.!?。！？]*', text):
+            return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                           filter_constraints={}, slot_updates=(),
+                           decision_evidence={**parsed.decision_evidence, 'requirement_control': 'redo'})
 
         def add(slot, op, values=(), tier=None):
             updates.append(SlotUpdate(slot, op, tuple(values), tier, 0.9, message))
+
+        correction = pending.get('correction')
+        if correction:
+            choice = None
+            parts = re.split(r'\s*[,，;；]\s*(?:(?:but|and)\s+|但|另外)?|\s+(?:but|and)\s+', text, maxsplit=1)
+            answer = parts[0]
+            if re.fullmatch(r'(?:both|either|keep both|两种都看|两个都要|都看看|都可以)[.!?。！？]*', answer):
+                choice = tuple(dict.fromkeys((*correction['old'], *correction['new'])))
+            elif re.fullmatch(r'(?:replace|replace it|use the new one|换成新的|换新的|替换|就新的)[.!?。！？]*', answer):
+                choice = tuple(correction['new'])
+            elif re.fullmatch(r'(?:keep original|keep the original|keep the old one|no|nope|保留原来的|还是原来的|不改了)[.!?。！？]*', answer):
+                choice = tuple(correction['old'])
+            if choice is not None:
+                add(correction['slot'], 'remove_exclusion', choice)
+                add(correction['slot'], 'set', choice, 'hard')
+                extra = self.understand_turn(parts[1]) if len(parts) > 1 else None
+                if extra:
+                    updates.extend(extra.slot_updates or ())
+                return replace(parsed, intent_type=None, slots={}, hard_constraints={}, soft_preferences={},
+                               filter_constraints={}, slot_updates=tuple(updates),
+                               decision_evidence={**parsed.decision_evidence, **(extra.decision_evidence if extra else {})})
 
         # No-preference replies are explicit withdrawals, not positive values.
         cleared = set()
         names = {"color": "colou?r", "material": "material", "brand": "brand", "size": "size", "style": "style", "use_case": "(?:use.case|occasion)", "budget": "(?:budget|price)"}
         for slot, pattern in names.items():
-            if re.search(rf"(?:any\s+{pattern}|no\s+(?:additional\s+)?preference\s+for\s+{pattern}|{pattern}\s+(?:is\s+)?(?:unlimited|unrestricted)|(?:ignore|forget)\s+(?:my\s+)?(?:earlier\s+)?{pattern}|no\s+{pattern}\s+(?:limit|restriction))", text):
+            if re.search(rf"(?:any\s+{pattern}|no\s+(?:additional\s+)?preference\s+for\s+{pattern}|{pattern}\s+(?:is\s+)?(?:unlimited|unrestricted)|{pattern}\s+(?:doesn't|does not)\s+matter|(?:ignore|forget)\s+(?:my\s+)?(?:earlier\s+)?{pattern}|no\s+{pattern}\s+(?:limit|restriction))", text):
                 cleared.add(slot)
         chinese_clear = {
             "color": ("颜色不限", "颜色无所谓"),
@@ -51,7 +124,13 @@ class TurnIntentRouter(IntentRouter):
         for slot, phrases in chinese_clear.items():
             if any(phrase in text for phrase in phrases):
                 cleared.add(slot)
-        if pending and re.search(r"(?:no|don't have (?:a|an))\s+(?:additional\s+)?preference|doesn't matter|any is fine", text):
+        # Only an unqualified reply refers to the pending question. For example,
+        # "material doesn't matter, black please" must not clear a color answer.
+        clauses = re.split(r'[,，;；.!?。！？]|\b(?:but|and)\b|但是|但', text)
+        generic_indifference = any(re.fullmatch(
+            r"(?:(?:i\s+)?(?:have\s+no|no|don't have (?:a|an))\s+(?:additional\s+)?preference|(?:it\s+)?doesn't matter|any is fine|都行|随便|无所谓)",
+            clause.strip()) for clause in clauses)
+        if pending and generic_indifference:
             cleared.add(pending["target_slot"])
         for slot in sorted(cleared):
             for name in (("price_min", "price_max", "budget_target") if slot == "budget" else (slot,)):
@@ -154,20 +233,35 @@ class TurnIntentRouter(IntentRouter):
                 continue
             if name == "color" and re.search(r"\b(?:also|too)\b.*\b(?:fine|okay|ok)\b|\bis\s+(?:also\s+)?(?:fine|okay|ok)\b", text):
                 add(name, "remove_exclusion", values)
+                add(name, 'set', values, 'soft')
                 continue
             # Preference wording applies to its clause, not every extracted slot.
-            clauses = re.split(r"[,;.，。；]", scoped_text)
-            value_clause = next((clause for clause in clauses if any(_contains(clause, str(v)) for v in values)), scoped_text)
-            soft = name in {"style", "use_case", "feature", "budget_target"} or bool(re.search(r"\b(?:prefer|preferably|maybe|ideally|like)\b|(?:最好|偏好|希望|尽量)", value_clause))
+            clauses = re.split(r"[,;.，。；]|\b(?:but|however|whereas)\b|但是|然而|不过|但|\band\s+(?=(?:i\s+)?(?:must|need|prefer|preferably|ideally)\b)", scoped_text)
+            def mentions_value(clause):
+                extracted = self.understand(clause).slots.get(name, [])
+                extracted = extracted if isinstance(extracted, list) else [extracted]
+                return any(v in extracted or _contains(clause, str(v)) for v in values)
+            value_clause = next((clause for clause in clauses if mentions_value(clause)), scoped_text)
+            soft = name in {"style", "use_case", "feature", "budget_target"} or bool(re.search(r"\b(?:prefer|preferably|maybe|ideally|like)\b|(?:最好|偏好|希望|尽量|也不错|也可以|或许|可能)", value_clause))
             if name in {"budget_min", "budget_max"}:
                 soft = False
+            # Explicit revision can demote/replace a previous hard requirement.
+            # Ordinary tentative preferences still cannot silently erase it.
+            optional = bool(re.search(r'\b(?:optional|not required|not essential)\b|(?:不是必须|不强求|非必需)', value_clause))
+            mandatory = bool(re.search(r'\b(?:must|required|essential|non[ -]negotiable)\b|(?:必须|一定要|只接受)', value_clause))
+            if mandatory and not optional and name != 'budget_target':
+                soft = False
+            revision = bool(re.search(r'\b(?:actually|instead|changed my mind|change my mind)\b|(?:改成|改为|换成|改主意)', scoped_text))
+            if name in {'color', 'material', 'size', 'brand', 'style', 'use_case'} and (optional or (soft and revision)):
+                add(name, 'clear')
+                soft = True
             add(name, "remove_exclusion", values)
             add(name, "set", values, "soft" if soft else "hard")
         for name, values in scoped.slots.items():
             if name.endswith("_exclude"):
                 add(name[:-8], "exclude", values)
         # Short answers to a structured question need not repeat the slot name.
-        if not updates and pending and len(text.split()) <= 5 and text.strip(" .") and not RESULT_CONTROL_RE.fullmatch(text):
+        if not updates and pending and not correction and len(text.split()) <= 5 and text.strip(" .") and not RESULT_CONTROL_RE.fullmatch(text):
             target = pending["target_slot"]
             if target in {"category", "color", "material", "brand", "size", "style", "use_case"}:
                 add(target, "set", (text.strip(" ."),), "hard" if target == "category" else pending.get("constraint_type", "soft"))
@@ -177,4 +271,9 @@ class TurnIntentRouter(IntentRouter):
                 number = float(re.search(r"\d+(?:\.\d+)?", text).group())
                 add("budget_max", "set", (number,), "hard")
         evidence = {**parsed.decision_evidence, "negative_feedback": "not quite right" in text or "none of these" in text or "不太合适" in text or "这些都不行" in text}
+        # Preserve the stronger meaning instead of collapsing pure cotton into
+        # any cotton content. The same value works for preferences/exclusions.
+        if re.search(r'纯棉|\b(?:100\s*%\s*|pure\s+|all[ -])cotton\b', text):
+            updates = [replace(update, values=tuple('100% cotton' if value == 'cotton' else value for value in update.values))
+                       if update.slot == 'material' else update for update in updates]
         return replace(parsed, slot_updates=tuple(updates), decision_evidence=evidence)

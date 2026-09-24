@@ -13,7 +13,8 @@ def values(value):
 
 
 class StructuredStateMemoryManager:
-    def __init__(self):
+    def __init__(self, max_turns=10):
+        self.max_turns = max_turns
         self.sessions = {}
         self.profiles = {}
         self.versions = {}
@@ -21,6 +22,8 @@ class StructuredStateMemoryManager:
         self.pending = {}
         self.feedback_turns = {}
         self.context = {}
+        self.requirement_history = {}
+        self.requirement_future = {}
 
     def reset(self, session_id, user_profile):
         self.sessions[session_id] = SessionState(session_id)
@@ -30,12 +33,14 @@ class StructuredStateMemoryManager:
         self.pending[session_id] = None
         self.feedback_turns[session_id] = set()
         self.context[session_id] = {}
+        self.requirement_history[session_id] = []
+        self.requirement_future[session_id] = []
 
     def drop(self, session_id):
         """Release every state fragment owned by one completed/expired session."""
         for collection in (
             self.sessions, self.profiles, self.versions, self.questions,
-            self.pending, self.feedback_turns, self.context,
+            self.pending, self.feedback_turns, self.context, self.requirement_history, self.requirement_future,
         ):
             collection.pop(session_id, None)
 
@@ -46,9 +51,24 @@ class StructuredStateMemoryManager:
             raise ValueError("Explicit version-2 slot updates are required")
         sid, turn = handoff["session_id"], handoff["turn"]
         state = deepcopy(self.sessions[sid])
-        if type(turn) is not int or not state.turn_id < turn <= 10:
-            raise ValueError("State turn must advance within the ten-turn limit")
+        requirement_fields = ('hard_slots', 'soft_slots', 'rejected_values')
+        before = {name: deepcopy(getattr(state, name)) for name in requirement_fields}
+        if type(turn) is not int or turn <= state.turn_id or (self.max_turns is not None and turn > self.max_turns):
+            raise ValueError("State turn must advance within the configured conversation limit")
         operations = [SlotUpdate(**row) for row in handoff["slot_updates"]]
+        undo = handoff['legacy_result'].get('decision_evidence', {}).get('requirement_control') == 'undo'
+        redo = handoff['legacy_result'].get('decision_evidence', {}).get('requirement_control') == 'redo'
+        undo_applied = undo and bool(self.requirement_history[sid])
+        redo_applied = redo and bool(self.requirement_future[sid])
+        if undo or redo:
+            operations = []
+            if undo_applied or redo_applied:
+                source = self.requirement_history[sid] if undo else self.requirement_future[sid]
+                destination = self.requirement_future[sid] if undo else self.requirement_history[sid]
+                destination.append(before)
+                previous = source.pop()
+                for name, value in previous.items():
+                    setattr(state, name, deepcopy(value))
         incoming_category = next((u.values[0] for u in operations if u.slot == "category" and u.operation == "set"), None)
         old_category = state.hard_slots.get("category")
         category_changed = bool(old_category and incoming_category and old_category.value != incoming_category)
@@ -56,7 +76,7 @@ class StructuredStateMemoryManager:
             # A new product target retains explicit monetary limits, not old
             # product-specific material, color, brand or feature requirements.
             state.hard_slots = {k: v for k, v in state.hard_slots.items() if k in {"price_min", "price_max"}}
-            state.soft_slots.clear()
+            state.soft_slots = {k: v for k, v in state.soft_slots.items() if k == 'budget_target'}
             state.rejected_values.clear()
             # Shown products belong to the previous shopping task. Clearing
             # them creates an intent-scoped novelty window for the new target.
@@ -68,6 +88,12 @@ class StructuredStateMemoryManager:
             state.intent = Intent(incoming_intent)
             state.intent_confidence = handoff["legacy_result"]["intent_confidence"]
         cleared = []
+        conflicts = []
+        explicitly_cleared = {u.slot for u in operations if u.operation == 'clear'}
+        protected_conflicts = {u.slot for u in operations
+            if u.operation == 'set' and u.constraint_type == 'soft'
+            and u.slot in state.hard_slots and u.slot not in explicitly_cleared
+            and set(u.values) - set(values(state.hard_slots[u.slot].value))}
         for update in operations:
             name, op = update.slot, update.operation
             if op == "clear":
@@ -92,6 +118,9 @@ class StructuredStateMemoryManager:
                 other = state.soft_slots if update.constraint_type == "hard" else state.hard_slots
                 # A weaker preference cannot erase an explicit hard requirement.
                 if update.constraint_type == "soft" and name in state.hard_slots:
+                    old_values = tuple(values(state.hard_slots[name].value))
+                    if name in {'color', 'material', 'size', 'style', 'brand'} and set(update.values) - set(old_values):
+                        conflicts.append({'slot': name, 'old': old_values, 'new': update.values})
                     continue
                 other.pop(name, None)
                 value = update.values[0] if len(update.values) == 1 else update.values
@@ -110,17 +139,56 @@ class StructuredStateMemoryManager:
                         else:
                             slots[name].value = remaining[0] if len(remaining) == 1 else tuple(remaining)
             elif op == "remove_exclusion":
+                if name in protected_conflicts:
+                    continue  # A tentative proposal does not yet authorize lifting exclusions.
                 remaining = [v for v in state.rejected_values.get(name, []) if v not in update.values]
                 if remaining:
                     state.rejected_values[name] = remaining
                 else:
                     state.rejected_values.pop(name, None)
         state.turn_id = turn
+        # Ignore repeated facts and non-requirement messages, not just empty turns.
+        def signature(fields):
+            return ({k: v.value for k, v in fields['hard_slots'].items()},
+                    {k: v.value for k, v in fields['soft_slots'].items()}, fields['rejected_values'])
+        after = {name: getattr(state, name) for name in requirement_fields}
+        previous_category = before['hard_slots'].get('category')
+        current_category = state.hard_slots.get('category')
+        category_changed = bool(previous_category and current_category
+                                and previous_category.value != current_category.value)
+        if category_changed:
+            # Undo may also cross product targets. Old results must not exclude
+            # matches for the restored target, and old questions are audit only.
+            state.shown_asins.clear()
+            state.rejected_asins.clear()
+        changed = signature(before) != signature(after)
+        if not undo and not redo and signature(before) != signature(after):
+            self.requirement_history[sid].append(before)
+            self.requirement_future[sid].clear()
         state.summary = "; ".join([f"intent={state.intent.value}"] + [f"{k}={v.value}" for k, v in state.hard_slots.items()] + [f"prefer {k}={v.value}" for k, v in state.soft_slots.items()])
         self.sessions[sid] = state
         self.versions[sid] += 1
-        self.pending[sid] = None
+        pending_before = self.pending[sid]
+        streak = 0 if category_changed else self.context[sid].get('clarification_streak', 0)
+        question_scope_start = turn if category_changed else self.context[sid].get('question_scope_start', 0)
+        conversation_act = handoff['legacy_result'].get('decision_evidence', {}).get('conversation_act')
+        evidence = handoff['legacy_result'].get('decision_evidence', {})
+        if ((undo and not undo_applied) or (redo and not redo_applied)) and state.shown_asins:
+            conversation_act = 'history_noop'
+        if (evidence.get('uncertain_preference') and not changed and state.shown_asins
+                and not evidence.get('requested_more') and not evidence.get('negative_feedback')):
+            conversation_act = 'uncertainty'
+        self.pending[sid] = pending_before if conversation_act else None
         self.context[sid] = {"query": handoff["legacy_result"]["raw_query"], "category_changed": category_changed,
+                             'conversation_act': conversation_act,
+                             'requirements_changed': changed,
+                             'requirement_conflicts': conflicts,
+                             'clarification_streak': streak,
+                             'question_scope_start': question_scope_start,
+                             'clarification_stalled': bool(pending_before and not changed and not conflicts),
+                             'requested_results': handoff['legacy_result'].get('decision_evidence', {}).get('requested_results', False),
+                             "requirement_undo": ('applied' if undo_applied else 'empty') if undo else None,
+                             "requirement_redo": ('applied' if redo_applied else 'empty') if redo else None,
                              "intent_changed": intent_changed, "cleared_slots": cleared,
                              "negative_feedback": handoff["legacy_result"].get("decision_evidence", {}).get("negative_feedback", False)}
         return self.snapshot(sid)
@@ -138,7 +206,9 @@ class StructuredStateMemoryManager:
             profile_hints={"preference_tags": list(self.profiles[sid].get("preference_tags", []))},
             session_summary=state.summary, shown_asins=tuple(state.shown_asins),
             rejected_asins=tuple(state.rejected_asins),
-            suggestions={**self.context[sid], "clarification_count": state.clarification_count},
+            suggestions={**self.context[sid], "clarification_count": state.clarification_count, "max_turns": self.max_turns,
+                         'can_undo_requirements': bool(self.requirement_history[sid]),
+                         'can_redo_requirements': bool(self.requirement_future[sid])},
             asked_questions=tuple(self.questions[sid]), pending_question=self.pending[sid],
         )
 
@@ -151,6 +221,8 @@ class StructuredStateMemoryManager:
             self.questions[sid].append(question)
             self.pending[sid] = question
             state.clarification_count += 1
+        if not self.context[sid].get('conversation_act'):
+            self.context[sid]['clarification_streak'] = self.context[sid].get('clarification_streak', 0) + 1 if question else 0
         state.shown_asins.extend(asin for asin in shown_asins if asin not in state.shown_asins)
         state.candidate_count = candidate_count
         self.feedback_turns[sid].add(turn)

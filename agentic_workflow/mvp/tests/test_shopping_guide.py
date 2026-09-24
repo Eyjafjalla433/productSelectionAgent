@@ -17,9 +17,9 @@ class ShoppingGuideTests(unittest.TestCase):
     def test_features_require_source_evidence(self):
         product = self.product(features=['Cotton blend with pockets'])
         notes = describe(product)
-        self.assertIn('有口袋', notes['feature'])
+        self.assertIn('Pockets', notes['feature'])
         self.assertEqual(notes['caution'], '')
-        self.assertIn('含棉', notes['detail'])
+        self.assertIn('Contains cotton', notes['detail'])
         self.assertTrue(all(e['quote'] in product['features'] for e in notes['evidence']))
 
     def test_missing_data_is_not_invented(self):
@@ -43,11 +43,11 @@ class ShoppingGuideTests(unittest.TestCase):
         rows = [describe(dict(rank=i+1, parent_asin=str(i), title=t)) for i, t in enumerate(titles)]
         self.assertEqual(len({r['feature'] for r in rows}), 3)
         for row, size in zip(rows, ('M', 'S', 'L')):
-            self.assertIn('标题尺码 ' + size, row['detail'])
+            self.assertIn('Listed size ' + size, row['detail'])
             self.assertLess(len(row['feature']), 45)
             self.assertNotIn('提到', row['feature'] + row['detail'])
 
     def test_missing_price_is_one_shared_note(self):
         guide = build_shopping_guide([self.product(i) for i in range(1, 4)])
-        self.assertIn('价格未提供', guide['data_note'])
+        self.assertIn('Prices are unavailable', guide['data_note'])
         self.assertTrue(all(not row['caution'] for row in guide['top_three']))

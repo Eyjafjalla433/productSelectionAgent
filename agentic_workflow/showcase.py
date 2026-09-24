@@ -1,4 +1,4 @@
-"""Execute a Chinese shopping case and export a standalone replay webpage."""
+"""Execute an English shopping case and export a standalone replay webpage."""
 import argparse
 from datetime import datetime, timezone
 from html import escape
@@ -17,13 +17,13 @@ def pretty(value):
 
 def product_card(product):
     notes = describe(product)
-    points = ''.join(f'<li>{escape(p["label"])}<small>商品原文：{escape(p["quote"])}</small></li>'
+    points = ''.join(f'<li>{escape(p["label"])}<small>Source: {escape(p["quote"])}</small></li>'
                      for p in notes['evidence'][:2])
     price = product.get('price')
-    money = f'${price:.2f}' if isinstance(price, (int, float)) else '价格未知'
-    return f'''<article class="product"><div class="product-head"><span>候选 {product['rank']:02}</span><b>{money}</b></div>
+    money = f'${price:.2f}' if isinstance(price, (int, float)) else 'Price unavailable'
+    return f'''<article class="product"><div class="product-head"><span>Option {product['rank']:02}</span><b>{money}</b></div>
         <h3>{escape(product['title'])}</h3><p class="muted">{escape(product['parent_asin'])} · {escape(product['store'])}</p>
-        <p>{escape(notes['feature'])}</p><p>{escape(notes['detail'])}</p><details><summary>商品原文</summary><ul>{points}</ul></details></article>'''
+        <p>{escape(notes['feature'])}</p><p>{escape(notes['detail'])}</p><details><summary>Source details</summary><ul>{points}</ul></details></article>'''
 
 
 def run_case(backend='demo'):
@@ -34,11 +34,11 @@ def run_case(backend='demo'):
         if problems:
             raise RuntimeError('; '.join(problems))
         runtime = create_runtime()
-        prompts = ('我想找一条蓝色连衣裙。', '更喜欢棉质的。',
-                   '比较第一个和第二个和第三个', '确认最终选择')
+        prompts = ('I am looking for a blue dress.', 'I prefer cotton.',
+                   'Compare #1, #2 and #3', 'Finalize my selection')
     else:
         runtime = AgentRuntime.create(DEMO_CATALOG, orchestration_mode='adaptive')
-        prompts = DEMO_CASES['dress_zh']['prompts']
+        prompts = DEMO_CASES['dress_en']['prompts']
     sid = runtime.new_session()['session_id']
     turns = []
     for prompt in prompts:
@@ -62,30 +62,30 @@ def run_case(backend='demo'):
 
 
 def render(report):
-    labels = ['提出需求', '补充条件', '比较候选', '确认选择']
+    labels = ['Your request', 'Refine preferences', 'Compare options', 'Save selection']
     sections = []
     for i, turn in enumerate(report['turns']):
         result = turn['result']
         receipt = result['receipt']
-        state = {'必须满足': receipt.get('hard', {}), '偏好': receipt.get('soft', {}),
-                 '排除': receipt.get('excluded', {})}
+        state = {'Requirements': receipt.get('hard', {}), 'Preferences': receipt.get('soft', {}),
+                 'Exclusions': receipt.get('excluded', {})}
         cards = ''.join(product_card(p) for p in result['products'][:3])
         guide = build_shopping_guide(result['products'])
         rows = ''.join(f'<tr><td><b>#{p["rank"]}</b> {escape(p["title"])}</td><td>{escape(p["feature"]) or "—"}</td><td>{escape(p["detail"]) or "—"}</td></tr>' for p in guide['top_three'])
-        comparison = f'<div class="table-wrap"><table><caption>前三款对比</caption><thead><tr><th>本次排行 / 商品</th><th>款式特点</th><th>其他信息</th></tr></thead><tbody>{rows}</tbody></table></div><p class="muted">{guide["data_note"]}</p>'
+        comparison = f'<div class="table-wrap"><table><caption>Top three comparison</caption><thead><tr><th>Rank / Product</th><th>Standout features</th><th>Other details</th></tr></thead><tbody>{rows}</tbody></table></div><p class="muted">{guide["data_note"]}</p>'
         others = ''.join(f'<article class="other-option"><b>#{p["rank"]} {escape(p["title"])}</b><p>{escape(" · ".join(filter(None, (p["feature"], p["detail"]))))}</p></article>' for p in guide['other_options'])
-        remaining = f'<section class="remaining"><h3>其余几款，也各有值得留意的地方</h3>{others}</section>' if others else ''
-        final = f'<div class="confirmed">✓ 已帮你保存 {len(report["handoff"]["selected_products"])} 款候选。先留着慢慢考虑，还没有下单。</div>' if i == 3 else ''
+        remaining = f'<section class="remaining"><h3>More options to consider</h3>{others}</section>' if others else ''
+        final = f'<div class="confirmed">✓ Saved {len(report["handoff"]["selected_products"])} options for later. No order has been placed.</div>' if i == 3 else ''
         sections.append(f'''<section class="step" id="step-{i}"><div class="step-heading"><span>0{i+1} / 04</span><h2>{labels[i]}</h2></div>
-            <div class="columns"><div><div class="bubble user"><label>模拟用户 · 小林</label><p>{escape(turn['user'])}</p></div>
-            <div class="bubble agent"><label>SHOPPING AGENT · 实际回复</label><p>{escape(result['assistant']['message'])}</p></div>
-            <details><summary>查看该轮完整执行结果</summary><pre>{pretty(result)}</pre></details></div>
-            <aside><h3>你的偏好，我记着呢</h3><p>这一轮整理了 {len(result['products'])} 款，最多展示 10 款。</p><p class="muted">{guide['ranking_note']}</p><details><summary>查看记住的条件</summary><pre>{pretty(state)}</pre></details></aside></div>
+            <div class="columns"><div><div class="bubble user"><label>DEMO SHOPPER · ALEX</label><p>{escape(turn['user'])}</p></div>
+            <div class="bubble agent"><label>SHOPPING AGENT · ACTUAL RESPONSE</label><p>{escape(result['assistant']['message'])}</p></div>
+            <details><summary>View the full turn result</summary><pre>{pretty(result)}</pre></details></div>
+            <aside><h3>Your preferences, remembered</h3><p>Showing {len(result['products'])} options this turn, up to 10.</p><p class="muted">{guide['ranking_note']}</p><details><summary>View remembered requirements</summary><pre>{pretty(state)}</pre></details></aside></div>
             {comparison}{final}<div class="products">{cards}</div>{remaining}</section>''')
     tabs = ''.join(f'<button class="tab" data-step="{i}" type="button">0{i+1} {label}</button>' for i, label in enumerate(labels))
     document = Path(__file__).with_name('showcase_template.html').read_text(encoding='utf-8')
     data = json.dumps(report, ensure_ascii=False).replace('<', '\\u003c')
-    notice = ('本页是实际 search_tool 模型与商品索引跑出的结果，用户对话为示范脚本。价格、评分、库存未由该工具提供，所以不做推测。' if report.get('backend') == 'search_tool' else '本页使用内置模拟商品，由当前 workflow 实际执行，价格和评分为模拟数据。')
+    notice = ('This replay uses the actual search_tool model and product index with a scripted shopper. The tool does not supply prices, ratings, or stock, so these are not inferred.' if report.get('backend') == 'search_tool' else 'This replay runs the actual workflow on synthetic products. Prices and ratings are simulated.')
     return document.replace('<!--TABS-->', tabs).replace('<!--STEPS-->', ''.join(sections)).replace('/*REPORT*/', data).replace('<!--NOTICE-->', notice)
 
 

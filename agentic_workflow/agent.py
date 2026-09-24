@@ -8,4 +8,7 @@ class Agent(FinalAgent):
         if catalog_path is None:
             kwargs['search_adapter'] = SearchToolAdapter(search_function, details_function)
         kwargs.setdefault('orchestration_mode', 'adaptive')
+        if kwargs['orchestration_mode'] == 'adaptive':
+            kwargs.setdefault('max_turns', None)
+            kwargs.setdefault('clarification_mode', 'conversational')
         super().__init__(catalog_path, **kwargs)

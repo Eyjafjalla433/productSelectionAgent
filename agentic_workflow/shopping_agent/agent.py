@@ -1,6 +1,7 @@
 """Official reset/respond API and observable, versioned orchestration."""
 from copy import deepcopy
 from dataclasses import replace
+import json
 from time import perf_counter
 
 from intent_router.turn_router import TurnIntentRouter
@@ -8,11 +9,14 @@ from intent_router.catalog_lexicon import NON_BRAND_STORE_WORDS
 from state_memory.structured_manager import StructuredStateMemoryManager
 from .retrieval import RetrievalRequest, StateAwareRetriever
 from .ranking import StateAwareReranker
-from .policy import PreRetrievalPolicy, PostRetrievalPolicy
+from .policy import PreRetrievalPolicy, PostRetrievalPolicy, PolicyDecision
 
 
 class FinalAgent:
-    def __init__(self, catalog_path=None, *, retrieval_backend=None, ranking_mode=None, orchestration_mode="adaptive", clarification_mode=None, trace_enabled=False, requirement_enhancer=None, search_adapter=None):
+    def __init__(self, catalog_path=None, *, retrieval_backend=None, ranking_mode=None, orchestration_mode="adaptive", clarification_mode=None, trace_enabled=False, requirement_enhancer=None, search_adapter=None, max_turns=10):
+        if max_turns is not None and (type(max_turns) is not int or max_turns < 1):
+            raise ValueError('max_turns must be a positive integer or None')
+        self.max_turns = max_turns
         if orchestration_mode not in {"adaptive", "score_compat"}:
             raise ValueError("orchestration_mode must be adaptive or score_compat")
         if ranking_mode is None:
@@ -20,6 +24,7 @@ class FinalAgent:
         if clarification_mode is None:
             clarification_mode = "state_evidence" if orchestration_mode == "score_compat" else "strict_dynamic"
         profiles = {
+            "conversational": (0, 0, None),
             "strict_dynamic": (0, 0, 2),
             "state_evidence": (4, 0, 2),
             "fixed_two_dynamic": (0, 2, 3),
@@ -33,12 +38,13 @@ class FinalAgent:
                                              mode="recall_compat" if orchestration_mode == "score_compat" else "strict")
         brands = {str(p.get("store") or "").strip().lower() for p in self.retriever.products.values()}
         self.router = TurnIntentRouter(known_brands={b for b in brands if len(b) >= 3 and b not in NON_BRAND_STORE_WORDS})
-        self.memory = StructuredStateMemoryManager()
+        self.memory = StructuredStateMemoryManager(max_turns=max_turns)
         minimum_evidence, minimum_questions, max_questions = profiles[clarification_mode]
         self.pre_policy = PreRetrievalPolicy(minimum_evidence, minimum_questions, max_questions)
         self.reranker = search_adapter if search_adapter is not None else StateAwareReranker(ranking_mode)
         self.post_policy = PostRetrievalPolicy(max_questions)
         self.calls = {}
+        self.result_history = {}
         self.trace_enabled = trace_enabled
         self.trace = []
         self.errors = []
@@ -69,10 +75,12 @@ class FinalAgent:
     def reset(self, session_id, user_profile):
         self.memory.reset(session_id, user_profile)
         self.calls[session_id] = {}
+        self.result_history[session_id] = []
 
     def drop_session(self, session_id):
         """Release C-layer and state-memory data for an expired web session."""
         self.calls.pop(session_id, None)
+        self.result_history.pop(session_id, None)
         self.memory.drop(session_id)
         # Trace and diagnostic errors are session data too. Keeping them after
         # TTL/LRU eviction would make the otherwise bounded web runtime grow
@@ -94,8 +102,8 @@ class FinalAgent:
         """Record a C-layer conversational control without mutating requirements."""
         if session_id not in self.calls:
             raise ValueError("reset(session_id, user_profile) is required")
-        if type(turn) is not int or not 1 <= turn <= 10:
-            raise ValueError("turn must be between 1 and 10")
+        if type(turn) is not int or turn < 1 or (self.max_turns is not None and turn > self.max_turns):
+            raise ValueError("turn exceeds the configured conversation limit")
         if type(top_k) is not int or not 1 <= top_k <= 10:
             raise ValueError("top_k must be between 1 and 10")
         calls = self.calls[session_id]
@@ -134,8 +142,8 @@ class FinalAgent:
     def respond(self, session_id, user_message, turn, top_k=10):
         if session_id not in self.calls:
             raise ValueError("reset(session_id, user_profile) is required")
-        if type(turn) is not int or not 1 <= turn <= 10:
-            raise ValueError("turn must be between 1 and 10")
+        if type(turn) is not int or turn < 1 or (self.max_turns is not None and turn > self.max_turns):
+            raise ValueError("turn exceeds the configured conversation limit")
         if type(top_k) is not int or not 1 <= top_k <= 10:
             raise ValueError("top_k must be between 1 and 10")
         calls = self.calls[session_id]
@@ -159,7 +167,8 @@ class FinalAgent:
         model_usage = {"prompt_tokens": 0, "completion_tokens": 0}
         try:
             intent_result = self.router.understand_turn(user_message, pending_question=self.memory.pending[session_id])
-            if self.requirement_enhancer is not None:
+            uncertainty_only = intent_result.decision_evidence.get('uncertain_preference') and not intent_result.slot_updates
+            if self.requirement_enhancer is not None and intent_result.decision_evidence.get('requirement_control') not in {'undo', 'redo'} and not intent_result.decision_evidence.get('conversation_act') and not uncertainty_only and not intent_result.decision_evidence.get('retry_search'):
                 stage = "1_model_enhancement"
                 enhancement = self.requirement_enhancer.enhance(user_message, intent_result.slot_updates or ())
                 combined = tuple(intent_result.slot_updates or ()) + enhancement.updates
@@ -185,9 +194,30 @@ class FinalAgent:
             state = self.memory.update_from_intent(handoff)
             observe("3_state", state.to_dict())  # BP3: accumulated state
             stage = "4A_pre_policy"
-            pre_decision = self.pre_policy.decide(state)
+            result_key = json.dumps([state.hard_constraints,
+                {k: [p.value for p in v] for k, v in state.soft_preferences.items()},
+                state.exclusions], sort_keys=True, ensure_ascii=False)
+            restored = None
+            history_action = 'redo' if state.suggestions.get('requirement_redo') else 'undo'
+            if self.orchestration_mode == 'adaptive' and state.suggestions.get('requirement_' + history_action) == 'applied':
+                cached = next((item for item in reversed(self.result_history[session_id]) if item['key'] == result_key), None)
+                if cached and all(self.retriever.products.get(key) == source for key, source in cached['sources'].items()):
+                    rows = [row for row in cached['ranking'].ranked_candidates
+                            if row.parent_asin not in state.rejected_asins
+                            and StateAwareRetriever.satisfies(self.retriever, row.parent_asin, state)]
+                    if rows:
+                        restored = replace(cached['ranking'], turn=turn, state_version=state.state_version,
+                            ranking_method='restored_previous_results',
+                            ranked_candidates=tuple(replace(row, rank=i) for i, row in enumerate(rows[:top_k], 1)))
+            pre_decision = PolicyDecision('restore', history_action + '_previous_results') if restored else self.pre_policy.decide(state)
             observe("4A_pre_policy", pre_decision.to_dict())  # BP4A
-            if pre_decision.action == "clarify":
+            if restored:
+                ranking = restored
+                decision = PolicyDecision('recommend', history_action + '_previous_results')
+                observe('5_restore_results', {'source_turn': cached['ranking'].turn, 'candidate_set_id': ranking.candidate_set_id})
+                observe('4B_ranking', ranking.to_dict())
+                observe('4B_post_policy', decision.to_dict())
+            elif pre_decision.action in {"clarify", "acknowledge"}:
                 decision = pre_decision
                 ranking = None
             else:
@@ -218,21 +248,54 @@ class FinalAgent:
                 "recommendations": recommendations,
                 "usage": model_usage,
             }
-            if recommendations and self.orchestration_mode == 'adaptive':
+            if decision.reason == 'awaiting_product_context':
+                response['message'] = "No rush. When you're ready, tell me what you're shopping for and I'll take it from there."
+            if decision.reason == 'conversation_acknowledgement':
+                response['message'] = "You're welcome. We can pick up here whenever you're ready."
+            elif decision.reason == 'conversation_pause':
+                response['message'] = "Take your time. I'll keep your preferences here."
+            elif decision.reason == 'conversation_uncertainty':
+                response['message'] = "No need to decide yet. I'll keep your current preferences. You can ask for more options whenever you like."
+            elif decision.reason == 'conversation_history_noop':
+                response['message'] = "Your current options and preferences are unchanged."
+            if recommendations and not decision.question and self.orchestration_mode == 'adaptive':
                 hard = state.hard_constraints
-                description = ' '.join(str(hard.get(k, '')) for k in ('color', 'category')).strip()
+                color = hard.get('color', '')
+                if isinstance(color, (tuple, list)):
+                    color = ' or '.join(map(str, color))
+                preferred_color = state.soft_preferences.get('color', ())
+                description = ' '.join(str(v) for v in (color, hard.get('category', '')) if v)
+                if not color and preferred_color:
+                    description += f', preferably {preferred_color[0].value}'
                 target = state.soft_preferences.get('budget_target', ())
                 budget = f', aiming for around ${float(target[0].value):g}' if target else ''
                 response['message'] = f"Got it — {description}{budget}. I've pulled together {len(recommendations)} options so you can compare their details."
                 if (target or 'price_max' in hard or 'price_min' in hard) and getattr(self.retriever, 'mode', '') == 'search_tool':
                     response['message'] += " This source doesn't include prices, so I can't confirm which fit your budget yet; I've kept it in your preferences."
+            undo_status = state.suggestions.get('requirement_undo')
+            if restored:
+                response['message'] = f"I've restored {len(recommendations)} previously shown options in their earlier order so you can pick up your comparison."
+            if undo_status:
+                prefix = "I've undone your last requirement change. " if undo_status == 'applied' else "There isn't an earlier requirement change to undo. "
+                response['message'] = prefix + response['message']
+            if state.suggestions.get('requirement_redo'):
+                prefix = "I've restored your last undone requirement change. " if state.suggestions['requirement_redo'] == 'applied' else "There isn't an undone requirement change to restore. "
+                response['message'] = prefix + response['message']
+            if recommendations and self.orchestration_mode == 'adaptive':
+                history = self.result_history[session_id]
+                history[:] = [item for item in history if item['key'] != result_key]
+                history.append({'key': result_key, 'ranking': deepcopy(ranking),
+                                'sources': {row['parent_asin']: self.get_catalog_product(row['parent_asin']) for row in recommendations}})
+                del history[:-24]  # Bounded per-session display history, not a product database.
         except Exception as exc:
             error = {"session_id": session_id, "turn": turn, "stage": stage, "type": type(exc).__name__, "message": str(exc)}
             self.errors.append(error)
             observe("error", error)
             # Fail closed: do not reuse stale candidates or drop hard constraints.
             decision = None
-            response = {"message": "I could not complete this search. Please restate your requirements.", "ask_attribute": None, "recommendations": [], "usage": model_usage}
+            message = ("I could not complete this search. Your requirements are saved; say 'try again' to retry."
+                       if state is not None else "I could not process that request. Please send it again.")
+            response = {"message": message, "ask_attribute": None, "recommendations": [], "usage": model_usage}
         observe("response", response)  # BP-response
         if state is not None:
             feedback = self.memory.record_execution(session_id, turn=turn,

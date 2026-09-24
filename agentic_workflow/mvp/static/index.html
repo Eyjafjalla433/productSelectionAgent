@@ -29,7 +29,7 @@
       <p class="lede">A shopping copilot that remembers evolving intent and exposes the evidence behind every decision.</p>
 
       <section class="turn-card" aria-label="Conversation turn progress">
-        <div><span>TURN BUDGET</span><strong id="turn-label">0 / 10</strong></div>
+        <div><span>Conversation</span><strong id="turn-label">0 messages</strong></div>
         <div class="turn-track"><i id="turn-progress"></i></div>
       </section>
 
@@ -62,6 +62,8 @@
         </article>
       </div>
 
+      <div id="reply-options" class="reply-options" role="group" aria-label="Suggested replies; you can also type freely" hidden></div>
+
       <div id="results-head" class="results-head" hidden>
         <p class="section-label">CURRENT RESULTS</p>
         <span id="result-summary"></span>
@@ -81,6 +83,8 @@
           <button id="finalize-selection" type="button">FINALIZE</button>
           <button id="export-selection" type="button">EXPORT HANDOFF</button>
           <button id="clear-shortlist" type="button">CLEAR SHORTLIST</button>
+          <button id="undo-shortlist" type="button" hidden>UNDO SHORTLIST EDIT</button>
+          <button id="redo-shortlist" type="button" hidden>REDO SHORTLIST EDIT</button>
         </div>
       </section>
 
@@ -109,7 +113,7 @@
           <textarea id="message" rows="1" maxlength="1000" placeholder="e.g. Blue instead — and no budget limit" required></textarea>
           <button type="submit" aria-label="Send message">SEND <span>↗</span></button>
         </div>
-        <p>Change your mind, say “Compare #1 and #3” or “不要第2个”. The ledger shows what changed.</p>
+        <p>Change your mind, say “Compare #1 and #3” or “Reject #2”. The ledger shows what changed.</p>
         <p id="data-boundary" class="data-boundary">LOCAL ONLY · NO MODEL REQUESTS</p>
       </form>
     </section>
