@@ -1,0 +1,149 @@
+{
+  "status": "passed",
+  "python": "3.12.13",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "fresh_virtual_environment": true,
+  "directory_contains_spaces": true,
+  "third_party_packages": [
+    {
+      "name": "pip",
+      "version": "25.0.1"
+    }
+  ],
+  "tests": {
+    "shopping_agent/tests": 22,
+    "submission_tools/tests": 7
+  },
+  "public_sessions": 200,
+  "same_sample_hits_ranks_turns_as_development_run": true,
+  "offline_socket_guard": true,
+  "errors": 0,
+  "source_sha256": {
+    "agent.py": "9bcb93ef449085252038331e2ced99ae7e5f54d64ebaee459fa978a8e468394f",
+    "conversation-state-memory/src/state_memory/__init__.py": "31c1bab9364a5779177c712d17fb882e02bf18e54837ddafce56cf7b5ffcab73",
+    "conversation-state-memory/src/state_memory/catalog_lexicon.py": "7feb51066cfb26ce6699ef3acab988aab2f7da97b5abec25b9d67a830b1410f9",
+    "conversation-state-memory/src/state_memory/context_program.py": "e70ff5a72a32c80ff0a3451bf8add7170d662efe6b62caf1483788233228d1ae",
+    "conversation-state-memory/src/state_memory/contracts.py": "231837544877df2a6babbc512a1eabdf5bde09f7c4baddae577f278753f2e549",
+    "conversation-state-memory/src/state_memory/extractor.py": "ebab9fe549031d7cb2402fec9a11ae0d67df9ba6a9bec8ad74d08796970252b0",
+    "conversation-state-memory/src/state_memory/manager.py": "993f1fcbd902090cbdfaefa53326576f6353cde04e431f1083fe0493b4ae6031",
+    "conversation-state-memory/src/state_memory/models.py": "4998f0d398293a458545fb542b515f22a64a61ad862d8a1a2b34ece848ade2ab",
+    "conversation-state-memory/src/state_memory/profile.py": "01133c018b6167e9bfebcffe67269c3307570198d08a5852bc43ff4c2a735bf5",
+    "conversation-state-memory/src/state_memory/state_machine.py": "ba46ffdf1c2c42568976c7e51bb497b365c3cd83288ec46bf8cbd65827728ead",
+    "conversation-state-memory/src/state_memory/structured_manager.py": "a17883733212bb2077bf51e6b990428fc81a3ec9ff1e7d71e604e74dd0dc2fbf",
+    "intent-recognition/intent_router/__init__.py": "065181f03993244f509395743a0ec9976d4b0735466637d5ad8cc15cc52b940e",
+    "intent-recognition/intent_router/catalog_lexicon.py": "4c5cdcafd49515330784be89c530b3725a12d17ad0121d9320a82fe756e0b59b",
+    "intent-recognition/intent_router/models.py": "4379db38f9475e737e7a2aab694880ac5e277658329b5fe6080fe6f01e4675db",
+    "intent-recognition/intent_router/router.py": "a43298ac16e78c3637e948f1d61b29031f66d7117b2f4427396f5440c3209e41",
+    "intent-recognition/intent_router/turn_router.py": "8c6ed12f9ab17edbaff630e67f00f2c0921116339b75e0a1143ded44bd587b46",
+    "ranking_pipeline/__init__.py": "b98a68b0b62803a1ec54d053d31b33e871580d2895c881fe9385a02b3689fc57",
+    "ranking_pipeline/agent.py": "97c04833ac86467db72755682da2b70f7eede38278caaec9dc5169fd48856db4",
+    "ranking_pipeline/context.py": "28256addabfce379d8a714a354ffe77ad4125b0d8b526096bb168cbff9c33a6d",
+    "ranking_pipeline/contextual_ranking.py": "f9a76f7063af1941c362eca2306f584fbcee72b07f576d7c03248f1cd2104603",
+    "ranking_pipeline/diagnose_synthetic.py": "488b07d8036e63d7b002c872005903ff4b3308fe0ab415e432cd165befdd36ca",
+    "ranking_pipeline/distribution_alignment.py": "9eb6117c7d8d0da62761e81e7526086df1d6369809c8c2869ca2d1aa4e587558",
+    "ranking_pipeline/evaluate_agent.py": "365bbf743a5fb255c4c2b57f73fc17223b7d23201bb381484ec984b477b8ecde",
+    "ranking_pipeline/evaluate_override_ablation.py": "eb28b8676f1716f492e393edea54adacd702886a9e046c17c60eef1330fc844f",
+    "ranking_pipeline/memory_context.py": "6dd732929789d9eb3f5a8ddb4c0aa5a9d73da0f210970ad990cc8f2cfb51cc23",
+    "ranking_pipeline/override_aware_agent.py": "0da3bf70a44700a428b5965e0123d846125459d7daf19b58534c54b33d1b3c76",
+    "ranking_pipeline/prompt.py": "0c99dddb15216faf2e2498bc502fb908a0a0f8774f2cca07045668e7633005c3",
+    "ranking_pipeline/qwen_reranker.py": "ef4dc381167d6877f5acafae75793b8bd460aeec613927d75b440c00bac0df64",
+    "ranking_pipeline/summarize_results.py": "a9682fc94122b7807adef490d6fd2309fb0573a76ad3cefad647fb6b3e102ad8",
+    "ranking_pipeline/train_reranker.py": "4e09277369f1db3a37dfa3cb6305e8a453b13aa51eebc4f4a4c63f474a4ffa2f",
+    "ranking_pipeline/training_data.py": "322709114566357b21e8672fa243474bd98264a6864a1d77d6f8b2ed773ac208",
+    "retrieval-and-reranking/techjam_agent/__init__.py": "cff531d4df4c6f951eb4c804733c54d0fa4878189796e891dc97bee2ade55e8f",
+    "retrieval-and-reranking/techjam_agent/agent.py": "f9c7b7c8ce0ff552d201bf31b2c86f6e8c20808dbab9388c3846904ae61202ff",
+    "retrieval-and-reranking/techjam_agent/contracts.py": "909334fafbb46e6795d1bfc70ee4a01f6273b1cae9de8a13d5dddab927945287",
+    "retrieval-and-reranking/techjam_agent/contracts_v2.py": "f6b06e4db3c93e1d550b62df41635e0f2f32ee747bd7225709f5598a08fe3459",
+    "retrieval-and-reranking/techjam_agent/dialogue.py": "88cadec9e9e28ad6f326ea7905bd07116c27e8187b36fad8b5ddc7fbccdf225f",
+    "retrieval-and-reranking/techjam_agent/query.py": "682a4c1fc42d2be47860c192e1a02e640c2c87dfa96a03a30169ca19d0d9d35d",
+    "retrieval-and-reranking/techjam_agent/ranking.py": "8d859af2ce7de9ccb35ba95f8db6055d07b6bdf4da8e5f5fa020bcd4072e2b9f",
+    "retrieval-and-reranking/techjam_agent/retrieval.py": "685000ed00b09b54a828ed145a9f257def1ff62868959e62c01d0d6c943edb03",
+    "shopping_agent/__init__.py": "e9fd1a531d287b7db6fe96363d81aec6e75d2e60e277291c7ed66bc549a897b0",
+    "shopping_agent/agent.py": "79abaf068f20bc2bec56b6dabb66b14c451ae00f9fa7d2789e6d438257318e46",
+    "shopping_agent/policy.py": "bf99ce801d896d3d4e5d07aa7c891d4afd16f96c578fe5ed5a875b0de1bc333a",
+    "shopping_agent/ranking.py": "1f13eea105b026351a8fb760086bf04f375247cd46d544a11d773d3835e6e01b",
+    "shopping_agent/retrieval.py": "5d543032dd157aaf6f07c4b11de257f04a88d9a5c65a8cfbd5240f2d33a28a50",
+    "submission_tools/__init__.py": "21976565dc8e6fac13c12fcadd300af010593d6d4cb3610b1ad3a05c26a19415",
+    "submission_tools/build.py": "b6bff7e676ee0d8fa4a23563ea5b3a5ca58e35ae1bd77aef3e8978db01707619",
+    "submission_tools/common.py": "3667d75be124369eec9b6b346914591893b55a5834a3cb81d6f63ccc1f855861",
+    "submission_tools/demo.py": "db1fba994abdecd1ad5948ecd156468320f7277150bc88322c40d62b1b7a91a0",
+    "submission_tools/evaluate.py": "0a46ae0bb748d1e4459862fd63eabaadacad319c6b8f2559573a4a0e35bb978a",
+    "submission_tools/prepare_data.py": "ddc8575f50594681db1c02f24fefd43993be825641ed20d34e17d36eb6a52016",
+    "submission_tools/verify.py": "58c00cb56641aca8064d8e2b24b862627b67afff0a92c512d36a118edf753fcf"
+  },
+  "setup_archive_sha256": "b3d7e283b835343b42c4919ea2ca90f2fb5a2aa2b10537f14dcf42f03e5b38ae",
+  "setup_mode": "verified offline organizer ZIP",
+  "demo_scenarios": [
+    "clarify",
+    "override",
+    "browse"
+  ],
+  "checks": [
+    {
+      "command": "python -m pip install --no-index -r requirements.txt",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m pip list --format=json",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.verify --code-only",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.prepare_data --archive TEMP/participant-kit.zip",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.verify",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m unittest discover -s shopping_agent/tests -v",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m unittest discover -s submission_tools/tests -v",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.evaluate --offline-check --output results/public200.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.demo --scenario clarify",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.demo --scenario override",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.demo --scenario browse",
+      "exit_code": 0
+    },
+    {
+      "command": "python -m submission_tools.verify",
+      "exit_code": 0
+    }
+  ],
+  "note": "Clean candidate package code was tested. Final packaging updates only this evidence and documentation; final manifest is checked separately.",
+  "development_repository_test_total": 120,
+  "development_repository_test_breakdown": {
+    "intent-recognition/tests": 17,
+    "conversation-state-memory/tests": 26,
+    "retrieval-and-reranking/tests": 13,
+    "ranking_pipeline/tests": 35,
+    "shopping_agent/tests": 22,
+    "submission_tools/tests": 7
+  },
+  "public_metrics": {
+    "hit_rate_at_10": 0.985,
+    "mrr": 0.888375,
+    "mttc": 3.205,
+    "efficiency": 0.7795,
+    "recommended_technical_score": 0.914913
+  },
+  "additional_development_demo": "dynamic4b: two fixed 4A questions, negative-feedback 4B clarification, then recommendation; passed"
+}

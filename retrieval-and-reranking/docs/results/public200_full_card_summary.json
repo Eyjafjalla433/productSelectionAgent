@@ -1,0 +1,14 @@
+{
+  "evaluation_kind": "offline_full_card_diagnostic",
+  "official_interactive_score": false,
+  "sample_count": 200,
+  "top50_coverage_count": 199,
+  "locked_weighted_rrf": {
+    "hit_at_1_count": 173,
+    "hit_at_3_count": 193,
+    "hit_at_5_count": 197,
+    "hit_at_10_count": 198,
+    "mrr_at_10": 0.912625
+  },
+  "default_method": "locked_weighted_rrf"
+}

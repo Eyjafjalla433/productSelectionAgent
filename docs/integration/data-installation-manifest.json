@@ -1,0 +1,183 @@
+{
+  "date": "2026-08-31",
+  "spec_url": "https://bytedance.larkoffice.com/wiki/DNtSwxgeciCS2nkiUefc5qqtnkf",
+  "official_release": "https://github.com/TechJam2026/techjam-conversational-search/releases/tag/participant-kit",
+  "archive_hashes": {
+    "techjam-participant-kit.zip": "b3d7e283b835343b42c4919ea2ca90f2fb5a2aa2b10537f14dcf42f03e5b38ae",
+    "techjam-runtime-assets-v0.1.0.zip": "57769c08803b2a68604e12bbc59ec07beea65d831498aa3d361cb0e0a7004f2b",
+    "SHA256SUMS": "cd04b5f52cc06b61b0bd54ad93dc89bab6b0f2ec33d0725c79ed3c193e4de9e9"
+  },
+  "catalog_rows": 50000,
+  "catalog_unique_asins": 50000,
+  "public_sessions": 200,
+  "scenarios": {
+    "buying": 80,
+    "intent_override": 30,
+    "browsing": 80,
+    "boundary": 10
+  },
+  "runtime_files": {
+    "retrieval-and-reranking/data/catalog.jsonl": {
+      "sha256": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+      "bytes": 60546327
+    },
+    "retrieval-and-reranking/resources/bge-small-en-v1.5/model.safetensors": {
+      "sha256": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+      "bytes": 133466304
+    },
+    "retrieval-and-reranking/resources/dense_catalog_embeddings/baai-bge-small-en-v1-5-catalog-embeddings.npy": {
+      "sha256": "51d95d439c0656ef3a59fd932bcb85ad9a317f4b456b9cdfd4c17ccecc3ea98b",
+      "bytes": 76800128
+    },
+    "retrieval-and-reranking/resources/dense_catalog_embeddings/baai-bge-small-en-v1-5-parent-asins.json": {
+      "sha256": "d39da028e49c5e9b159a9c67c83fb8a1d0fd685e61aabe38a82f12877dfa545c",
+      "bytes": 700002
+    }
+  },
+  "identical_to_official_kit": {
+    "intent-recognition/data/public_set.jsonl": "857259f7a438e6188ac63e18995b6ff4489bfcfc4a716a798b9a2aa0ee8f7579",
+    "intent-recognition/evaluator/local_evaluator.py": "79a5ea06f9a1b8c5036f30efa85dc1f36b8f6b06eb8feb8f545dfa767bc45564",
+    "intent-recognition/docs/agent_api_contract.json": "635563741dd71c273d540722913eccdc595b4af9b47ade79f38cd42ae45c8822",
+    "intent-recognition/docs/evaluation_config.json": "8ee0c899ddc68d521754cf9d2f239a8bc09851fb37c5872567160c30d431aa53",
+    "retrieval-and-reranking/data/public_set.jsonl": "857259f7a438e6188ac63e18995b6ff4489bfcfc4a716a798b9a2aa0ee8f7579",
+    "retrieval-and-reranking/evaluator/local_evaluator.py": "79a5ea06f9a1b8c5036f30efa85dc1f36b8f6b06eb8feb8f545dfa767bc45564",
+    "retrieval-and-reranking/docs/agent_api_contract.json": "635563741dd71c273d540722913eccdc595b4af9b47ade79f38cd42ae45c8822",
+    "retrieval-and-reranking/docs/evaluation_config.json": "8ee0c899ddc68d521754cf9d2f239a8bc09851fb37c5872567160c30d431aa53"
+  },
+  "dense_shape": [
+    50000,
+    384
+  ],
+  "dense_order_matches_catalog": true,
+  "intent_catalog_link": "../../retrieval-and-reranking/data/catalog.jsonl",
+  "code_commit": "1bb8c985e5e31892c95e8283dd8f497481e551d1",
+  "python": "3.12.13 (main, Aug  7 2026, 02:15:23) [Clang 22.1.3 ]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "dependencies_available": {
+    "numpy": true,
+    "torch": false,
+    "transformers": false,
+    "sentence_transformers": false
+  },
+  "team_repo_private": true,
+  "fresh_evaluation": {
+    "official-bm25-public200": {
+      "sample_count": 200,
+      "hit_rate_at_10": 0.125,
+      "mrr": 0.068034,
+      "mttc": 9.81,
+      "efficiency": 0.119,
+      "recommended_technical_score": 0.10671,
+      "reported_token_usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scenario_metrics": {
+        "boundary": {
+          "sample_count": 10,
+          "hit_rate_at_10": 0.0,
+          "mrr": 0.0,
+          "mttc": 11.0
+        },
+        "browsing": {
+          "sample_count": 80,
+          "hit_rate_at_10": 0.025,
+          "mrr": 0.004514,
+          "mttc": 10.75
+        },
+        "buying": {
+          "sample_count": 80,
+          "hit_rate_at_10": 0.2375,
+          "mrr": 0.126508,
+          "mttc": 8.625
+        },
+        "intent_override": {
+          "sample_count": 30,
+          "hit_rate_at_10": 0.133333,
+          "mrr": 0.104167,
+          "mttc": 10.066667
+        }
+      },
+      "hit_count": 25
+    },
+    "locked-lite-public200": {
+      "sample_count": 200,
+      "hit_rate_at_10": 0.985,
+      "mrr": 0.884625,
+      "mttc": 3.205,
+      "efficiency": 0.7795,
+      "recommended_technical_score": 0.913788,
+      "reported_token_usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "scenario_metrics": {
+        "boundary": {
+          "sample_count": 10,
+          "hit_rate_at_10": 0.9,
+          "mrr": 0.85,
+          "mttc": 3.8
+        },
+        "browsing": {
+          "sample_count": 80,
+          "hit_rate_at_10": 1.0,
+          "mrr": 0.9125,
+          "mttc": 3.0
+        },
+        "buying": {
+          "sample_count": 80,
+          "hit_rate_at_10": 0.9875,
+          "mrr": 0.911771,
+          "mttc": 3.1
+        },
+        "intent_override": {
+          "sample_count": 30,
+          "hit_rate_at_10": 0.966667,
+          "mrr": 0.749444,
+          "mttc": 3.833333
+        }
+      },
+      "hit_count": 197
+    }
+  },
+  "router": {
+    "intent_distribution": {
+      "buying": 0,
+      "browsing": 90,
+      "undetermined": 110
+    },
+    "initial_buying_constraint_coverage": 1.0,
+    "constraint_sample_count": 80,
+    "override_detection_recall": 1.0,
+    "override_sample_count": 30,
+    "scenario_counts": {
+      "buying": {
+        "count": 80,
+        "buying": 0,
+        "browsing": 0,
+        "undetermined": 80
+      },
+      "intent_override": {
+        "count": 30,
+        "buying": 0,
+        "browsing": 0,
+        "undetermined": 30
+      },
+      "browsing": {
+        "count": 80,
+        "buying": 0,
+        "browsing": 80,
+        "undetermined": 0
+      },
+      "boundary": {
+        "count": 10,
+        "buying": 0,
+        "browsing": 10,
+        "undetermined": 0
+      }
+    }
+  },
+  "limits": "No exact-mode/BGE inference, Qwen inference, private800 evaluation, or complete final-agent acceptance run was performed."
+}

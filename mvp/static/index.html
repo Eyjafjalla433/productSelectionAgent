@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An inspectable, offline shopping copilot demo.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23d9ff43'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='26' font-weight='900'%3ESM%3C/text%3E%3C/svg%3E">
+  <title>Show Me Your Agent</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Show Me Your Agent home">
+      <span class="brand-mark">SM</span>
+      <span>SHOW ME<br><b>YOUR AGENT</b></span>
+    </a>
+    <div id="runtime-mode" class="runtime-badge"><i></i> OFFLINE · CATALOG · 0 TOKENS</div>
+    <div class="top-actions">
+      <button id="export-audit" class="ghost-button" type="button" disabled>EXPORT AUDIT ↓</button>
+      <button id="new-session" class="ghost-button" type="button">NEW SESSION ↗</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="brief-panel">
+      <p class="eyebrow">THE BRIEF / 01</p>
+      <h1>Find the one.<br><em>Show your work.</em></h1>
+      <p class="lede">A shopping copilot that remembers evolving intent and exposes the evidence behind every decision.</p>
+
+      <section class="turn-card" aria-label="Conversation turn progress">
+        <div><span>TURN BUDGET</span><strong id="turn-label">0 / 10</strong></div>
+        <div class="turn-track"><i id="turn-progress"></i></div>
+      </section>
+
+      <section>
+        <p class="section-label">TRY A STORY</p>
+        <div id="scenarios" class="scenario-list"></div>
+      </section>
+
+      <section class="principles">
+        <p class="section-label">DESIGN PRINCIPLES</p>
+        <div><b>01</b><span>State before style</span></div>
+        <div><b>02</b><span>Evidence before confidence</span></div>
+        <div><b>03</b><span>Ask only when useful</span></div>
+      </section>
+    </aside>
+
+    <section class="conversation-panel">
+      <div class="conversation-head">
+        <div>
+          <p class="eyebrow">LIVE CONVERSATION / 02</p>
+          <h2>Shopping Copilot</h2>
+        </div>
+        <span id="status" class="status">WARMING UP</span>
+      </div>
+
+      <div id="chat" class="chat" aria-live="polite">
+        <article class="message agent-message intro-message">
+          <span class="speaker">AGENT / READY</span>
+          <p>Tell me what you are shopping for. You can stay vague, add constraints, or change your mind later.</p>
+        </article>
+      </div>
+
+      <div id="results-head" class="results-head" hidden>
+        <p class="section-label">CURRENT RESULTS</p>
+        <span id="result-summary"></span>
+      </div>
+      <section id="products" class="products" aria-label="Recommended products"></section>
+
+      <section id="shortlist" class="shortlist" aria-label="Session product shortlist" hidden>
+        <header>
+          <div>
+            <span>SHORTLIST</span><b id="shortlist-count">0 / 3</b>
+            <strong id="shortlist-status" class="shortlist-status">DRAFT</strong>
+          </div>
+          <p>SESSION SELECTION · NEVER FED BACK INTO RANKING</p>
+        </header>
+        <div id="shortlist-items" class="shortlist-items"></div>
+        <div class="shortlist-actions">
+          <button id="finalize-selection" type="button">FINALIZE</button>
+          <button id="export-selection" type="button">EXPORT HANDOFF</button>
+          <button id="clear-shortlist" type="button">CLEAR SHORTLIST</button>
+        </div>
+      </section>
+
+      <section id="comparison" class="comparison" aria-label="Selected product comparison" hidden>
+        <header>
+          <div><span>COMPARISON</span><b>BACKEND-SOURCED</b></div>
+          <p>DESCRIPTIVE VALUES · DOES NOT RERANK PRODUCTS</p>
+        </header>
+        <div id="comparison-table" class="comparison-table"></div>
+        <p id="comparison-note" class="comparison-note"></p>
+      </section>
+
+      <section id="story-guide" class="story-guide" aria-label="Guided demo story" hidden>
+        <div>
+          <span id="story-progress">DEMO STORY</span>
+          <b id="story-name"></b>
+        </div>
+        <p id="story-prompt"></p>
+        <button id="story-next" type="button">LOAD THIS TURN ↗</button>
+        <small>Loads a prompt only. You stay in control of sending it.</small>
+      </section>
+
+      <form id="composer" class="composer">
+        <label for="message">YOUR NEXT CLUE</label>
+        <div>
+          <textarea id="message" rows="1" maxlength="1000" placeholder="e.g. Blue instead — and no budget limit" required></textarea>
+          <button type="submit" aria-label="Send message">SEND <span>↗</span></button>
+        </div>
+        <p>Change your mind, say “Compare #1 and #3” or “不要第2个”. The ledger shows what changed.</p>
+        <p id="data-boundary" class="data-boundary">LOCAL ONLY · NO MODEL REQUESTS</p>
+      </form>
+    </section>
+
+    <aside class="lens-panel">
+      <div class="lens-head">
+        <p class="eyebrow">DECISION LENS / 03</p>
+        <span>TRACE: LIVE</span>
+      </div>
+
+      <section>
+        <div class="state-title">
+          <p class="section-label">ACTIVE STATE</p>
+          <span id="intent-version">INTENT V1</span>
+        </div>
+        <div id="state-empty" class="empty-state">No constraints yet.<br>The ledger updates after each turn.</div>
+        <div id="state-groups" class="state-groups" hidden></div>
+        <div id="state-changes" class="state-changes">
+          <p>No state changes yet.</p>
+        </div>
+      </section>
+
+      <section class="decision-card">
+        <div class="decision-title"><span>POLICY RECEIPT</span><b id="decision-action">WAITING</b></div>
+        <p id="decision-reason">The next decision will be reported from the agent's actual trace.</p>
+        <dl>
+          <div><dt>Candidates</dt><dd id="candidate-count">—</dd></div>
+          <div><dt>Shown</dt><dd id="shown-count">—</dd></div>
+          <div><dt>New / repeats</dt><dd id="novelty-count">—</dd></div>
+          <div><dt>Questions</dt><dd id="question-count">—</dd></div>
+          <div><dt>Latency</dt><dd id="latency">—</dd></div>
+          <div><dt>Fully supported</dt><dd id="support-count">—</dd></div>
+          <div><dt>Model tokens</dt><dd id="token-count">0</dd></div>
+        </dl>
+        <p id="novelty-note" class="novelty-note">Novelty policy has not run yet.</p>
+      </section>
+
+      <section>
+        <div class="shadow-title">
+          <p class="section-label">SHADOW QUESTION BOARD</p>
+          <span>NON-OPERATIVE</span>
+        </div>
+        <div id="shadow-board" class="shadow-board">
+          <p>Runs after retrieval. Click an option to load a clue; nothing is sent automatically.</p>
+        </div>
+      </section>
+
+      <section id="model-assist" class="model-assist" hidden>
+        <div class="shadow-title">
+          <p class="section-label">MODEL ASSIST</p>
+          <span>OPTIONAL / EVIDENCE-GATED</span>
+        </div>
+        <div>
+          <b id="model-assist-name"></b>
+          <p id="model-assist-detail"></p>
+        </div>
+      </section>
+
+      <section>
+        <p class="section-label">TURN AUDIT</p>
+        <ol id="turn-audit" class="turn-audit" aria-live="polite">
+          <li><span>READY</span><p>Each completed turn will leave a bounded receipt here.</p></li>
+        </ol>
+      </section>
+
+      <section>
+        <p class="section-label">PIPELINE</p>
+        <ol id="pipeline" class="pipeline">
+          <li><i></i><span>Intent</span><b>queued</b></li>
+          <li><i></i><span>State</span><b>queued</b></li>
+          <li><i></i><span>Policy</span><b>queued</b></li>
+          <li><i></i><span>Retrieve</span><b>queued</b></li>
+          <li><i></i><span>Rank</span><b>queued</b></li>
+        </ol>
+      </section>
+
+      <p class="honesty-note">Scores are ranking signals, not probabilities. Product attributes come from the frozen catalog and may be incomplete.</p>
+    </aside>
+  </main>
+
+  <template id="product-template">
+    <article class="product-card">
+      <div class="product-visual"><span class="product-rank"></span><b class="product-glyph"></b></div>
+      <div class="product-body">
+        <span class="product-category"></span>
+        <h3></h3>
+        <p class="product-store"></p>
+        <div class="product-meta"></div>
+        <div class="match-summary"><b class="hard-match"></b><span class="soft-match"></span></div>
+        <div class="product-advice">
+          <div><b>WHY IT MAY FIT</b><ul class="product-pros"></ul></div>
+          <div><b>WATCH-OUTS</b><ul class="product-cons"></ul></div>
+        </div>
+        <details>
+          <summary>WHY THIS RESULT</summary>
+          <ul class="product-signals"></ul>
+          <p class="product-evidence"></p>
+          <small class="match-disclaimer"></small>
+        </details>
+        <details class="catalog-detail">
+          <summary>CATALOG DETAILS</summary>
+          <div class="catalog-detail-body"><p>Open to load bounded catalog evidence.</p></div>
+        </details>
+        <div class="product-actions">
+          <button class="shortlist-button" type="button">+ SHORTLIST</button>
+          <button class="reject-button" type="button">NOT FOR ME</button>
+        </div>
+      </div>
+    </article>
+  </template>
+  <script src="/app.js" defer></script>
+</body>
+</html>

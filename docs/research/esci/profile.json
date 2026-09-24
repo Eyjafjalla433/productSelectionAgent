@@ -1,0 +1,2015 @@
+{
+  "commit": "7916cdf6ab75a462e77f20ab40428a10923998d5",
+  "manifest": {
+    "examples": {
+      "url": "https://media.githubusercontent.com/media/amazon-science/esci-data/7916cdf6ab75a462e77f20ab40428a10923998d5/shopping_queries_dataset/shopping_queries_dataset_examples.parquet",
+      "sha256": "4a735b693b4a424a6fc67f5be6e4c811495c488bbf66d02a602d308b2744263a",
+      "bytes": 51286808
+    },
+    "products": {
+      "url": "https://media.githubusercontent.com/media/amazon-science/esci-data/7916cdf6ab75a462e77f20ab40428a10923998d5/shopping_queries_dataset/shopping_queries_dataset_products.parquet",
+      "sha256": "25124442d064d64b26f74082d6fa09438d679efc0c183cf28d19064a2b65a265",
+      "bytes": 1108857465
+    },
+    "sources": {
+      "url": "https://raw.githubusercontent.com/amazon-science/esci-data/7916cdf6ab75a462e77f20ab40428a10923998d5/shopping_queries_dataset/shopping_queries_dataset_sources.csv",
+      "sha256": "a5fed8ecc016443de40bf3c63098f0e3f23bbe4daa4236f1c38b8c3184778c50",
+      "bytes": 1682802
+    }
+  },
+  "duckdb_version": "1.5.5",
+  "schema": {
+    "examples": [
+      {
+        "column_name": "example_id",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "query",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "query_id",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_id",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_locale",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "esci_label",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "small_version",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "large_version",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "split",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "__index_level_0__",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      }
+    ],
+    "products": [
+      {
+        "column_name": "product_id",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_title",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_description",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_bullet_point",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_brand",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_color",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "product_locale",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      }
+    ],
+    "sources": [
+      {
+        "column_name": "query_id",
+        "column_type": "BIGINT",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      },
+      {
+        "column_name": "source",
+        "column_type": "VARCHAR",
+        "null": "YES",
+        "key": null,
+        "default": null,
+        "extra": null
+      }
+    ]
+  },
+  "versions": [
+    {
+      "small_version": 0,
+      "large_version": 1,
+      "pairs": 1503277,
+      "queries": 82360
+    },
+    {
+      "small_version": 1,
+      "large_version": 1,
+      "pairs": 1118011,
+      "queries": 48300
+    }
+  ],
+  "splits": [
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "pairs": 27464,
+      "queries": 1427
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "pairs": 110172,
+      "queries": 5705
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "pairs": 30118,
+      "queries": 1544
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "pairs": 118052,
+      "queries": 6176
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "pairs": 244061,
+      "queries": 13502
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "pairs": 973410,
+      "queries": 54006
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "pairs": 65883,
+      "queries": 2417
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "pairs": 152891,
+      "queries": 5632
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "pairs": 88789,
+      "queries": 3123
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "pairs": 209094,
+      "queries": 7284
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "pairs": 181701,
+      "queries": 8956
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "pairs": 419653,
+      "queries": 20888
+    }
+  ],
+  "labels": [
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 568
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 22580
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 1286
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 3030
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 2545
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 89281
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 5575
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 12771
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 431
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 24764
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 1663
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 3260
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 1666
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 96003
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 6757
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 13626
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 2823
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 197640
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 12107
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 31491
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 10037
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 788391
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 48351
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 126631
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 4902
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 27074
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 11449
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 22458
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 12488
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 63131
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 26472
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 50800
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 4033
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 41597
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 13604
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 29555
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 8970
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 96170
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 34454
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 69500
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "C",
+      "pairs": 8099
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "E",
+      "pairs": 79708
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "I",
+      "pairs": 30331
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "esci_label": "S",
+      "pairs": 63563
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "C",
+      "pairs": 19090
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "E",
+      "pairs": 181819
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "I",
+      "pairs": 71116
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "esci_label": "S",
+      "pairs": 147628
+    }
+  ],
+  "totals": [
+    {
+      "pairs": 2621288,
+      "query_ids": 130652,
+      "query_texts": 130193,
+      "product_keys": 1814883
+    }
+  ],
+  "products": [
+    {
+      "product_locale": "es",
+      "products": 260011,
+      "unique_ids": 260011
+    },
+    {
+      "product_locale": "jp",
+      "products": 339059,
+      "unique_ids": 339059
+    },
+    {
+      "product_locale": "us",
+      "products": 1215854,
+      "unique_ids": 1215854
+    }
+  ],
+  "duplicate_product_keys": [
+    {
+      "duplicate_groups": 0
+    }
+  ],
+  "duplicate_pairs": [
+    {
+      "duplicate_groups": 0,
+      "extra_rows": 0
+    }
+  ],
+  "split_overlap_query_id": [
+    {
+      "queries": 1
+    }
+  ],
+  "split_overlap_query_text": [
+    {
+      "queries": 1
+    }
+  ],
+  "missing_products": [
+    {
+      "pairs": 0
+    }
+  ],
+  "source_counts": [
+    {
+      "source": "other",
+      "queries": 113656
+    },
+    {
+      "source": "behavioral",
+      "queries": 3780
+    },
+    {
+      "source": "negations",
+      "queries": 6964
+    },
+    {
+      "source": "parse_pattern",
+      "queries": 6083
+    },
+    {
+      "source": "nlqec",
+      "queries": 169
+    }
+  ],
+  "missing_sources": [
+    {
+      "queries": 0
+    }
+  ],
+  "overlap_details": [
+    {
+      "query_id": 79706,
+      "query": "piano",
+      "splits": [
+        "test",
+        "train"
+      ],
+      "versions": [
+        0,
+        1
+      ]
+    }
+  ],
+  "over_40": [
+    {
+      "small_version": 0,
+      "queries": 1466
+    },
+    {
+      "small_version": 1,
+      "queries": 1219
+    }
+  ],
+  "source_slices": [
+    {
+      "source": "behavioral",
+      "product_locale": "es",
+      "split": "test",
+      "queries": 198,
+      "pairs": 7206
+    },
+    {
+      "source": "behavioral",
+      "product_locale": "es",
+      "split": "train",
+      "queries": 459,
+      "pairs": 16720
+    },
+    {
+      "source": "behavioral",
+      "product_locale": "jp",
+      "split": "test",
+      "queries": 430,
+      "pairs": 16723
+    },
+    {
+      "source": "behavioral",
+      "product_locale": "jp",
+      "split": "train",
+      "queries": 1003,
+      "pairs": 38970
+    },
+    {
+      "source": "behavioral",
+      "product_locale": "us",
+      "split": "test",
+      "queries": 223,
+      "pairs": 7887
+    },
+    {
+      "source": "behavioral",
+      "product_locale": "us",
+      "split": "train",
+      "queries": 539,
+      "pairs": 18453
+    },
+    {
+      "source": "negations",
+      "product_locale": "es",
+      "split": "test",
+      "queries": 402,
+      "pairs": 15064
+    },
+    {
+      "source": "negations",
+      "product_locale": "es",
+      "split": "train",
+      "queries": 937,
+      "pairs": 35002
+    },
+    {
+      "source": "negations",
+      "product_locale": "jp",
+      "split": "test",
+      "queries": 672,
+      "pairs": 25209
+    },
+    {
+      "source": "negations",
+      "product_locale": "jp",
+      "split": "train",
+      "queries": 1567,
+      "pairs": 59366
+    },
+    {
+      "source": "negations",
+      "product_locale": "us",
+      "split": "test",
+      "queries": 689,
+      "pairs": 21481
+    },
+    {
+      "source": "negations",
+      "product_locale": "us",
+      "split": "train",
+      "queries": 1629,
+      "pairs": 50303
+    },
+    {
+      "source": "nlqec",
+      "product_locale": "us",
+      "split": "test",
+      "queries": 30,
+      "pairs": 844
+    },
+    {
+      "source": "nlqec",
+      "product_locale": "us",
+      "split": "train",
+      "queries": 69,
+      "pairs": 1793
+    },
+    {
+      "source": "other",
+      "product_locale": "es",
+      "split": "test",
+      "queries": 1383,
+      "pairs": 27627
+    },
+    {
+      "source": "other",
+      "product_locale": "es",
+      "split": "train",
+      "queries": 3224,
+      "pairs": 63858
+    },
+    {
+      "source": "other",
+      "product_locale": "jp",
+      "split": "test",
+      "queries": 2021,
+      "pairs": 46857
+    },
+    {
+      "source": "other",
+      "product_locale": "jp",
+      "split": "train",
+      "queries": 4714,
+      "pairs": 110758
+    },
+    {
+      "source": "other",
+      "product_locale": "us",
+      "split": "test",
+      "queries": 7233,
+      "pairs": 123890
+    },
+    {
+      "source": "other",
+      "product_locale": "us",
+      "split": "train",
+      "queries": 16874,
+      "pairs": 286735
+    },
+    {
+      "source": "parse_pattern",
+      "product_locale": "es",
+      "split": "test",
+      "queries": 434,
+      "pairs": 15986
+    },
+    {
+      "source": "parse_pattern",
+      "product_locale": "es",
+      "split": "train",
+      "queries": 1012,
+      "pairs": 37311
+    },
+    {
+      "source": "parse_pattern",
+      "product_locale": "us",
+      "split": "test",
+      "queries": 781,
+      "pairs": 27599
+    },
+    {
+      "source": "parse_pattern",
+      "product_locale": "us",
+      "split": "train",
+      "queries": 1777,
+      "pairs": 62369
+    }
+  ],
+  "natural_query_examples": [
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5611,
+      "query": "A bomber jacket with inner warming lining, preferrably black",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5612,
+      "query": "A laptop that had good gaming capabilities while being budget friendly ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5615,
+      "query": "A laptop with enough power to play 4K videos and run photoshop easily.",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5616,
+      "query": "A lightweight one with long battery life and quick processor with adequate storage. One that can be transported easily with at least a 13 inch screen and backlit keyboard.",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5618,
+      "query": "A long (mid calf length), lightweight beige/brown single breasted trench jacket ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5621,
+      "query": "A navy blue puffer jacket which covers my bum and has a fur lined hood.  It also has a gold zip & fleece lined pockets",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5625,
+      "query": "A powerful yet slim laptop which allows me to do all my normal note-taking plus a bit of light gaming on the side ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5626,
+      "query": "A second-hand or vintage mid-weight jacket, or one from a sustainable brand. ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5627,
+      "query": "A short length light blue denim jacket which looks faded or worn",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5629,
+      "query": "A standard new laptop that is budget friendly and which has internet access, a windows operating system, large clean screen and user friendly ",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5630,
+      "query": "A three quarter length jacket in navy with a zip and two large pockets on the front",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5631,
+      "query": "A warm but washable longer length jacket to protect me from the cold and rain.If possible made from sustainable materials like cotton or wool.",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5632,
+      "query": "A warm jacket that feels comfy. Also probably one with plaid.",
+      "source": "nlqec"
+    },
+    {
+      "query_id": 5633,
+      "query": "A windows laptop which has a webcam, access to microsoft office and a decent graphics card. A laptop which runs very quickly and efficiently",
+      "source": "nlqec"
+    }
+  ],
+  "missing_fields": [
+    {
+      "field": "product_title",
+      "product_locale": "es",
+      "n": 260011,
+      "missing": 0,
+      "mean_chars": 115.83
+    },
+    {
+      "field": "product_title",
+      "product_locale": "jp",
+      "n": 339059,
+      "missing": 0,
+      "mean_chars": 61.95
+    },
+    {
+      "field": "product_title",
+      "product_locale": "us",
+      "n": 1215854,
+      "missing": 0,
+      "mean_chars": 105.7
+    },
+    {
+      "field": "product_description",
+      "product_locale": "es",
+      "n": 260011,
+      "missing": 118370,
+      "mean_chars": 954.02
+    },
+    {
+      "field": "product_description",
+      "product_locale": "jp",
+      "n": 339059,
+      "missing": 189640,
+      "mean_chars": 350.5
+    },
+    {
+      "field": "product_description",
+      "product_locale": "us",
+      "n": 1215854,
+      "missing": 569795,
+      "mean_chars": 840.2
+    },
+    {
+      "field": "product_bullet_point",
+      "product_locale": "es",
+      "n": 260011,
+      "missing": 36977,
+      "mean_chars": 695.21
+    },
+    {
+      "field": "product_bullet_point",
+      "product_locale": "jp",
+      "n": 339059,
+      "missing": 88367,
+      "mean_chars": 259.78
+    },
+    {
+      "field": "product_bullet_point",
+      "product_locale": "us",
+      "n": 1215854,
+      "missing": 178776,
+      "mean_chars": 676.34
+    },
+    {
+      "field": "product_brand",
+      "product_locale": "es",
+      "n": 260011,
+      "missing": 12020,
+      "mean_chars": 8.51
+    },
+    {
+      "field": "product_brand",
+      "product_locale": "jp",
+      "n": 339059,
+      "missing": 58401,
+      "mean_chars": 9.93
+    },
+    {
+      "field": "product_brand",
+      "product_locale": "us",
+      "n": 1215854,
+      "missing": 72335,
+      "mean_chars": 9.78
+    },
+    {
+      "field": "product_color",
+      "product_locale": "es",
+      "n": 260011,
+      "missing": 100088,
+      "mean_chars": 9.6
+    },
+    {
+      "field": "product_color",
+      "product_locale": "jp",
+      "n": 339059,
+      "missing": 184828,
+      "mean_chars": 5.9
+    },
+    {
+      "field": "product_color",
+      "product_locale": "us",
+      "n": 1215854,
+      "missing": 406104,
+      "mean_chars": 9.45
+    }
+  ],
+  "query_groups": [
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "test",
+      "queries": 1427,
+      "min_candidates": 8,
+      "max_candidates": 40,
+      "avg_candidates": 19.25,
+      "median_candidates": 16.0,
+      "no_exact": 0,
+      "all_exact": 568,
+      "exact_substitute": 659,
+      "exact_complement": 242,
+      "all_four": 85
+    },
+    {
+      "small_version": 0,
+      "product_locale": "es",
+      "split": "train",
+      "queries": 5705,
+      "min_candidates": 1,
+      "max_candidates": 58,
+      "avg_candidates": 19.31,
+      "median_candidates": 16.0,
+      "no_exact": 1,
+      "all_exact": 2297,
+      "exact_substitute": 2581,
+      "exact_complement": 1004,
+      "all_four": 315
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "test",
+      "queries": 1544,
+      "min_candidates": 8,
+      "max_candidates": 64,
+      "avg_candidates": 19.51,
+      "median_candidates": 16.0,
+      "no_exact": 0,
+      "all_exact": 628,
+      "exact_substitute": 712,
+      "exact_complement": 186,
+      "all_four": 44
+    },
+    {
+      "small_version": 0,
+      "product_locale": "jp",
+      "split": "train",
+      "queries": 6176,
+      "min_candidates": 8,
+      "max_candidates": 86,
+      "avg_candidates": 19.11,
+      "median_candidates": 16.0,
+      "no_exact": 0,
+      "all_exact": 2425,
+      "exact_substitute": 2888,
+      "exact_complement": 754,
+      "all_four": 167
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "test",
+      "queries": 13502,
+      "min_candidates": 8,
+      "max_candidates": 126,
+      "avg_candidates": 18.08,
+      "median_candidates": 16.0,
+      "no_exact": 0,
+      "all_exact": 5326,
+      "exact_substitute": 6521,
+      "exact_complement": 1225,
+      "all_four": 328
+    },
+    {
+      "small_version": 0,
+      "product_locale": "us",
+      "split": "train",
+      "queries": 54006,
+      "min_candidates": 1,
+      "max_candidates": 198,
+      "avg_candidates": 18.02,
+      "median_candidates": 16.0,
+      "no_exact": 4,
+      "all_exact": 21241,
+      "exact_substitute": 25996,
+      "exact_complement": 4548,
+      "all_four": 1220
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "test",
+      "queries": 2417,
+      "min_candidates": 8,
+      "max_candidates": 61,
+      "avg_candidates": 27.26,
+      "median_candidates": 23.0,
+      "no_exact": 0,
+      "all_exact": 0,
+      "exact_substitute": 2152,
+      "exact_complement": 1065,
+      "all_four": 653
+    },
+    {
+      "small_version": 1,
+      "product_locale": "es",
+      "split": "train",
+      "queries": 5632,
+      "min_candidates": 8,
+      "max_candidates": 77,
+      "avg_candidates": 27.15,
+      "median_candidates": 21.0,
+      "no_exact": 0,
+      "all_exact": 0,
+      "exact_substitute": 4949,
+      "exact_complement": 2509,
+      "all_four": 1498
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "test",
+      "queries": 3123,
+      "min_candidates": 8,
+      "max_candidates": 86,
+      "avg_candidates": 28.43,
+      "median_candidates": 31.0,
+      "no_exact": 0,
+      "all_exact": 0,
+      "exact_substitute": 2785,
+      "exact_complement": 1058,
+      "all_four": 575
+    },
+    {
+      "small_version": 1,
+      "product_locale": "jp",
+      "split": "train",
+      "queries": 7284,
+      "min_candidates": 8,
+      "max_candidates": 96,
+      "avg_candidates": 28.71,
+      "median_candidates": 35.0,
+      "no_exact": 0,
+      "all_exact": 0,
+      "exact_substitute": 6465,
+      "exact_complement": 2522,
+      "all_four": 1431
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "test",
+      "queries": 8956,
+      "min_candidates": 8,
+      "max_candidates": 95,
+      "avg_candidates": 20.29,
+      "median_candidates": 16.0,
+      "no_exact": 1,
+      "all_exact": 0,
+      "exact_substitute": 7736,
+      "exact_complement": 2294,
+      "all_four": 1148
+    },
+    {
+      "small_version": 1,
+      "product_locale": "us",
+      "split": "train",
+      "queries": 20888,
+      "min_candidates": 8,
+      "max_candidates": 188,
+      "avg_candidates": 20.09,
+      "median_candidates": 16.0,
+      "no_exact": 0,
+      "all_exact": 0,
+      "exact_substitute": 18066,
+      "exact_complement": 5408,
+      "all_four": 2739
+    }
+  ],
+  "us_train_query_signals": [
+    {
+      "n": 20888,
+      "basic_color": 1562,
+      "has_digits": 4395,
+      "for_with_without": 4036,
+      "short_1_to_3_tokens": 9642
+    }
+  ],
+  "selected_samples": [
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "C",
+      "product_id": "B008XDXU44",
+      "product_title": "Elmer's All Purpose School Glue Sticks, Washable, 0.24 Ounce Glue Sticks for Kids | School Supplies | Scrapbooking Supplies | Vision Board Supplies, 60 Count, Standard Stick",
+      "product_brand": "Elmer's",
+      "product_color": "Washable",
+      "bullet_excerpt": "Bonds to paper, cardboard, foam board, display board, and more\nWashable, non toxic, acid free, and photo safe\nApplies smoothly without clumps\nDries quickly and colorlessly perfect for arts, crafts, and school projects\nIncludes: 60, 7 gram (0.24 ounce) washable glue sticks"
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "E",
+      "product_id": "B000J07BRQ",
+      "product_title": "Scotch Heavy Duty Packaging Tape, 1.88\" x 22.2 yd, Designed for Packing, Shipping and Mailing, Strong Seal on All Box Types, 1.5\" Core, Clear, 6 Rolls with Dispenser (142-6)",
+      "product_brand": "Scotch",
+      "product_color": "Clear",
+      "bullet_excerpt": "Guaranteed to stay sealed (If your box does not stay sealed, 3M will refund the purchase price of this tape). Proof of purchase required.\nProvides excellent holding power for heavy-duty packaging and shipping\nStrong seal on all box types, including harder-to-stick-to 100% recycled boxes\nStrong, durable solvent-free hot melt adhesive seals and protects\nRelease coating makes unwind easy. Resists slivering, splitting and tearing..Includes 6 rolls with 6 dispensers with fallback tabs to ensure tape doesn't fall back on the roll.Scotch brand's strongest clear-to-the-core packaging tape.Clear backing and instant adhesion.Meets U.S. postal regulations for standard packages.Made in USA with US and globally sourced materials"
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "E",
+      "product_id": "B00D8STBHY",
+      "product_title": "Hasbro Gaming CONNECT 4 - Classic four in a row game - Board Games and Toys for Kids, boys, girls - Ages 6+",
+      "product_brand": "Hasbro Gaming",
+      "product_color": "Design 1",
+      "bullet_excerpt": "Classic Connect 4 game is disc dropping fun\nChoose yellow or red discs. For 2 players\nWhen you get 4 discs in a row you win\nIncludes grid, 2 legs, slider bar, 21 red discs, 21 yellow discs and instructions"
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "I",
+      "product_id": "B0000223UV",
+      "product_title": "Gorilla Glue, 8 Oz.",
+      "product_brand": "Gorilla",
+      "product_color": "Tan",
+      "bullet_excerpt": "Bonds to wood, stone, metal, ceramic and more!\nProvides a strong bond for indoor or outdoor repairs. Works well on glass, foam, brick, concrete, stone, wood and other surfaces.\nExpands during penetration to deliver a powerful hold.\nPaintable, stainable and sandable formula helps lend a finished appearance to any project.\nWaterproof glue helps prevent breaking down when exposed to moisture. Resists extreme temperatures for use in challenging conditions."
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "I",
+      "product_id": "B00006IAT6",
+      "product_title": "Quartet Easel Stand, Collapsible, Portable Display Stand for Home School Supplies, Home Office Supply Tripod for Posters, Paintings, Art or White Boards, Base 63\" Max. Height, Supports 5 lbs. (29E)",
+      "product_brand": "Quartet",
+      "product_color": "Black",
+      "bullet_excerpt": "EASY SET UP: Easel quickly sets up for instant use, whether you’re in the office or on the road; Collapses for quick clean up, allowing you to move to your next project or presentation\nLIGHTWEIGHT: The instant display stands 63 Inches tall and supports items up to 5 Pounds Ideal for lightweight posters or signage\nPORTABLE: Easily collapse the easel for travel. The easel has a 15 Inches folded size and weighs only 2.55 Pounds, which is great for storage and portable use\nADJUSTABLE DISPLAY: Help improve visibility by adjusting the display height. Simply unclip and slide the display holders to different positions to make sure your display is seen"
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "S",
+      "product_id": "B071NZ5KF3",
+      "product_title": "Juvale Paper Picture Frames - 50-Pack DIY Black Paper Photo Mats Photo Frame Picture Holder - Ideal for Inserting and Sending Memorable Documents, DIY Wall Decorations, Holds 4 x 6 Inches Inserts",
+      "product_brand": "Juvale",
+      "product_color": "Black",
+      "bullet_excerpt": "SET INCLUDES: 50 photo frames made of durable black paper. Fits photo sheets up to 4 x 6 inch. Displays 3.2 x 5.1 inches of image.\nSHARE YOUR MEMORABLE MOMENTS: The frames come with blank insides so you can insert your written notes, blessings or personal pictures and make them stand out.\nGREAT FOR MULTI OCCASIONS: Use the frames for birthdays, anniversaries, Christmas or other holidays.\nENHANCE YOUR INTERIOR DECORATION: Place the frames on your walls or table tops to make your decoration more personal and unique.\nMEASUREMENTS: Photo frame card measures 5 x 7 inches. Can fit photos of 4 x 6 inches or less. Please note the window is 3.2 x 5.1 inches and will not display the full 4 x 6 photos."
+    },
+    {
+      "query_id": 214,
+      "query": "+black +cardboard not foam",
+      "esci_label": "S",
+      "product_id": "B07P3H8H39",
+      "product_title": "BENECREAT 12 Pack Kraft Square Cardboard Jewelry Boxes Necklace Ring Earring Kraft Box for Jewelry Set, 2.87 x 2.87 x 1.18 Inches, Black",
+      "product_brand": "BENECREAT",
+      "product_color": "Necklace & Ring & Earring (2.87x2.87x1.18\")",
+      "bullet_excerpt": "【PACKAGE INCLUDES】: 12 Pack kraft jewlery boxes, perfect for necklace, ring and earring presentation or other jewelries, and Gift-giving\n【MEASUREMENT】: Outside dimension approximately 2.87\" x 2.87\" x 1.18\" (73 x 73 x 30 mm); Inner length approximately 2.682\" (68mm); Please take pic 2 for reference\n【BLACK VELVET CUSHION】: The box comes with a thick black velvet cushion, flexible and delicate, not sticky hair to better foil the style of jewelry\n【SPECIAL SLOTS FOR JEWLRY】: Each box has several slots to help keep your different jewleries in good place, will not mess up, which brings much convenience\n【WIDE USUAGE】: These boxes is great for jewelry presentation and gift-giving. Ideal boxes to keep necklace, ring, earring or other small jewelry in place"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "C",
+      "product_id": "B07XKDLFTJ",
+      "product_title": "Adherion Adhesive Shower Curtain Rod Holder | Rod Retainer | No Drilling | Stick On | 3M Adhesive | White | Shower Curtain Rod not included |",
+      "product_brand": "Adherion",
+      "product_color": "White",
+      "bullet_excerpt": "✔️ ULTIMATE SHOWER CURTAIN ROD MOUNT- Never have your relaxing shower interrupted by a falling shower curtain rod again!\n✔️ INSTALLS FAST & EASY WITH NO DRILLING AND NO DAMAGE- Just peel and stick, the Rod Retainer installs without drilling or damage to your bathroom's tile or walls\n✔️ STICKS TO STONE, TILE, AND PAINT- High-tech adhesive bonds securely to most common surfaces\n✔️ ATTRACTIVE DESIGN- sleek, low profile design design blends in with your bathroom. No logos or unsightly branding\n✔️ FITS ROD ENDS UP TO 1.5\" IN DIAMETER"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "C",
+      "product_id": "B08GWR7WX6",
+      "product_title": "ZOEYES 8 Pack Heavy Duty Double Curtain Rod Brackets for 1 and 5/8 Inch Rod, Wall Mount Curtain Rod Holders for Curtain Rods and Drapery Rod, Bronze",
+      "product_brand": "ZOEYES",
+      "product_color": "Bronze",
+      "bullet_excerpt": "Fit 1 Inch and 5/8 Inch Rod - Bracket for curtain rods is compatible with one 1 inch and one 5/8 inch curtain rods which is for you choice according to your need.\nHigh Quality Material - Curtain bracket is made of high quality thick metal material with antique black coating. It's very durable and surface smooth, not easy to break.\nSuper Carrying Capacity - Heavy duty curtain rod hooks provides a stable foundation for supporting the weight of a curtain rod and hanging curtains or drapes, hold up to 22 lbs of weight without damaging the wall.\nWidely Used - Double curtain rod brackets are classic designed for curtain rods and draperies, Perfect for bedroom, living room, dining room, office or kitchen.\nLifetime Warranty - We offer you 100% satisfaction warranty, if you have any problem for our"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "E",
+      "product_id": "B06XHQWMM3",
+      "product_title": "Kenney Adler Indoor/Outdoor Rust-Resistant Wrap Around Curtain Rod, 28-48\", Black",
+      "product_brand": "Kenney",
+      "product_color": "Black",
+      "bullet_excerpt": "The 5/8\" Adler Indoor/Outdoor Rust-Resistant Wrap Around Curtain Rod can be wall or ceiling mounted indoors or out\n5/8\" diameter curtain rod adjusts from 28-48\" and projects 3.5”\nFor use with light to medium weight curtains in larger rooms or outside your home\nSteel industrial designed wrap around curtain rod in black textured finish with matching hardware. Care Instructions: Wipe clean with damp cloth\nIncludes: One telescoping curtain rod, screws, drywall anchors, and installation instructions"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "E",
+      "product_id": "B073V44H23",
+      "product_title": "Amazon Basics Tension Curtain Rod, Adjustable 78-108\" Width - Black, Classic Finial",
+      "product_brand": "Amazon Basics",
+      "product_color": "Black",
+      "bullet_excerpt": "Multi-purpose tension curtain rod for shower stalls, bathtubs, closets, windows, changing areas and more\n7/8-inch diameter rod and 1.4-inch finials with rubber end caps for traction and a sturdy hold; adjustable from 78 to 108 inches\nDurable, lightweight metal construction\nBlack finish; easily coordinates with existing bathroom accessories and household decor\nEasy to install with spring pull rod and rubber suction cups; no drilling or tools needed"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "I",
+      "product_id": "B01ANF6YR4",
+      "product_title": "Umbra Cappa 1-Inch Curtain Rod, Includes 2 Matching Finials, Brackets & Hardware, 36 to 66, Black",
+      "product_brand": "Umbra",
+      "product_color": "Black",
+      "bullet_excerpt": "ATTRACTIVE MODERN DESIGN: Designed by Mauricio Affonso for Umbra, Cappa adjustable curtain rod features a modern yet understated design intended to complement your curtains or drapes without drawing attention away from them\nADJUSTABLE CURTAIN ROD: Cappa curtain rod comes in a variety of sizes and supports light to medium weight curtains so it's perfect for a variety of window sizes\nSTYLISH ADDITION TO ANY ROOM: Cappa is simple yet stylish drapery rod with a universal design appeal that makes it suitable for virtually any room in your home including the bedroom, living room, dining room, family room or kitchen\nEASY TO SET UP: Your Cappa adjustable curtain rod comes complete with everything you need to get set up quickly including 2 cast metal finials, 3 wall-mounted curtain rod brackets, sc"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "I",
+      "product_id": "B07SQFZQBZ",
+      "product_title": "Kwik-Hang Single Curtain Rod Brackets – No Drill, No Damage – Perfect Curtains Every Time – 1” Black",
+      "product_brand": "Kwik-Hang",
+      "product_color": "Black",
+      "bullet_excerpt": "EASY INSTALLATION – MUST HAVE WOOD TRIM. All you need is a hammer, the included left corner bracket and right corner bracket, and windows with a depth of at least ½ inch. Then just place bracket, tap in, and hang curtains. It’s as speedy as that!\nSTURDY AND DURABLE – These heavy duty rack holders support up to 20 pounds, making them safe for heavy drapes and in homes with kids, families, and pets. They go up and stay up without a hitch!\nZERO DAMAGE – Enjoy this window aligning collection that is ideal for renters, frequent movers, or anyone who doesn’t like wall damage.\nMADE IN THE USA – Kwik Hang is proud to be a family owned and operated business with all operations and manufacturing based in the USA. Family values influence everything we do, from product quality to customer experience.\n"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "S",
+      "product_id": "B00FB6MHOU",
+      "product_title": "Umbra Cappa, ¾” Adjustable Curtain Rod for Windows – 36 to 72” Drapery Rod, Nickel (244993-411-REM)",
+      "product_brand": "Umbra",
+      "product_color": "Nickel",
+      "bullet_excerpt": "ATTRACTIVE MODERN DESIGN: Designed by Mauricio Affonso for Umbra, Cappa adjustable curtain rod features a modern yet understated design intended to complement your curtains or drapes without drawing attention away from them\nADJUSTABLE CURTAIN ROD: Cappa curtain rod comes in a variety of sizes and supports light to medium weight curtains so it's perfect for a variety of window sizes\nSTYLISH ADDITION TO ANY ROOM: Cappa is simple yet stylish drapery rod with a universal design appeal that makes it suitable for virtually any room in your home including the bedroom, living room, dining room, family room or kitchen\nEASY TO SET UP: Your Cappa adjustable curtain rod comes complete with everything you need to get set up quickly including 2 cast metal finials, 3 wall-mounted curtain rod brackets, sc"
+    },
+    {
+      "query_id": 761,
+      "query": "1 in curtain rod black without brackets",
+      "esci_label": "S",
+      "product_id": "B00SH2MYS4",
+      "product_title": "Umbra Cappa Curtain 1-Inch Drapery Rod Extends from 66 to 120 Inches, Includes 2 Matching Finials, Brackets & Hardware, 120-Inch, Brushed Brass",
+      "product_brand": "Umbra",
+      "product_color": "Brushed Brass",
+      "bullet_excerpt": "MODERN DESIGN: Designed by Mauricio Affonso for Umbra, Cappa adjustable curtain rods feature a modern yet understated design intended to complement your curtains or drapes without drawing attention away from them\nADJUSTABLE & STYLISH: The length of your Cappa modern curtain rod is adjustable and suitable for light to medium-weight curtains. The contemporary design makes Cappa ideal for any room in your home; including the bedroom, living room, dining room, family room, kitchen, and more\nEASY TO INSTALL: Your Cappa adjustable drapery rod comes complete with everything you need to get set up quickly, including matching metal finials, wall-mounted curtain rod brackets, screws, drywall anchors and easy to follow instructions\nSTURDY DESIGN & HIGH-QUALITY FINISH: Made of high-quality metal and c"
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "C",
+      "product_id": "B08X2PLV72",
+      "product_title": "ZEBRE Wireless Charger Compatible with Samsung Watch/Buds and More Type-C Interface Earbuds，2 in 1 Charging Dock Stand Accessories for Galaxy Watch 3/Active 2/Active/Galaxy Buds/Buds+/Buds Live",
+      "product_brand": "Zebre",
+      "product_color": null,
+      "bullet_excerpt": "⌚【2 in 1 Wireless Charging Station】--- ZEBRE 2021 new version wireless charger stand for fast charging. You can charge your Galaxy Watch/Buds at the same time by the 2 in 1 charging station, making you life more convenient.(Not including watch, earbuds )\n📢 【Compatible Modes】--- ZEBRE 2 in 1 Charging Dock Stand for 📌 Galaxy Watch 3/Active 2/Active& Galaxy Buds/Buds+/Buds Live and more type-C interface earbuds . (📌Please Note: These Watch charger Not fit for Galaxy Gear S3 watch 46mm & Galaxy watch 42mm)\n⏳ 【Safety & Efficiency】--- Wireless galaxy active 2 charging station uses the advanced automatic control technology. Built in overvoltage protection, temperature control, foreign object detection, and more to protect your watch and earbuds. Just simply plug the cable from the wireless charge"
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "E",
+      "product_id": "B07RF7CSVD",
+      "product_title": "Samsung Galaxy Buds True Wireless In-Ear Bluetooth Headphones Black SM-R170 2019 (Renewed)",
+      "product_brand": "Samsung Electronics",
+      "product_color": "Black",
+      "bullet_excerpt": "Connectivity : Bluetooth v5.0 (LE up to 2 Mbps) | Bluetooth Profiles : A2DP, AVRCP, HFP\nCompatible Specification of Smartphone : Android 5.0 ↑ , 1.5GB ↑\nStandard Battery Capacity : 58 mAh | Typical Usage Time (Hours) : Up to 6 Hours | Talk Time/Voice Call : Up to 5 Hours\nSensors : Accelerometer, Hall Sensor, Proximity Sensor\nPackage Contents : Earbuds, Eartips (S, M, L), Quick Start Guide, USB Cable, Wingtips (S, M, L), Wireless Charging Dock"
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "E",
+      "product_id": "B083Q453NG",
+      "product_title": "Samsung Galaxy Buds Plus, True Wireless Earbuds (Wireless Charging Case Included), Red – US Version",
+      "product_brand": "Samsung Electronics",
+      "product_color": "Red",
+      "bullet_excerpt": "Exactly what you want to hear. Galaxy Buds+ are the perfect fitting earbuds to isolate you from distracting noises, so you can stay focused on what you want. And if you’d like to filter in some of the outside world to be more in-tune with your surroundings, you can switch on Ambient Aware2. Hear flight annozments, oncoming traffic or your order number while still enjoying your favorite playlist or podcast.\n22 hours of serious sound. Get up to 11 hours of nonstop music on a single charge, then pop your Galaxy Buds+ in the wireless charging case and get nearly 11 more. Forgot to charge them the night before, No worries. 3 minutes of charging gives you one hour of play time, so you have enough juice for your commute or workout.\nYour voice, loud and clear. Ensure you’re heard clearly. A dedica"
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "I",
+      "product_id": "B072LY7465",
+      "product_title": "USB Type C Charger Cable 6.6FT 2-Pack,Nylon Charging Cord for Samsung Galaxy Fold Note 10 9 S8 S9 S10 Plus S10E 10E S10+ S20 Ultra 20,A51 LG V50 V40 V35 V30 G7 G8 Thinq,Google Pixel 4 3 3a 2 XL,S21",
+      "product_brand": "Basesailor",
+      "product_color": "Silver",
+      "bullet_excerpt": "⍟ Colorful cable make colorful life ⍟ --- Select the color resonates with you, makes you happy and energizes you. Or just simply choose the color that match your devices!\n⍟ FAST CHARGING FOR USB-C DEVICES ⍟ --- Use this cable to connect a device with a USB-C port to a charger or computer with a standard USB port and then you can benefit from the latest speed boosts it brings when charging your USB C device. It can deliver up to 3A of power, so fast charging won’t be a problem.\n⍟ EXTREMELY DURABLE ⍟ --- Our product is a durable and sturdy cable that you can rely on, with a double-braided exterior and a premium aramid fiber core. It boasts a 7000+ bend-tested lifespan, which enables to endure daily wear and tear. The aluminum alloy connectors also have reinforced necks to reduce damage from "
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "I",
+      "product_id": "B07F17X6CP",
+      "product_title": "Short USB Type C Cable,OneKer(1ft 2-Pack) Portable USB-C Charger Nylon Braided Fast Charging Cord Compatible Android Samsung Galaxy S10 S9 S8 Plus Note 9 8,LG G5 G6,Google Pixel 2 XL,Power Bank(Grey)",
+      "product_brand": "OneKer",
+      "product_color": "(2*1FT)Gray",
+      "bullet_excerpt": "【1-Feet Short USB C Cable】 1ft USB Type C Charger Cable Easy for charging your phone with a power bank. beat the tangle and always keep the clutter down.Ideal for Travel use.\n【USB C CABLE BROAD COMPATIBILITY】: Compatible with the new USB C devices such as Samsung Galaxy Note 8/S10/S9/S9+/S8/S8+,LG V30, LG G6 G5, LG V20,Apple Macbook 12\"(2015), Pro(2016), OnePlus 5 3T 2, Google Nexus 6P/5X, Google Pixel/Pixel XL,Pixel C, New Nokia N1 tablet, Lumia 950, Lumia 950XL, ChromeBook Google Pixel, Asus Zen AiO, Lenovo Zuk Z1, HP Pavilion X2, ASUS ZenPad S 8.0,Huawei P10 Plus,Huawei Mate 9, GoPro Hero5 and other devices with USB C connector.\n【REVERSIBLE CONNECTOR】:Keeps up with the latest trend of USB interface. This user-friendly design allows you to plug into all your USB Type-C compatible devices"
+    },
+    {
+      "query_id": 850,
+      "query": "1 pairs of samsung galaxy buds without the charger",
+      "esci_label": "S",
+      "product_id": "B089B658NP",
+      "product_title": "SAMSUNG Galaxy Buds Live True Wireless Earbuds US Version Active Noise Cancelling Wireless Charging Case Included, Mystic Black",
+      "product_brand": "Samsung Electronics",
+      "product_color": "Mystic Black",
+      "bullet_excerpt": "SOUND THAT ROCKS: The AKG-tuned 12mm speaker and enhanced bass tone play everything in studio-quality sound.\nNEW STYLE, NEW SOUND: Equal parts earbud and ear bling, Galaxy Buds Live come in 4 colors you’ll want to rock all day.\nTURN DOWN DISTRACTIONS: Turn on Active noise cancellation to block out background noise on an airplane, train or bus.\nLONG-LASTING BATTERY: Long-lasting battery life¹ with a case that doubles as a wireless charger. Up to 8 hours of non-stop listening\nALWAYS-ON ASSISTANCE: Use your always-on voice Assistant to order coffee, send a message or search for music hands free."
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "C",
+      "product_id": "B092HLP8XD",
+      "product_title": "Universal Bathtub Stopper for Shower and Jacuzzi Drain Stopper, Kitchen Silicone Sink Stopper (Black1)",
+      "product_brand": "tikumik",
+      "product_color": "Black1",
+      "bullet_excerpt": "【Material】Made from quality and durable silicone， which is soft and flexible, always can last for long time. Unique love handle also make a decoration to your bathtub or sink.\n【Material】Made from quality and durable silicone， which is soft and flexible, always can last for long time. Unique love handle also make a decoration to your bathtub or sink.\n【Material】Made from quality and durable silicone， which is soft and flexible, always can last for long time. Unique love handle also make a decoration to your bathtub or sink.\n【Material】Made from quality and durable silicone， which is soft and flexible, always can last for long time. Unique love handle also make a decoration to your bathtub or sink.\n【Material】Made from quality and durable silicone， which is soft and flexible, always can last fo"
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "E",
+      "product_id": "B007B5PGA6",
+      "product_title": "Decor Star PU-003-TB 1 1/2\" Bathroom Faucet Vessel Vanity Sink Pop Up Drain Stopper Without Overflow Brushed Nickel",
+      "product_brand": "Decor Star",
+      "product_color": "Brushed Nickel",
+      "bullet_excerpt": "Durable solid brass construction\nSmooth long lasting pop up open / close operation\nFits vessel sink or bathroom vanity sink with No overflow and minimum drain hole diameter of 1 1/2\"\nStandard sized US plumbing\nLimited Lifetime Manufacturer Warranty w/ US Based Customer Service."
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "E",
+      "product_id": "B00GMSXS30",
+      "product_title": "Decor Star PU-005-TO 1 1/2\" Bathroom Faucet Vessel Vanity Sink Grid Drain Stopper Strainer Without Overflow Oil Rubbed Bronze",
+      "product_brand": "Decor Star",
+      "product_color": "Oil-rubbed Bronze",
+      "bullet_excerpt": "Durable solid brass construction\nOil Rubbed Bronze Finish\nFits vessel sink or bathroom vanity sink with No overflow and minimum drain hole diameter of 1 1/2\"\nStandard sized US plumbing\nLimited Lifetime Manufacturer Warranty w/ US Based Customer Service."
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "I",
+      "product_id": "B01NCV8ITS",
+      "product_title": "PF WaterWorks PF0730-BN-CH-NO, Chrome Plated ABS Body Bathroom Sink/Lavatory Pop-Up Drain with Ball Lift Rod | Without Overflow | CUPC Listed, Brushed Nickel",
+      "product_brand": "PF WaterWorks",
+      "product_color": "Brushed Nickel",
+      "bullet_excerpt": "Drain Type: No-Overflow\nCountry Of Origin: China\nModel Number: PF0730-BN-CH-NO\nItem Package Dimension: 2.5\" L x 5.0\" W x 10.0\" H"
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "I",
+      "product_id": "B074N8Y6VP",
+      "product_title": "Royal Imports 5lb Small Decorative Ornamental River Pebbles Rocks for Fresh Water Fish Animal Plant Aquariums, Landscaping, Home Decor etc. with Netted Bag, Small - Natural",
+      "product_brand": "Royal Imports",
+      "product_color": "Natural",
+      "bullet_excerpt": "NATURAL STONES- These high quality natural stones by Royal imports are non-toxic and eco-friendly river rocks. Their natural attribute will make them last longer because they will not deteriorate like mulch does. Common applications include flowerbeds, groundcover, decorative concrete topping, or walkway paving. Decorative rocks are a permanent and cost-effective alternative to annual wood mulching.\nMANY USES- If you want to add extra beauty in your garden, lawn and even to your potted plant or aquarium this pack of pebbles is ideal for you. It is perfect for home decor and a creative interior and exterior design. Use for flower arrangements, vase fillers, walkways, water features, exposed aggregate flooring or walls, swimming pool areas and many other areas. It could also be used as an ac"
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "S",
+      "product_id": "B002X3YQNE",
+      "product_title": "Inello Brushed Nickel 1 5/8\" Pop-up Drain No Overflow for Vessel Sinks",
+      "product_brand": "Inello",
+      "product_color": "Chrome",
+      "bullet_excerpt": "1 5/8\" diameter x 3\" long threaded drain body, 4 1/2\" tail piece\nPerfect fit for vessel sinks with standard size 1 3/4\" drain holes\nBrushed Nickel Finish\nWithout Overflow\nMaterial: Brass"
+    },
+    {
+      "query_id": 940,
+      "query": "1-1/2 inch black sink drain without overflow -pop",
+      "esci_label": "S",
+      "product_id": "B0042UD9DY",
+      "product_title": "VIGO VG07000BN 2.75\" Diameter Vessel Bathroom Sink Pop-Up Drain and Mounting Ring Without Overflow in Brushed Nickel Finish",
+      "product_brand": "Vigo",
+      "product_color": "Brushed Nickel",
+      "bullet_excerpt": "✅ WITHOUT OVERFLOW: Pop-up drain model is without overflow\n✅ EASY RELEASE: Easily push down to seal and release drain\n✅ CORROSION RESISTANT: Premium finish resists corrosion and tarnishing\n✅ MULTIPLE FINISHES: Available in 6 unique finishes\n✅ SOLID BRASS: Built from solid brass construction for exceptional durability"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "C",
+      "product_id": "B089R9CWFB",
+      "product_title": "BWE Black Vessel Sink Drain Bathroom Faucet Vessel Sink Pop Up Drain Stopper with Overflow Fits Standard Bathroom Sink Hole 1-1/2\" to 1-3/4\" Matte Black",
+      "product_brand": "BWE",
+      "product_color": "Matte Black",
+      "bullet_excerpt": "Standard Drain Opening:Fits standard US bathroom sink with 1-1/2\" to 1-3/4 inch drain hole(33-50mm).please check the size of the sink hole before purchasing.\nTypes of Materials: Pop-up drain stopper, threaded pipe are made from brass, tailpiece is made from stainless steel.Durable solid brass construction, Black finished.\nEasy Operation:Press the cover to seal and press again to open. You can turn the upper cap counter-clockwise to unscrew and remove.\nEasy to install: All required gaskets, seals and brass mounting nut are included. Please make sure the gaskets are in the right position (please refer to product pictures or instructions) to avoid leakage.\nDIMENSIONS: Overall length from the top of pop up cap to the end of tailpiece: 8.14\". Diameter at Top: 2.36\". Diameter at tailpiece connec"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "E",
+      "product_id": "B00T492QB4",
+      "product_title": "Yodel Bathroom Sink Drain Stopper Pop up Drain Without Overflow for Vessel Sink Lavatory Vanity,Brushed Nickel",
+      "product_brand": "Yodel faucet",
+      "product_color": "Brushed Nickel Without overflow",
+      "bullet_excerpt": "Without Overflow\nFits vessel sinks with 1 3/4\" drain holes\nDurable solid brass construction\nEasy to install\nStandard sized US plumbing"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "E",
+      "product_id": "B06XY2HPQY",
+      "product_title": "KES Pop Up Drain Stopper for Bathroom Vessel Vanity Sink without Overflow, Brushed Nickel S2007D-BN",
+      "product_brand": "KES",
+      "product_color": "Brushed Nickel",
+      "bullet_excerpt": "No Overflow Pop Up Stopper: For routine cleaning, you can turn the pop-up head counter-clockwise to unscrew and remove it.\nNo Leakage: Comes with all needed silicone washers. Position washer in the right place, and please make sure which side facing up.\nSolid Metal Construction: The pop-up drain plug and drain flange are constructed of Brass. The tailpiece is constructed of Type 304 premium grade stainless steel, protecting against corrosion and rust in a humid environment.\nFits Standard Drain Hole: MIN. sinkhole diameter 1.6-inch. Max. Sink Thickness: 1.9-inch. Fits most vanity/undermount/vessel sinks. Standard sized U.S. plumbing.\nEasy to Install: No need for extra purchase. You can contact KES for step by step guide if you need any help. KES takes responsibility for quality-related issu"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "I",
+      "product_id": "B00NQE73G6",
+      "product_title": "VIGO VG07000MB 2.75\" Diameter Vessel Bathroom Sink Pop-Up Drain and Mounting Ring Without Overflow in Matte Black Finish",
+      "product_brand": "Vigo",
+      "product_color": "Matte Black",
+      "bullet_excerpt": "✅ VESSEL BOWL SINKS: For use in countertop mounted vessel bowl bathroom sinks\n✅ SOLID BRASS CONSTRUCTION: Rust, corrosion, and tarnish resistant due to its solid brass construction, this pop-up drain and mounting ring are as sturdy as they are beautiful\n✅ EASY PUSH-DOWN: Drain easily releases with push-down functionality\n✅ STANDARD FIT: Fits 1 3/4 inch sink drain hole\n✅ PREMIUM FINISHES: Finish is coated in 7 layers to resist rust, corrosion, and tarnish"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "I",
+      "product_id": "B06XQKHWGV",
+      "product_title": "Ownace Bathroom Faucet Vessel Vanity Sink Pop Up Drain Stopper with Overflow Black Color",
+      "product_brand": "Ownace",
+      "product_color": "Black",
+      "bullet_excerpt": "Durable solid-brass construction; expertly crafted\nEasy to install; hardware & gaskets included\nFits sinks with 1 3/5\"(min) drain holes\nEngineered for a lifetime of use\nLuxury Black color"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "S",
+      "product_id": "B00MGSYK6O",
+      "product_title": "Bathroom Sink Drain, Angle Simple Brass Pop Up Drain Stopper, Vessel Sink Drain with Overflow, Lavatory Vanity Sink Drain Stoppers Brushed Nickel",
+      "product_brand": "Angle Simple",
+      "product_color": "Brushed Nickel",
+      "bullet_excerpt": "CONVENIENT ALTERNATIVE: functional replacement sink drain for the traditional pull mechanism, simply press the stopper to seal or drain the water.\nNOT EASY TO GET CLOGGED: strainer basket inside for collecting hair or sundries, prevent items from flushing into the drain, can be unscrewed for cleaning.\nSOLID AND PREMIUM CONSTRUCION: solid brass stopper with stainless steel tailpiece for durability, premium brushed finish, resist rust, corrosion and tarnish.\nSTANDARD SIZE FITS MOST SINKS: apply to standard bathroom undermount sinks or vessel sinks that HAVE OVERFLOW, drain hole diameter required: 1-5/8\" to 2\", diameter of the top flange is 2-5/8\".\nALL PART INCLUDED, NO LEAKING: all necessary parts included for easy installation, rubber gasket for better tight seal, no leaking if install it p"
+    },
+    {
+      "query_id": 1016,
+      "query": "1.63 black drain without overflow",
+      "esci_label": "S",
+      "product_id": "B06XGXSRXL",
+      "product_title": "Sinkology TG01-AG Copper Decorative Solid Brass Bath Grid Drain Without Overflow in Aged",
+      "product_brand": "Sinkology",
+      "product_color": "Copper",
+      "bullet_excerpt": "High-quality finish ensures long lasting durability\nHigh-quality brass construction, expertly finished\nCoordinates beautifully with Aged Copper and Antique Copper sinks\nNo-Overflow design is easy to install\n3D interactive assembly instructions for this product are available through the free BILT app."
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "C",
+      "product_id": "B07RGJNF24",
+      "product_title": "DNHCLL 100PCS 10mm DIY Black Plastic Solid Safety Eyes Sewing Crafting Eyes Buttons for Bear Doll Puppet Plush Animal Toy",
+      "product_brand": "DNHCLL",
+      "product_color": null,
+      "bullet_excerpt": "Material: plastic ;Color: Black ;Size: 10mm (Dia.)\nPackage:100 PCS. Little buttons is perfect material of DIY.\nIdeal for Sewing Crafting and making bears, dolls, puppets, plush animals and crochet critters\nIdeal for many craft, card making and scrapbooking projects\nYou can use as a decorative buttons, thread sewing adhesive,Put on clothes, cloth art goods or headdress,Crafts for Kids."
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "C",
+      "product_id": "B07V9DWMP3",
+      "product_title": "Coopay 160 Yards Length 1/8\" Width Elastic Cord Elastic Bands Elastic Rope Heavy Stretch Elastic Spool Knit for Sewing, 2 Rolls, 80 Yards/Roll (Black and White, 1/8 Inch)",
+      "product_brand": "Coopay",
+      "product_color": "Black and White",
+      "bullet_excerpt": "Package includes: come with 2 rolls 1/8\" width elastic cord, 80 yards/roll, one roll is black band and the other is white, total 160 yards.\nMaterial: high quality elastic spool is made of polyester fibre, which is durable, strong and soft with good breathable.\nGood elasticity: the elastic band in the range of allowable tensile elastic deformation, can easily restore the original length without deformation.\nWide usage: the knit elastic spool with good elasticity can be applied widely for wigs, underwear, pants, sportswear, skirts, waistbands, necklines or crafts diy projects and so on, can be cut whatever length you want.\nWarm notice: please make sure the size when you buy this item(1/8 inch width). By scissors you can shorten the elastic band into the length you want and it is convenient t"
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "E",
+      "product_id": "B004BPJSP8",
+      "product_title": "Dress It Up JBT-3244 Micro Mini Round Buttons, Black",
+      "product_brand": "Dress It Up",
+      "product_color": "Black",
+      "bullet_excerpt": "Novelty embellishments for sewing and crafting\nSew thru buttons\nApproximately 60 pieces\nPiece sizes range from 1/8 to 1/4 inch high\nWarning; Choking Hazard; Small Parts; Not for children under 3 years or for use on children's clothing"
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "E",
+      "product_id": "B07CZWRH6Z",
+      "product_title": "YAKA 30pcs Brown Round Wood Buttons 4 Holes,Craft Buttons for Sewing Clothing, Large Size 2Inch Sewing Buttons for Crafts",
+      "product_brand": "YAKA",
+      "product_color": "Dark Brown",
+      "bullet_excerpt": "Material:Earth-friendly Wood Color: Brown Size: 50mm(2inch)\nPackage includes: 30Pcs wood buttons\nPure natural materials, Wooden buttons good quality is not easy to deformation,\nIdeal for a variety of sewing, knitting, decoration, backpacks , scarves , pillows , Hat ,woolen coats and scrapbooking,Etc DIY with it to represent your own fashion.4 holes natural wood buttons, simple but delicate.\nWelcome to check our store for more options.www.amazon.com/shops/YAKA"
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "I",
+      "product_id": "B00GIJOT5Y",
+      "product_title": "YAKA 100pc New Thick Coconut Shell 2 Holes Button Craft/Sewing/hot Products",
+      "product_brand": "YAKA",
+      "product_color": null,
+      "bullet_excerpt": "Material:Coconut Shell, natural Brown color, environmentally friendly\nSize: diameter:1 inch / 2.5cm Quantity:100pcs\nSewing buttons: Replace the buttons on the clothes, such as jackets, pants buttons\nCraft & Arts project, diy craft, scrapbooking, embelishments\nCrochet projects: crochet hats, scarves, cowls, boot cuffs, & ear warmers."
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "I",
+      "product_id": "B00HYQBDN6",
+      "product_title": "YOYOSORE 100x 10mm Black Cute Round Sew Buckles Button Cloth Accessory Craft Finding DIY",
+      "product_brand": "YOYOSTORE",
+      "product_color": null,
+      "bullet_excerpt": "Sewing Buttons Fit Carfts or Sewing Findings and Other Handmade Accessories\nMaterial: Resin\nDiametre (Approx): 3/8 inch (10 mm)\nColor: Black\nQuantity: 100 pc"
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "S",
+      "product_id": "B015C5KMG4",
+      "product_title": "HOUSWEETY 50PCs Wood Sewing Buttons Scrapbooking 2 Holes Round Mixed 3cm(1 1/8\") Dia.",
+      "product_brand": "HOUSWEETY",
+      "product_color": null,
+      "bullet_excerpt": "Approx:3cm Dia.(1 1/8\");Hole size: 2.9mm(1/8\") Thickness: 4.9mm(2/8\");\nMain Material: Earth-friendly Wood; Main Color: Mixed;\nA velvet gift bag included. Package Included: 50PCs;\nIdeal for a variety of sewing, knitting, crochet, card making and scrapbooking.Every button has its unique design and style and theme, DIY with it to represent your own fashion.\nVarious styles of buttons with different theme and different size. Welcome to check our store for more options.Discount is avaliable for big order."
+    },
+    {
+      "query_id": 1140,
+      "query": "1/4” black buttons for sewing without holes",
+      "esci_label": "S",
+      "product_id": "B01CHZTSC6",
+      "product_title": "Chenkou Craft Random 100pcs Small Plastic Buttons DIY Sewing Craft Accessory (Mix)",
+      "product_brand": "Chenkou Craft",
+      "product_color": "Mix",
+      "bullet_excerpt": "Material:Plastic\nColor:Mix,more than 8 colors,more choice for your craft\nSize:Mix(from 8mm to 20mm)\nQuantity:Random 100pcs;the quantity of each color each size each style is at random\nBrand:Chenkou Craft"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "C",
+      "product_id": "B019XGM9K0",
+      "product_title": "ABCCANOPY Patio Pop Up Canopy Tent 10x10 Commercial-Series (White)",
+      "product_brand": "ABCCANOPY",
+      "product_color": "White",
+      "bullet_excerpt": "Canopy coverage: 10x10FT of shade. Cover 4 tables in your garden; cover 3 beach chair on the beach; cover 10 people at the same time for your commercial events.\nHeavy duty fabric: Durable PU, UV blocker, UPF 50+, 100% waterproof. Suitable for both sunny and rainy days.\nSet up in second: Super easy to set up with only 2 people. Roller bag for easy portability and light transportation. Heavy duty wheels glide smooth. Bonus 4 Canopy Sand Bags, 4 Stakes&Ropes for stable and sturdy use.\nMultiple use occasions: Perfect tent for outdoor sports, event, festival, flea market, party, beach, play ground. (Better check the length of the canopy fit your trunk of the car or not before purchase.\nOne year after-sale protection for frame, six months after-sale protection for fabrics and accessories. If you"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "C",
+      "product_id": "B07J66XY7Q",
+      "product_title": "ABCCANOPY Sand Bags Canopy Tent Weights,4 Pack (Black)",
+      "product_brand": "ABCCANOPY",
+      "product_color": "Black",
+      "bullet_excerpt": "DURABLE MATERIAL: 1680D Oxford fabric with PVC coating,300% stronger than the most in the market,make the weight bag durable and waterproof. WITHOUT FILLER.\nEach pack can hold up to a maximum of 21 lbs of weight in sand, rock, gravel, snow, dirt and other contents.\nFOUR VELCROS: Four velcros sewed on the bag,make the bag attaches the frame closely and firmly\nQUICK AND EASY SIMPLY FILL: Quick and Easy simply fill the anchors with sand into the large top opening and then simply attach the \"hook and loop\" straps to the canopy legs.\nStabilize any Instant leg Canopy, Pop Up tent or gazebo structures, camping sun shlters, sports umbrella with a set of durable universal weight bags."
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "E",
+      "product_id": "B0084TJEAG",
+      "product_title": "Tent and Table 20 Foot x 20 Foot Weekender Canopy Pole Tent | White | Indoor and Outdoor | 33-80 Person Capacity | for Parties, Weddings, and Events | Commercial and Residential Use",
+      "product_brand": "TentandTable",
+      "product_color": "White",
+      "bullet_excerpt": "IMPORTANT - Pole tents are best suited for setup on GRASS or SOFT SURFACES. Pole tents may be utilized on blacktop or asphalt, but it will require the use of heavy duty stakes and a stake driver for drilling into the ground. Please consult your local fire marshal for tent requirements BEFORE purchase\nPREMIUM QUALITY - White 14 vinyl top, designed to withstand the wear and tear of being set up and taken down multiple times each year\nSIZE - 20 ft x 20 ft, ideal for approximately 33 people to sit down and eat, 40 people for buffet style dinner, 50 people for cathedral (row) seating, and 80 people for a standing cocktail party\nLIGHTWEIGHT - Can be packed up and setup without a truck or trailer and minimal tools\nSAFETY - Fire-resistant vinyl, exceeds all National Fire Protection Association fir"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "E",
+      "product_id": "B01M10GU0G",
+      "product_title": "FDW 10x30 Party Tent Wedding Patio Gazebo Outdoor Carport Canopy Shade with Side 8 Removable Walls",
+      "product_brand": "FDW",
+      "product_color": "White",
+      "bullet_excerpt": "【 BIG SIZE 】 The party tent size is big enough ;made with 8 removable sides walls with window provide the patio tent more shade. The wedding tent can hold up to an estimated 50 people for dining or party. patio tent wedding tent party tent.\n【HIGH QUANITY 】The plastic connect between the tubes enhance the stability of the tent frame.The party tent have rust & corrosion resistant white powder coated steel framework, 0.6/0.7mm Steel tube, new material plastic connector of wedding tent make the frame stronger than others, we provide the patio tent with ropes and Stakes for added Stability. Wedding tent party tent canoy.\n【ATTENTATION 】 We advise customers to never leave patio tent up overnight or under bad weather conditions. We will not be responsible for such weather damages. It is up to cust"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "I",
+      "product_id": "B07NYN3KYB",
+      "product_title": "EAGLE PEAK 10' x 10' Heavy Duty Commercial Canopy Tent Pop Up Industrial Instant Canopy Shelter with 100 Square Feet of Shade (White)",
+      "product_brand": "EAGLE PEAK",
+      "product_color": "White",
+      "bullet_excerpt": "DURABLE & FOLDS COMPACT: This heavy duty powerfully built EAGLE PEAK Commercial canopy still folds smaller than other canopies of its size without sacrificing any of its sturdiness or durability. Folds down to 4.5 feet and can easily be stored or transported in its heavy-duty wheeled roller bag.\nVENTED TOP: Perfect for outdoor vending, up to 8 people can work or relax in 100 square feet of shade while enjoying comfortable air flow provided by our EAGLE PEAK VENT. The canopy's large feet provide increased stability on all terrain types.\nEASY SETUP: Legs and sliders feature our EAGLE PEAK push-button control system, eliminating pinch-points for easy setup. The telescoping legs are individually adjustable to 5 positions, so the angle and height can be modified for maximum shade.\nSUPERIOR QUAL"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "I",
+      "product_id": "B07NYYDFLP",
+      "product_title": "EAGLE PEAK 10’ x 10' Pop Up Canopy Tent Instant Outdoor Canopy Easy Set-up Straight Leg Folding Shelter with 100 Square Feet of Shade (White)",
+      "product_brand": "EAGLE PEAK",
+      "product_color": "White",
+      "bullet_excerpt": "EASY ONE PERSON SETUP: Easy Peak Center Push Technology design enables One person to easily open and close the canopy from the center without the hassle of locking and unlocking the canopy leg sliders. One pinch-free push, and you’re ready to go!\nVENTED TOP: Stay cool with our EAGLE PEAK VENT that allows for greater airflow while you work or relax. Easily adjustable 3-position push button telescoping steel legs. Straight leg design provides maximum coverage so 6 or more people can enjoy the spacious 100 square feet of shade. The canopy top also has 2 grommets on each side edge to help water drainage and to prevent pooling.\nSUPERIOR QUALITY: The CPAI-84 flame resistant 150D oxford fabric canopy top is water resistant and offers superior UPF 50+ UV sun protection. Made of high-grade, powder-"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "S",
+      "product_id": "B01FYU7RSI",
+      "product_title": "GOUTIME 10x20 Feet Ez Pop Up Canopy Instant Tent Shelter with 4Pcs 10Ft Removable Sidewalls for Outdoor Christmas Party Events",
+      "product_brand": "GOUTIME",
+      "product_color": "White",
+      "bullet_excerpt": "【Set up in Minutes】Easy and fast to set up by 3-6 people without any tools. Come with a wheeled bag that fits in most vehicles,you can move the canopy yourself and set up anywhere you like. The carrying case has wheels for easy transport (If you have any issue after receiving the product, please feel free to contact us. We guarantee that any faulty parts will be replaced free of charge)\n【Large Space】Provides 200 square feet of shade coverage, holds up to an estimated 18 people. Ideal for family outdoor events, tailgating, kids' sporting events, market stall/market trade show, party,parties, picnics. It can be used in commercial areas, playgrounds, yards, gardens, farms and other outdoor occasions, as well as indoor occasions such as large gymnasiums\n【Package Includes】10x20 canopy frame x1+"
+    },
+    {
+      "query_id": 1167,
+      "query": "10 by 30 white tents without sidewall",
+      "esci_label": "S",
+      "product_id": "B076FL4NVP",
+      "product_title": "E-Z UP Ambassador Instant Shelter Canopy, 10' x 10', Roller Bag and 4 Piece Spike Set, White Slate",
+      "product_brand": "E-Z UP",
+      "product_color": "White Slate",
+      "bullet_excerpt": "100 SQUARE FEET OF SHADE - Straight leg design has a 10 foot by 10 foot footprint and 10'x10' coverage at the top.\nMAXIMUM HEADROOM - The Clear-Span Ceiling provides increased headroom of up to 9'5\" inside. The unique interior frame does not have Cross Bars running through the middle of the canopy. The Ambassador has a valance clearance of 6' 6\". Max exterior peak Height of 9\" 6\". Collapses down to 4'3” High.\nSET UP IN SECONDS - E-Z UP canopies set up in seconds with no tools required. Just take the fully assembled frame with top out of the bag, pull open, extend the legs and you are done. Breakdown is just as easy with the push button toggle leg adjustments and large pull pin loops. Collapse and fold in to place into the wheeled storage bag. Ambassador optional equipment includes: Deluxe "
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "C",
+      "product_id": "B00OCEI9VC",
+      "product_title": "Rubbermaid Classic 13 Gallon Step-On Trash Can with Lid, Black Waste Bin for Kitchen",
+      "product_brand": "Rubbermaid",
+      "product_color": "Black",
+      "bullet_excerpt": "HANDS-FREE PEDAL: Long-lasting pedal stands up to daily use and removes the need to touch the lid during waste disposal to keep hands clean.\nDURABLE DESIGN: The seamless construction and strong resin material make the container easy to clean and long-lasting.\nLINERLOCK TECHNOLOGY: LinerLock bag arms secure the trash bag to the rim of the can to prevent the bag from slipping.\nPERFECT FOR ANY ROOM IN THE HOME: Rubbermaid's timeless designs are perfect for any room in the home, be it the kitchen, laundry room, bathroom, or nursery.\nMADE IN USA: Recognized as a “Brand of the Century”, Rubbermaid is one of only 100 companies named as having an impact on the American way of life. Rubbermaid waste products are proudly designed in Huntersville, NC and manufactured in Winfield, Kansas."
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "E",
+      "product_id": "B000ARPH42",
+      "product_title": "Rubbermaid Small Kitchen Bathroom Trash Can, Under Sink Waste Basket, Plastic Beige 5 Gallons 8 Inch Wide",
+      "product_brand": "Rubbemaid",
+      "product_color": "Bisque",
+      "bullet_excerpt": "This traditional wastebasket is durable and lightweight.\nWith an extra-tough rim and strong sides, it will stand up to years of daily use.\nHaas a smooth inside surface and a textured exterior that resists stains.\nMade in the USA.\nNOTE: 8.9 Length; 13 Width (Narrow End – Narrow End);15 Height (Tall)"
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "E",
+      "product_id": "B002JGIY3S",
+      "product_title": "United Solutions WB0084 Recycle Wastebasket, 1 Pack",
+      "product_brand": "United Solutions",
+      "product_color": "Blue",
+      "bullet_excerpt": "SMALL SPACES IN MIND WITH SLEEK DESIGN – Rectangular, Open top 7 gallon recycling bins fit nicely under the desk, in the kitchen cabinet or in between tight spaces\nEASY TO CLEAN – Durable utility containers wipe clean and air dry with ease for long-lasting use\nFOR EACH ROOM AT HOME – Ideal for the bathroom, bedroom, kitchen, and office space – multi-pack eliminates the need to buy multiple bag liner sizes.\nPERFECT FOR BUSINESS – Heavy duty and creates a consistent look and feel in any small business or corporate office where space is limited.\nINDIVIDUAL DIMENSIONS 14. 5 in L x 10. 5 in W x 15. 250 in H per recycle bin"
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "I",
+      "product_id": "B015RSYZL4",
+      "product_title": "Superio Mini Pedal Trash Can 7.5 Qt., Square Patio Waste Basket Brown Wicker, Space Saver Compact Garbage Can with Step On Foot Pedal Lid - Rattan Design",
+      "product_brand": "Superio",
+      "product_color": "Brown",
+      "bullet_excerpt": "IDEAL FOR SMALL SPACES - Looking for a compact trash can that will fit underneath a desk or in a dorm room? This 7.5 Qt trash can is the ideal choice for any small space.\nDECORATIVE DESIGN - Rattan decor is making a comeback! This rattan style trash can is aesthetically pleasing and a great fit for any decor style.\nSIMPLE AND EASY TO CLEAN - Trash cans can get gross quickly, which is why we offer a trash can that allows you to get into nooks and crannies without breaking a sweat!\nCOMES IN 4 DIFFERENT COLORS - We have a garbage can color to suit every preference! No matter the style preference, one of these trash can colors is sure to work in your space.\nZERO CHANCE OF RUST - Unlike stainless steel trash cans, this plastic trash can will never rust! Our foot pedal garbage can will last you "
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "I",
+      "product_id": "B075JMPWVV",
+      "product_title": "Superio 2.5 Gal Slim Step On Pedal Plastic Trash Can, Waste Bin for Under Desk, Office, Bedroom, Bathroom- 10 Qt, Greige",
+      "product_brand": "Superio",
+      "product_color": "Soft Beige",
+      "bullet_excerpt": "PERFECT FOR TIGHT SPACES - Do you need a garbage can that fits underneath your desk or under the bathroom sink? Then you’ve found the perfect lidded trash can for your needs!\nBUCKET HANDLE PREVENTS BAG SLIPPING - We’ve all been there. You go to put a new bag in your trash can only to have the bag crumple inside the second you put any weight in it. This garbage pails bucket handle feature prevents that annoying scenario from ever happening to you again.\nSIMPLE AND EASY TO CLEAN - Trash cans can get gross quickly, which is why we offer a trash can that allows you to get into nooks and crannies without breaking a sweat!\nCOMES IN 5 DIFFERENT COLORS - We have a color to suit every preference! No matter the decor style, one of these trash can colors will work in your space.\nZERO CHANCE OF RUST -"
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "S",
+      "product_id": "B000SZM6G8",
+      "product_title": "Umbra 086711-040 Grand Swing Top Garbage Large Capacity 10 Gallon Kitchen Trash Can with Lid, Indoor/Outdoor Use, Black",
+      "product_brand": "Umbra",
+      "product_color": "Black",
+      "bullet_excerpt": "MODERN SWING-TOP DESIGN: Grand Trash Can features a swing-top lid that fits securely in place while hiding your trash or recycling; leaving your kitchen, or other space clean and tidy\nDURABLE AND EASY TO CLEAN: Grand is made of durable polypropylene that is strong and easy to clean – simply wipe with a damp cloth when needed\nLARGE 10 GALLON CAPACITY: At 26-inches tall with a 13-inch diameter, the Grand garbage can was designed to hold most 13-gallon garbage bags, including draw-string and flap-tie bags\nSUITABLE FOR RESIDENTIAL OR COMMERCIAL USE: Not only is Grand the perfect kitchen trash can, it’s also suitable for workshops, garages, and other areas around your home or commercial space\nlid is inside the trash can during shipment"
+    },
+    {
+      "query_id": 1570,
+      "query": "10gal white trash can without lid",
+      "esci_label": "S",
+      "product_id": "B000UGRD6S",
+      "product_title": "Rubbermaid Spring Top Kitchen Bathroom Trash Can with Lid, 13 Gallon White Plastic Garbage Bin",
+      "product_brand": "Rubbermaid",
+      "product_color": "White",
+      "bullet_excerpt": "SPRING TOP LID: The oversized button allows the lid to spring open for convenient waste disposal.\nLARGE CAPACITY: The rectangular shape easily accomodates 13G of waste for less trips to empty the container.\nFITS STANDARD LINER BAGS: The container was designed to accommodate standard 13G kitchen trash bags.\nMADE IN USA: Recognized as a “Brand of the Century”, Rubbermaid is one of only 100 companies named as having an impact on the American way of life. Rubbermaid waste containers are manufactured in Winfield, Kansas.\nDIMENSIONS: 16.25 inches x 11.5 inches x 23 inches"
+    }
+  ],
+  "natural_product_examples": [
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "esci_label": "C",
+      "product_id": "B07QH8HYL1",
+      "product_title": "SimpleHouseware Mesh Ventilated Adjustable Laptop Stand, Black",
+      "product_brand": "Simple Houseware",
+      "product_color": "Black",
+      "bullet_excerpt": "Ventilated mesh laptop holder helps cooling your devices from crashes\nAdjust your laptop, notebook, textbook or iPad to a comfortable viewing height. Reduce neck and eye Strain\n11 Levels adjustable height from 15 to 50 degrees\nSturdy Metal Construction with Classic Black Coating\nDimension: 13\"W x 11\"L"
+    },
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "esci_label": "E",
+      "product_id": "B07RF1XD36",
+      "product_title": "Acer Aspire 5 Slim Laptop, 15.6 inches Full HD IPS Display, AMD Ryzen 3 3200U, Vega 3 Graphics, 4GB DDR4, 128GB SSD, Backlit Keyboard, Windows 10 in S Mode, A515-43-R19L, Silver",
+      "product_brand": "Acer",
+      "product_color": "Silver",
+      "bullet_excerpt": "AMD Ryzen 3 3200U Dual Core Processor (Up to 3.5GHz); 4GB DDR4 Memory; 128GB PCIe NVMe SSD\n15.6 inches full HD (1920 x 1080) widescreen LED backlit IPS display; AMD Radeon Vega 3 Mobile Graphics\n1 USB 3.1 Gen 1 port, 2 USB 2.0 ports & 1 HDMI port with HDCP support\n802.11ac Wi-Fi; Backlit Keyboard; Up to 7.5 hours battery life\nWindows 10 in S mode. Maximum power supply wattage: 65 Watts"
+    },
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "esci_label": "E",
+      "product_id": "B0869L1326",
+      "product_title": "ASUS VivoBook 15 Thin and Light Laptop, 15.6” FHD Display, Intel i3-1005G1 CPU, 8GB RAM, 128GB SSD, Backlit Keyboard, Fingerprint, Windows 10 Home in S Mode, Slate Gray, F512JA-AS34",
+      "product_brand": "ASUS",
+      "product_color": "Slate Gray",
+      "bullet_excerpt": "15.6 inch Full HD (1920x1080) 4-way NanoEdge bezel display with a stunning 88% screen-to-body ratio\nCompatible with Google Classroom; run Google Classroom on Microsoft Edge or Internet Explorer 11\nLatest 10th Gen Intel Core i3-1005G1 CPU (4M Cache, up to 3.4 GHz)\n8 GB DDR4 RAM and 128 GB PCIe NVMe M.2 SSD\nErgonomic backlit keyboard with fingerprint sensor activated via Windows Hello"
+    },
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "esci_label": "S",
+      "product_id": "B07D5N1PFY",
+      "product_title": "Fast Dell Latitude E5470 HD Business Laptop Notebook PC (Intel Core i5-6300U, 8GB Ram, 256GB Solid State SSD, HDMI, Camera, WiFi, SC Card Reader) Win 10 Pro (Renewed)",
+      "product_brand": "Dell",
+      "product_color": "Black",
+      "bullet_excerpt": "Processor: Intel Core 6th Generation i5-6300U High Performance Processor (Dual Core, up to 3.00 GHz, 3M Cache, 15W)\n8 GB DDR4 Ram / 256 GB Opal Encrypted Solid State Drive (SSD).\n14.6 Inch HD (1366 x 768) Anti-Glare Screen, Intel HD 520 Graphics, HQ Camera, Intel Dual Band Wireless 8260 (802.11ac) W/ Bluetooth, HDMI, VGA, SC Card Reader, SD Card Reader, 3 x USB 3.0, RJ-45.\nWindows 10 Professional (64 Bit). Comes With AC Adapter."
+    },
+    {
+      "query_id": 2162,
+      "query": "15 inch light weight laptop that has lots of memory storage and RAM.  It should include a HDMI port as well as a USB drive.  ",
+      "esci_label": "S",
+      "product_id": "B07DQVLVVS",
+      "product_title": "HP EliteBook 840 G3 - 14” FHD, Intel Core i5-6300U 2.4Ghz, 8GB DDR4, 256GB SSD, Bluetooth 4.2, Windows 10 64 (Renewed)",
+      "product_brand": "HP",
+      "product_color": null,
+      "bullet_excerpt": "PORTABLE POWERHOUSE - The HP EliteBook 840 G3 combines high-performance technology, like its Intel i5 6300U 2.4 GHz and 8GB DDR2 SDRAM, with long-lasting battery life.\nSMOOTH VISUALS - With the 14.0\" FHD (1920 x 1080) screen and Intel HD 520 Graphics, video conferencing and streaming both come through crystal clear.\nFEEL THE SPEED AND PERFORMANCE - With a 256GB SSD and the powerful Windows 10 Pro, the HP Elitebook 840 G3 won't be slowing you down.\nKISS DONGLES GOODBYE - At just 18.9 mm, the ultra-slim and light HP EliteBook 840 comes with VGA, Display Port, RJ-45, USB, USB-C, and enterprise docking capabilities."
+    },
+    {
+      "query_id": 5611,
+      "query": "A bomber jacket with inner warming lining, preferrably black",
+      "esci_label": "E",
+      "product_id": "B00026LH4K",
+      "product_title": "Ultra Force tm Black MA-1 Flight Jacket Size XL",
+      "product_brand": "Rothco",
+      "product_color": "Black",
+      "bullet_excerpt": "Classic MA-1 Flight Jacket With Reversible Orange Polyester Lining\nPoly Fiberfill Adds Warmth For Cold Climates\n100% Nylon Water Repellent Outer Shell\nRibbed Knit Collar, Cuffs And Waistband\nExtra Full Cut For Comfortable Fit"
+    },
+    {
+      "query_id": 5611,
+      "query": "A bomber jacket with inner warming lining, preferrably black",
+      "esci_label": "E",
+      "product_id": "B00026LI58",
+      "product_title": "Rothco M-65 Field Jacket - Olive Drab, Medium",
+      "product_brand": "Rothco",
+      "product_color": "Olive Drab",
+      "bullet_excerpt": "Quality tested and ensured for maximum durability\nDesigned with only the toughest, roughest users in mind\nComfort and Performance come hand in hand with Rothco"
+    },
+    {
+      "query_id": 5611,
+      "query": "A bomber jacket with inner warming lining, preferrably black",
+      "esci_label": "S",
+      "product_id": "B002IAIXIQ",
+      "product_title": "Als/92 Liner Medium/Olive Green",
+      "product_brand": "Alpha Industries",
+      "product_color": "M-65 Olive",
+      "bullet_excerpt": "100% Rip-Stop Nylon: The ALS/92 Liner is crafted with 100% rip-stop nylon fabric that prevents tears from spreading. Machine wash cold on gentle and tumble dry low.\nBonus Features: This authentic jacket has an onion quilted shell and 2 lower patch pockets. The liner buttons and knit cuff sleeves help to keep out the elements.\nCore Fit: This camo liner jacket features a core fit. It generally falls just above the hip. It also features a v-shape neckline.\nFor Light Weather: This liner features a polyester fill. Wear this jacket alone or button it into a men's M-65 Jacket for additional warmth.\nAbout Alpha Industries: After being commissioned in 1959, Alpha Industries began designing and manufacturing jackets for the U.S. military, protecting soldiers, aviators and sailors from the harsh elem"
+    },
+    {
+      "query_id": 5611,
+      "query": "A bomber jacket with inner warming lining, preferrably black",
+      "esci_label": "S",
+      "product_id": "B00HQ4KSGE",
+      "product_title": "Columbia Men's Standard Ascender Softshell Jacket, Black, Large",
+      "product_brand": "Columbia",
+      "product_color": "Black",
+      "bullet_excerpt": "ADVANCED TECHNOLOGY: Columbia Men's Ascender Softshell Jacket features our durable water and wind resistant shell to keep the elements out while keeping you dry and warm\nVERSATILE COLLEGE STYLE: Available with your favorite college logo, the lightweight build and adjustable features make this collegiate jacket a staple for any outdoor event\nDURABLE FABRIC: This jacket is crafted of a 100% polyester soft shell that's durable enough for everyday wear\nHANDY FEATURES: A zippered chest pocket plus two zippered hand pockets not only keep your small items secure but also keep your hands nice and toasty, while bound cuffs and a drawcord adjustable hem lock in warmth\nBUILT TO LAST: Columbia’s attention to detail is what sets our apparel apart. Specifying only the highest quality materials, expert s"
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "C",
+      "product_id": "B07YDPQNMY",
+      "product_title": "Down Jacket Repair Patches Black (Self-Adhesive)",
+      "product_brand": "DJR",
+      "product_color": "Black",
+      "bullet_excerpt": "Self-Adhesive, Ripstop, Nylon Patches for the Repair of Down Jackets and Sleeping Bags\nHigh quality, performance fabric patches that guarantee a strong, soft and subtle repair.\nEasy to apply - 30 second repair\nEach kit contains 7 patches: Five \"circles\" (smallest 1.6cm - largest 4.1cm diameter); Two \"ovals\" (smaller 3.8cm x 5.7cm and larger 4.5cm x 6.2cm)"
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "E",
+      "product_id": "B00HHOXV7Q",
+      "product_title": "Orolay Women's Thickened Down Jacket Black L",
+      "product_brand": "Orolay",
+      "product_color": "Black",
+      "bullet_excerpt": "Shell/Lining Fabric: 100% polyester; Body/Sleeve Filler: 90% duckdown , 10% duckfeather\nPolyester with a density 60% higher than usual in the market. It has excellent windproof and warm-keeping quality.\nThe bottom of the eiderdown garment adopts unique crumples. This was coupled with fashion design and manifested a unique practicability of magnificence but at the same time not too overt.\nFeaturing warm fleece lined hood, special side zippers, 6 big pockets, it is warm and cute for you to enjoy the outdoor activity in wintry days.\nKINDLY BE NOTED: The warm down coat will be folded and compacted inside of the package when delivery, so you may feel it thin and flat, if so, lightly pat the jacket with your hands and then have it hang."
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "E",
+      "product_id": "B013LAZ77Q",
+      "product_title": "Wantdo Women's Ultra Light Down Jacket Winter Packable Warm Coat Black Medium",
+      "product_brand": "Wantdo",
+      "product_color": "Black",
+      "bullet_excerpt": "Travel in Style - Made of 20D 400T nylon, our stylish, compressible, and lightweight down jackets for women are ideal for on-the-go use with this packable down jacket's carrying pouch - perfect to bring on travels and commutes\nWindproof & Warm - Battle strong winds without worry with the women's winter jackets women can count on. Our bubble jacket for women lets you indulge in superior support and warmth even under challenging weather conditions\nExceptional Quality - This fully-zippered and hooded puffer jacket boasts a waterproof coating and robust construction, perfect for slight rain and snowy weather\nPractical Light Weight Travel Jackets for Women - Keep your valuables with you at all times! This packable puffer coat employs 2 zippered pockets, 2 interior pockets, and a media port for "
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "I",
+      "product_id": "B07NQW2QYF",
+      "product_title": "Amazon Essentials Boys' Polar Fleece Full-Zip Mock Jackets, Red Buffalo Check, Large",
+      "product_brand": "Amazon Essentials",
+      "product_color": "Red Buffalo Check",
+      "bullet_excerpt": "Soft, warm and fuzzy mid-weight polar fleece fabric\nTwo pockets at front sides\nAn Amazon brand"
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "I",
+      "product_id": "B07T9DXFHX",
+      "product_title": "SWOTGdoby Boys Slim Fit Suits 5 Pieces Blazer Vest Shirt Pants Bowtie Jacket with Gold Rims for Wedding Party Prom",
+      "product_brand": "SWOTGdoby",
+      "product_color": "Black-golden",
+      "bullet_excerpt": "Material: High quality Polyester, no pilling, no-wrinkles, easy to care.\nFeatures: Single-breasted with double buttons, no vent, notch lapel with gold or silver rims, stylish and dashing; Vest is single-breasted, back with adjustable strap; Pants are no hem.\nSuitable Occasion: Wedding, dance, party, stage show, birthday, or some special ocassions.\n5 Pieces Suit Set: Blazer, bow-tie, vest, shirt, pants.\nTips: The size runs large, please order one size smaller than usual. If you have any questions, please feel free to email us."
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "S",
+      "product_id": "B0100XQO3I",
+      "product_title": "Tommy Hilfiger Men's Packable Down Puffer Jacket, Black, Large",
+      "product_brand": "Tommy Hilfiger",
+      "product_color": "Black",
+      "bullet_excerpt": "WARM FEATURES: 100% down feather padding giving the ability to lock in warmth; Featuring a quilted pattern to add style and functionality; Heat is secured within each stitched quilt\nPRACTICALITY: A favorable front zipper extending the length of the jacket is featured along with 2 hand pockets; The side entry pockets create a spacious and easily accessible pocket\nSTYLISH AND POLISHED: The Tommy Hilfiger logo is present on the left chest adding acknowledgement of the brand without being overpowering; The standup collar creates a mature look while adding to the warmth feature of the jacket\nEASY TRAVEL AND STORAGE: The packable feature comes from the lightweight accent of the jacket; Storage comes easy with the matching drawstring bag that can conveniently hold the jacket"
+    },
+    {
+      "query_id": 5624,
+      "query": "A plain black, warm puffer jacket with a hood and decently sized pockets",
+      "esci_label": "S",
+      "product_id": "B0751XL17H",
+      "product_title": "Steve Madden Women's Puffer Parka,Olive,Medium",
+      "product_brand": "Steve Madden",
+      "product_color": "Olive Two",
+      "bullet_excerpt": "Click on colors for a variety of styles\nSelected styles are hooded\nCozy interior that delivers warmth and comfort\nBrand logo"
+    }
+  ]
+}

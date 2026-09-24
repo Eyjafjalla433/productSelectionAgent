@@ -1,0 +1,15 @@
+{
+  "archive_name": "techjam-runtime-assets-v0.1.0.zip",
+  "archive_sha256": "57769c08803b2a68604e12bbc59ec07beea65d831498aa3d361cb0e0a7004f2b",
+  "download_url": "https://github.com/Zhang-Jingzhi/Shopping-Copilot-AI-Conversational-Search-and-Recommendations/releases/download/retrieval-runtime-v0.1.0/techjam-runtime-assets-v0.1.0.zip",
+  "github_release": {
+    "repository": "Zhang-Jingzhi/Shopping-Copilot-AI-Conversational-Search-and-Recommendations",
+    "tag": "retrieval-runtime-v0.1.0"
+  },
+  "critical_files": {
+    "data/catalog.jsonl": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+    "resources/bge-small-en-v1.5/model.safetensors": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+    "resources/dense_catalog_embeddings/baai-bge-small-en-v1-5-catalog-embeddings.npy": "51d95d439c0656ef3a59fd932bcb85ad9a317f4b456b9cdfd4c17ccecc3ea98b",
+    "resources/dense_catalog_embeddings/baai-bge-small-en-v1-5-parent-asins.json": "d39da028e49c5e9b159a9c67c83fb8a1d0fd685e61aabe38a82f12877dfa545c"
+  }
+}

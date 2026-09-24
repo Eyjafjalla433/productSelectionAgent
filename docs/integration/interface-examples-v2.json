@@ -1,0 +1,365 @@
+{
+  "scope": "Schema fixtures only. EXAMPLE_ONLY IDs never enter the real catalog or evaluation.",
+  "current_router_handoff": {
+    "schema_version": "2.0",
+    "session_id": "example",
+    "turn": 3,
+    "intent": "unknown",
+    "slot_updates": null,
+    "legacy_result": {
+      "raw_query": "blue instead",
+      "normalized_query": "blue instead",
+      "intent_type": null,
+      "intent_confidence": 0.5,
+      "slots": {
+        "color": [
+          "blue"
+        ]
+      },
+      "hard_constraints": {},
+      "filter_constraints": {},
+      "soft_preferences": {
+        "color": [
+          "blue"
+        ]
+      },
+      "keyword_query": "blue",
+      "semantic_query": "blue",
+      "ambiguity_flags": [
+        "missing_category",
+        "low_intent_confidence",
+        "intent_undetermined"
+      ],
+      "override_detected": true,
+      "decision_evidence": {
+        "buying": [],
+        "browsing": [],
+        "buying_score": 0.0,
+        "browsing_score": 0.0,
+        "margin": 0.0,
+        "decision": "undetermined"
+      }
+    }
+  },
+  "four_independent_operation_examples": [
+    {
+      "slot": "color",
+      "operation": "set",
+      "values": [
+        "blue"
+      ],
+      "constraint_type": "hard",
+      "confidence": null,
+      "evidence": "blue instead"
+    },
+    {
+      "slot": "price_max",
+      "operation": "clear",
+      "values": [],
+      "constraint_type": null,
+      "confidence": null,
+      "evidence": "ignore the budget"
+    },
+    {
+      "slot": "color",
+      "operation": "exclude",
+      "values": [
+        "black"
+      ],
+      "constraint_type": null,
+      "confidence": null,
+      "evidence": "not black"
+    },
+    {
+      "slot": "color",
+      "operation": "remove_exclusion",
+      "values": [
+        "black"
+      ],
+      "constraint_type": null,
+      "confidence": null,
+      "evidence": "black is also fine"
+    }
+  ],
+  "explicit_set_handoff_fixture": {
+    "schema_version": "2.0",
+    "session_id": "example",
+    "turn": 3,
+    "intent": "unknown",
+    "slot_updates": [
+      {
+        "slot": "color",
+        "operation": "set",
+        "values": [
+          "blue"
+        ],
+        "constraint_type": "hard",
+        "confidence": null,
+        "evidence": "blue instead"
+      }
+    ],
+    "legacy_result": {
+      "raw_query": "blue instead",
+      "normalized_query": "blue instead",
+      "intent_type": null,
+      "intent_confidence": 0.5,
+      "slots": {
+        "color": [
+          "blue"
+        ]
+      },
+      "hard_constraints": {},
+      "filter_constraints": {},
+      "soft_preferences": {
+        "color": [
+          "blue"
+        ]
+      },
+      "keyword_query": "blue",
+      "semantic_query": "blue",
+      "ambiguity_flags": [
+        "missing_category",
+        "low_intent_confidence",
+        "intent_undetermined"
+      ],
+      "override_detected": true,
+      "decision_evidence": {
+        "buying": [],
+        "browsing": [],
+        "buying_score": 0.0,
+        "browsing_score": 0.0,
+        "margin": 0.0,
+        "decision": "undetermined"
+      }
+    }
+  },
+  "state_snapshot_v2": {
+    "session_id": "example",
+    "turn": 3,
+    "state_version": 7,
+    "intent": "buying",
+    "intent_confidence": 0.9,
+    "query": "blue instead",
+    "hard_constraints": {
+      "color": "blue",
+      "price_max": 50.0
+    },
+    "soft_preferences": {},
+    "exclusions": {
+      "color": [
+        "black"
+      ]
+    },
+    "slot_metadata": {
+      "hard": {
+        "color": {
+          "value": "blue",
+          "source_turn": 3,
+          "confidence": 1.0,
+          "priority": 1.0,
+          "constraint_type": "hard",
+          "evidence": ""
+        },
+        "price_max": {
+          "value": 50.0,
+          "source_turn": 1,
+          "confidence": 1.0,
+          "priority": 1.0,
+          "constraint_type": "hard",
+          "evidence": ""
+        }
+      },
+      "soft": {}
+    },
+    "profile_hints": {},
+    "session_summary": "Blue item, at most $50; exclude black.",
+    "shown_asins": [],
+    "suggestions": {
+      "route": "buying_filter",
+      "action": "retrieve_buying",
+      "clarification_question": null,
+      "retrieval_budget": 50
+    },
+    "asked_questions": null,
+    "pending_question": null,
+    "schema_version": "2.0"
+  },
+  "two_candidate_result_v2": {
+    "candidate_set_id": "example:3:7",
+    "session_id": "example",
+    "turn": 3,
+    "state_version": 7,
+    "candidate_limit": 50,
+    "candidates": [
+      {
+        "parent_asin": "EXAMPLE_ONLY_0",
+        "candidate_rank": 1,
+        "source_ranks": {
+          "fixture": 1
+        },
+        "product": {
+          "title": "Example 0"
+        }
+      },
+      {
+        "parent_asin": "EXAMPLE_ONLY_1",
+        "candidate_rank": 2,
+        "source_ranks": {
+          "fixture": 2
+        },
+        "product": {
+          "title": "Example 1"
+        }
+      }
+    ],
+    "stats": {
+      "matched_count": null,
+      "filtered_count": null
+    },
+    "state_snapshot": {
+      "session_id": "example",
+      "turn": 3,
+      "state_version": 7,
+      "intent": "buying",
+      "intent_confidence": 0.9,
+      "query": "blue instead",
+      "hard_constraints": {
+        "color": "blue",
+        "price_max": 50.0
+      },
+      "soft_preferences": {},
+      "exclusions": {
+        "color": [
+          "black"
+        ]
+      },
+      "slot_metadata": {
+        "hard": {
+          "color": {
+            "value": "blue",
+            "source_turn": 3,
+            "confidence": 1.0,
+            "priority": 1.0,
+            "constraint_type": "hard",
+            "evidence": ""
+          },
+          "price_max": {
+            "value": 50.0,
+            "source_turn": 1,
+            "confidence": 1.0,
+            "priority": 1.0,
+            "constraint_type": "hard",
+            "evidence": ""
+          }
+        },
+        "soft": {}
+      },
+      "profile_hints": {},
+      "session_summary": "Blue item, at most $50; exclude black.",
+      "shown_asins": [],
+      "suggestions": {
+        "route": "buying_filter",
+        "action": "retrieve_buying",
+        "clarification_question": null,
+        "retrieval_budget": 50
+      },
+      "asked_questions": null,
+      "pending_question": null,
+      "schema_version": "2.0"
+    },
+    "legacy_requirements": null,
+    "warnings": [],
+    "schema_version": "2.0",
+    "returned_count": 2
+  },
+  "two_recommendation_ranking_v2": {
+    "candidate_set_id": "example:3:7",
+    "session_id": "example",
+    "turn": 3,
+    "state_version": 7,
+    "ranked_candidates": [
+      {
+        "parent_asin": "EXAMPLE_ONLY_0",
+        "rank": 1,
+        "score": 1.0,
+        "evidence": []
+      },
+      {
+        "parent_asin": "EXAMPLE_ONLY_1",
+        "rank": 2,
+        "score": 0.5,
+        "evidence": []
+      }
+    ],
+    "ranking_method": "fixture",
+    "score_semantics": "uncalibrated",
+    "schema_version": "2.0"
+  },
+  "empty_candidate_result_v2": {
+    "candidate_set_id": "empty-example",
+    "session_id": "example",
+    "turn": 3,
+    "state_version": 7,
+    "candidate_limit": 50,
+    "candidates": [],
+    "stats": {
+      "matched_count": null,
+      "filtered_count": null
+    },
+    "state_snapshot": {
+      "session_id": "example",
+      "turn": 3,
+      "state_version": 7,
+      "intent": "buying",
+      "intent_confidence": 0.9,
+      "query": "blue instead",
+      "hard_constraints": {
+        "color": "blue",
+        "price_max": 50.0
+      },
+      "soft_preferences": {},
+      "exclusions": {
+        "color": [
+          "black"
+        ]
+      },
+      "slot_metadata": {
+        "hard": {
+          "color": {
+            "value": "blue",
+            "source_turn": 3,
+            "confidence": 1.0,
+            "priority": 1.0,
+            "constraint_type": "hard",
+            "evidence": ""
+          },
+          "price_max": {
+            "value": 50.0,
+            "source_turn": 1,
+            "confidence": 1.0,
+            "priority": 1.0,
+            "constraint_type": "hard",
+            "evidence": ""
+          }
+        },
+        "soft": {}
+      },
+      "profile_hints": {},
+      "session_summary": "Blue item, at most $50; exclude black.",
+      "shown_asins": [],
+      "suggestions": {
+        "route": "buying_filter",
+        "action": "retrieve_buying",
+        "clarification_question": null,
+        "retrieval_budget": 50
+      },
+      "asked_questions": null,
+      "pending_question": null,
+      "schema_version": "2.0"
+    },
+    "legacy_requirements": null,
+    "warnings": [],
+    "schema_version": "2.0",
+    "returned_count": 0
+  }
+}

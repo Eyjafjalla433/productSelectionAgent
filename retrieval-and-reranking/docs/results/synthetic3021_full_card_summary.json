@@ -1,0 +1,23 @@
+{
+  "evaluation_kind": "offline_full_card_proxy_diagnostic",
+  "official_interactive_score": false,
+  "sample_count": 3021,
+  "top50_coverage_count": 3001,
+  "locked_weighted_rrf": {
+    "hit_at_1_count": 2586,
+    "hit_at_3_count": 2841,
+    "hit_at_5_count": 2899,
+    "hit_at_10_count": 2960,
+    "conditional_hit_at_10": 0.9863378873708764,
+    "mrr_at_10": 0.9011932346589745
+  },
+  "exploratory_fullfit_pairwise": {
+    "trained_and_evaluated_on_same_proxy_sessions": true,
+    "hit_at_1_count": 2958,
+    "hit_at_3_count": 2998,
+    "hit_at_5_count": 3001,
+    "hit_at_10_count": 3001,
+    "mrr_at_10": 0.9856669976828863
+  },
+  "default_method": "locked_weighted_rrf"
+}

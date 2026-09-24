@@ -1,0 +1,10 @@
+{
+  "baseline": "weak_bm25",
+  "dataset": "data/public_set.jsonl",
+  "sample_count": 200,
+  "hit_rate_at_10": 0.125,
+  "mrr": 0.068034,
+  "mttc": 9.81,
+  "efficiency": 0.119,
+  "technical_score": 0.10671
+}

@@ -1,0 +1,65 @@
+{
+  "same_message_intent": {
+    "message": "I'm looking for Earrings Hoop, but I'm still exploring.",
+    "router_intent": "browsing",
+    "router_route": "semantic_track",
+    "state_intent": "buying",
+    "state_route": "buying_filter"
+  },
+  "material_negation": {
+    "message": "I need shoes, not leather",
+    "must_match": {
+      "category": "shoes",
+      "material": "leather"
+    },
+    "must_not_match": {}
+  },
+  "return_to_previously_rejected_color": {
+    "messages": [
+      "show me a black dress",
+      "blue instead",
+      "black instead"
+    ],
+    "must_match": {
+      "category": "dress",
+      "color": "black"
+    },
+    "must_not_match": {
+      "color": [
+        "black",
+        "blue"
+      ]
+    }
+  },
+  "snapshot_adapter": {
+    "input_must_match": {
+      "category": "dress",
+      "color": "blue",
+      "price_max": 50.0
+    },
+    "input_must_not_match": {
+      "color": [
+        "black"
+      ]
+    },
+    "output_requirements": {
+      "category": "dress",
+      "hard_constraints": [
+        "color: blue"
+      ],
+      "soft_preferences": [
+        "budget: under 50.0"
+      ]
+    }
+  },
+  "numeric_budget_filter": {
+    "all_catalog_prices": 500,
+    "requested_maximum": 50,
+    "returned_candidates": 50,
+    "candidate_snapshot_has_price": false
+  },
+  "direct_agent_turn_11": {
+    "returned_recommendations": 10,
+    "note": "The evaluator limits turns; the agent itself accepts turn 11."
+  }
+}

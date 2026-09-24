@@ -1,0 +1,38 @@
+{
+  "configuration": {
+    "agent": "ranking_pipeline.agent.RankingAgent",
+    "retrieval_mode": "lite",
+    "reranker_mode": "locked",
+    "sample_count": 200,
+    "official_evaluator_unmodified": true
+  },
+  "official_artifact_sha256": {
+    "catalog": "da979b05a68af864cb0dcf9ee6a81c010c7e66a57978ad286c7a2e005fc69a67",
+    "public_set": "857259f7a438e6188ac63e18995b6ff4489bfcfc4a716a798b9a2aa0ee8f7579",
+    "evaluator": "79a5ea06f9a1b8c5036f30efa85dc1f36b8f6b06eb8feb8f545dfa767bc45564"
+  },
+  "question_limit_2": {
+    "hit_rate_at_10": 0.985,
+    "mrr": 0.884625,
+    "mttc": 3.205,
+    "efficiency": 0.7795,
+    "recommended_technical_score": 0.913788,
+    "result": "ranking_pipeline/results/question-limit-2-lite.json"
+  },
+  "question_limit_1": {
+    "hit_rate_at_10": 0.965,
+    "mrr": 0.769306,
+    "mttc": 2.545,
+    "efficiency": 0.8455,
+    "recommended_technical_score": 0.882392,
+    "result": "ranking_pipeline/results/question-limit-1-lite.json"
+  },
+  "limit_1_minus_limit_2": {
+    "hit_rate_at_10": -0.02,
+    "mrr": -0.115319,
+    "mttc": -0.66,
+    "efficiency": 0.066,
+    "recommended_technical_score": -0.031396
+  },
+  "interpretation": "The Lite run exactly matches the recorded Exact metrics on public-200; this does not prove identical behavior on private sessions."
+}

@@ -1,0 +1,15 @@
+{
+  "catalog_id_field": "parent_asin",
+  "top_k": 10,
+  "max_turns": 10,
+  "miss_turn_value": 11,
+  "exact_match": true,
+  "metrics": ["hit_rate_at_10", "mrr", "mttc", "reported_token_usage"],
+  "scenario_metrics": ["buying", "browsing", "intent_override", "boundary"],
+  "efficiency_formula": "clip((11 - mttc) / 10, 0, 1)",
+  "recommended_composite": {
+    "hit_rate_at_10": 0.5,
+    "mrr": 0.3,
+    "efficiency": 0.2
+  }
+}

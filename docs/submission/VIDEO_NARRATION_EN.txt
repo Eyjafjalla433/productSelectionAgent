@@ -1,0 +1,10 @@
+Welcome to Shopping Copilot, our CPU-only conversational search agent running on the real fifty-thousand-product catalog.
+[[slnc 1800]]
+In the first two turns, the pre-retrieval policy collects category, feature, color, and budget evidence instead of retrieving too early.
+[[slnc 1200]]
+On turn three, the integrated pipeline routes intent, updates memory, retrieves fifty candidates, reranks them, and returns ten recommendations.
+[[slnc 1200]]
+When the user rejects those options, the post-retrieval policy detects negative feedback and asks for one more feature.
+[[slnc 1200]]
+After the user requests a drawstring closure, the state is updated and the agent recommends again.
+The full run is deterministic, requires no GPU or external API, and respects the ten-turn limit.

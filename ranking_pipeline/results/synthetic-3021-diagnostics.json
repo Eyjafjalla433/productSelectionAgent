@@ -1,0 +1,37 @@
+{
+  "top_k": 10,
+  "record_count": 3021,
+  "ranked_count": 3021,
+  "over_general_count": 1310,
+  "over_general_rate": 0.433631,
+  "tier_metrics": {
+    "high_confidence": {
+      "count": 1065,
+      "hits": 1018,
+      "recall": 0.955869
+    },
+    "low_likelihood": {
+      "count": 1644,
+      "hits": 1562,
+      "recall": 0.950122
+    },
+    "probable": {
+      "count": 144,
+      "hits": 142,
+      "recall": 0.986111
+    },
+    "uncertain": {
+      "count": 168,
+      "hits": 162,
+      "recall": 0.964286
+    }
+  },
+  "score_distribution": {
+    "count": 30210,
+    "min": 0.1,
+    "max": 1.0,
+    "mean": 0.292897,
+    "median": 0.183333,
+    "stdev": 0.263037
+  }
+}
