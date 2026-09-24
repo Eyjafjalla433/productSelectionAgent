@@ -405,9 +405,9 @@ class RuntimeTests(unittest.TestCase):
 
     def test_chinese_session_replies_in_chinese_and_keeps_locale(self):
         result = self.runtime.chat(self.session_id, "我想要一件蓝色衬衫")
-        self.assertIn("我找到了", result["assistant"]["message"])
+        self.assertIn("先看看", result["assistant"]["message"])
         compared = self.runtime.chat(self.session_id, "比较第一个")
-        self.assertIn("结构化对比", compared["assistant"]["message"])
+        self.assertIn("慢慢看", compared["assistant"]["message"])
         self.assertEqual(self.runtime.sessions[self.session_id].locale, "zh")
         self.assertEqual(message_locale("Show me more", "zh"), "zh")
 
@@ -418,7 +418,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(rejected["receipt"]["state_changes"], [])
         self.assertEqual(rejected["selection_state"]["rejected_asins"], ["A1"])
         self.assertEqual(rejected["receipt"]["rejected_asins"], ["A1"])
-        self.assertIn("不会再次", rejected["assistant"]["message"])
+        self.assertIn("不再推荐", rejected["assistant"]["message"])
 
     def test_chinese_error_message_does_not_claim_empty_catalog(self):
         message = localized_agent_message(
@@ -428,7 +428,7 @@ class RuntimeTests(unittest.TestCase):
             receipt={"timings": [{"stage": "error", "elapsed_ms": 1}]},
             product_count=0,
         )
-        self.assertIn("未能完成", message)
+        self.assertIn("搜索出了点问题", message)
 
     def test_chat_selection_control_does_not_retrieve_or_mutate_state(self):
         first = self.runtime.chat(self.session_id, "A blue shirt")

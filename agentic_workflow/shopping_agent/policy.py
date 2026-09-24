@@ -27,6 +27,26 @@ def clarify(state, attribute, message, reason, *, constraint_type=None, hard_val
     })
 
 
+def missing_detail_question(state, attribute, reason):
+    """Choose an unanswered dimension, not the next item in a turn script."""
+    known = set(state.hard_constraints) | set(state.soft_preferences) | set(state.exclusions)
+    asked = {q.get('target_slot') for q in state.asked_questions or ()}
+    skipped = set(state.suggestions.get('cleared_slots', ()))
+    options = (
+        ('style', 'Do you prefer a relaxed fit or something more fitted?', '你更喜欢宽松一点，还是合身一点的款式？'),
+        ('use_case', 'Will you mostly use it day to day, for work, or for an activity?', '主要是日常用、上班用，还是准备运动或出门时用呢？'),
+        ('material', 'Is there a material you prefer or would rather avoid?', '材质上有没有你偏爱的，或者不想要的？'),
+    )
+    apparel = state.hard_constraints.get('category') in {'t-shirt', 'shirt', 'dress', 'jacket', 'pants', 'shorts', 'skirt', 'jersey'}
+    for slot, english, chinese in options:
+        if slot in known | asked | skipped or (slot == 'style' and not apparel):
+            continue
+        decision = clarify(state, attribute, english, reason)
+        decision.question.update(target_slot=slot, message_zh=chinese)
+        return decision
+    return clarify(state, attribute, 'What would you like to be different about these options?', reason)
+
+
 class PreRetrievalPolicy:
     def __init__(self, minimum_evidence=0, minimum_questions=0, max_questions=2):
         if type(minimum_evidence) is not int or minimum_evidence < 0:
@@ -77,7 +97,7 @@ class PostRetrievalPolicy:
         if can_ask(state, self.max_questions) and state.suggestions.get("negative_feedback"):
             attr = next((a for a in ("feature", "other") if a not in asked), None)
             if attr:
-                return clarify(state, attr, "What additional requirement would make these options a better match?", "negative_feedback")
+                return missing_detail_question(state, attr, "negative_feedback")
         if can_ask(state, self.max_questions) and ((not informed and (retrieval.stats.filtered_count or 0) > 100) or state.suggestions.get("negative_feedback")) and "feature" not in asked:
-            return clarify(state, "feature", "What specific feature matters most to you?", "broad_pool_or_negative_feedback")
+            return missing_detail_question(state, "feature", "broad_pool_or_negative_feedback")
         return PolicyDecision("recommend", "ranked_eligible_candidates")

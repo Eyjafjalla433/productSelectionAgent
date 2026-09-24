@@ -29,7 +29,7 @@ MATERIAL_ALIASES = {
     "亚麻": "linen", "牛仔": "denim", "麂皮": "suede", "羊绒": "cashmere",
 }
 CATEGORY_PATTERNS = {
-    "t-shirt": ("t-shirt", "tee", "t shirt", "T恤", "短袖T恤"),
+    "t-shirt": ("t-shirt", "t-shirts", "tshirt", "tshirts", "tee", "tees", "t shirt", "t shirts", "T恤", "短袖T恤"),
     "shirt": ("shirt", "blouse", "衬衫", "上衣"),
     "jersey": ("jersey", "jerseys", "球衣"),
     "dress": ("dress", "gown", "连衣裙", "裙装"),

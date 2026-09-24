@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import replace
 import math
 import sys
+import importlib
 
 from techjam_agent.contracts import Candidate, PRODUCT_FIELDS, RankedCandidate
 from techjam_agent.contracts_v2 import RetrievalResultV2, RetrievalStats, RankingResultV2
@@ -26,8 +27,9 @@ class SearchToolAdapter:
             previous = sys.dont_write_bytecode
             try:
                 sys.dont_write_bytecode = True
-                from search_tool import tool
-                from agentic_workflow.search_resources import model_directory
+                from agentic_workflow.search_resources import model_directory, configure_allocator
+                configure_allocator()
+                tool = importlib.import_module('search_tool.tool')
                 tool.MODEL_DIR = model_directory()
                 search_products, get_product_details = tool.search_products, tool.get_product_details
             finally:

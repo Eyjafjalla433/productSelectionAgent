@@ -271,3 +271,9 @@ button { color: inherit; }
   .lens-panel { display: block; }
   .message { max-width: 92%; }
 }
+:root { --guide-line: #c9d4bd; }
+.shopping-top-three { grid-column: 1 / -1; overflow-x: auto; padding: 18px; background: #f5f6ed; color: #183e39; border-radius: 12px; }
+.shopping-top-three p { font-size: 12px; }
+.shopping-top-three table { width: 100%; min-width: 550px; border-collapse: collapse; font-size: 13px; }
+.shopping-top-three th, .shopping-top-three td { text-align: left; padding: 12px; border-bottom: 1px solid var(--guide-line); vertical-align: top; }
+.shopper-summary { font-size: 13px; line-height: 1.7; }

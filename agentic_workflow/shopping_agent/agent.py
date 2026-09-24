@@ -218,6 +218,14 @@ class FinalAgent:
                 "recommendations": recommendations,
                 "usage": model_usage,
             }
+            if recommendations and self.orchestration_mode == 'adaptive':
+                hard = state.hard_constraints
+                description = ' '.join(str(hard.get(k, '')) for k in ('color', 'category')).strip()
+                target = state.soft_preferences.get('budget_target', ())
+                budget = f', aiming for around ${float(target[0].value):g}' if target else ''
+                response['message'] = f"Got it — {description}{budget}. I've pulled together {len(recommendations)} options so you can compare their details."
+                if (target or 'price_max' in hard or 'price_min' in hard) and getattr(self.retriever, 'mode', '') == 'search_tool':
+                    response['message'] += " This source doesn't include prices, so I can't confirm which fit your budget yet; I've kept it in your preferences."
         except Exception as exc:
             error = {"session_id": session_id, "turn": turn, "stage": stage, "type": type(exc).__name__, "message": str(exc)}
             self.errors.append(error)

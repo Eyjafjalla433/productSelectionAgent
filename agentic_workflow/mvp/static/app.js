@@ -285,8 +285,30 @@ function productColor(text) {
 
 function renderProducts(products) {
   ui.products.replaceChildren();
+  if (products.length) {
+    const panel = document.createElement('section');
+    panel.className = 'shopping-top-three';
+    const heading = document.createElement('h3');
+    heading.textContent = products.length >= 3 ? '先看这三款，慢慢比较' : '先看这几款，慢慢比较';
+    const note = document.createElement('p');
+    note.textContent = '按搜索相关性排序，不是销量榜。' + (products.some(p => p.price == null) ? '价格未提供，预算是否符合还需核实。' : '');
+    const table = document.createElement('table');
+    const head = table.createTHead().insertRow();
+    ['排行 / 商品', '款式特点', '其他信息'].forEach(label => {
+      const cell = document.createElement('th'); cell.textContent = label; head.append(cell);
+    });
+    const body = table.createTBody();
+    products.slice(0,3).forEach(product => {
+      const notes = product.shopper_notes || {};
+      const row = body.insertRow();
+      [`#${product.rank} ${product.title}`, notes.feature || '—', notes.detail || '—'].forEach(value => {
+        row.insertCell().textContent = value;
+      });
+    });
+    panel.append(heading, note, table); ui.products.append(panel);
+  }
   ui.resultsHead.hidden = products.length === 0;
-  ui.resultSummary.textContent = products.length ? `${products.length} SHOWN · CLICK TO COMPARE` : "";
+  ui.resultSummary.textContent = products.length ? `本次推荐 ${products.length} 款 · 最多 10 款` : "";
   products.forEach((product, index) => {
     const card = document.querySelector("#product-template").content.firstElementChild.cloneNode(true);
     card.style.setProperty("--product-color", productColor(product.category));
@@ -296,6 +318,12 @@ function renderProducts(products) {
     card.querySelector(".product-category").textContent = product.category;
     card.querySelector("h3").textContent = product.title;
     card.querySelector(".product-store").textContent = `${product.store} · ${product.parent_asin}`;
+    if (product.shopper_notes) {
+      const shopperNote = document.createElement('p');
+      shopperNote.className = 'shopper-summary';
+      shopperNote.textContent = [product.shopper_notes.feature, product.shopper_notes.detail].filter(Boolean).join(' · ');
+      card.querySelector('h3').after(shopperNote);
+    }
     const price = product.price == null ? "PRICE N/A" : `$${Number(product.price).toFixed(2)}`;
     const rating = product.rating == null ? "NO RATING" : `★ ${product.rating} (${product.rating_count || 0})`;
     card.querySelector(".product-meta").replaceChildren();

@@ -3,4 +3,4 @@ numpy
 pandas
 torch
 transformers
-pyarrow
+pyarrow>=19.0.1

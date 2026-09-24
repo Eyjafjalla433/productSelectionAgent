@@ -331,7 +331,8 @@ class IntegrationTests(unittest.TestCase):
         ranking = self.agent.reranker.rerank(result, top_k=10)
         decision = self.agent.post_policy.decide(state, result, ranking)
         self.assertEqual(decision.action, "clarify")
-        self.assertEqual(decision.question["target_slot"], "feature")
+        self.assertEqual(decision.question["ask_attribute"], "feature")
+        self.assertEqual(decision.question["target_slot"], "style")
 
     def test_score_compat_policy_is_state_based_and_configuration_is_explicit(self):
         self.respond("I need a blue dress under $50.")

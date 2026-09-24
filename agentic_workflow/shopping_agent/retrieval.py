@@ -5,6 +5,7 @@ mode preserves module 2's deterministic Top-50 candidate contract.
 """
 from dataclasses import asdict, dataclass, replace
 import math
+import re
 
 from techjam_agent.contracts import Candidate, PRODUCT_FIELDS, Requirements
 from techjam_agent.contracts_v2 import RetrievalResultV2, RetrievalStats
@@ -33,7 +34,7 @@ def terms(value):
 CATEGORY_TAXONOMY_LABELS = {
     "dress": {"dress", "gown"},
     "shirt": {"shirt", "dress shirt", "casual button down shirt", "blouse"},
-    "t shirt": {"t shirt", "tee"},
+    "t shirt": {"t shirt", "tshirt", "tee"},
     "jersey": {"jersey"},
     "jacket": {"jacket", "coat", "hoodie", "blazer"},
     "pant": {"pant", "jean", "legging", "trouser"},
@@ -49,6 +50,8 @@ CATEGORY_TAXONOMY_LABELS = {
 
 
 def _normalized_label(value):
+    if re.fullmatch(r't[ -]?shirts?', str(value).strip(), re.I):
+        return 't shirt'
     return " ".join(_singular(token) for token in tokenize(_text(value)))
 
 
@@ -79,7 +82,11 @@ def category_matches(product, value):
         specific = required - {"clothing", "shoe", "jewelry"}
         return (specific or required) <= category_terms, "catalog taxonomy"
     required = terms(value)
-    matched = bool(required) and required <= terms(product.get("title"))
+    title_terms = terms(product.get("title"))
+    if requested == 't shirt':
+        matched = bool(re.search(r'(?<!\w)(?:t[ -]?shirts?|tees?)(?!\w)', str(product.get('title') or ''), re.I))
+    else:
+        matched = any(terms(alias) <= title_terms for alias in accepted) if accepted else bool(required) and required <= title_terms
     return matched, "title fallback (taxonomy unavailable)"
 
 

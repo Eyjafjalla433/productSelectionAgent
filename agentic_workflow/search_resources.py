@@ -1,7 +1,21 @@
 """Resolve supplied model layouts without changing search_tool files."""
 from pathlib import Path
+import os
+import re
+import warnings
 
 TOOL_ROOT = Path(__file__).resolve().parents[1] / 'search_tool'
+
+
+def configure_allocator():
+    """Repair the known local boolean syntax typo before torch initializes CUDA."""
+    key = 'PYTORCH_CUDA_ALLOC_CONF'
+    value = os.environ.get(key, '')
+    corrected = re.sub(r'\bexpandable_segments\s*=\s*(True|False)\b',
+                       r'expandable_segments:\1', value)
+    if corrected != value:
+        os.environ[key] = corrected
+        warnings.warn('Normalized expandable_segments syntax in this process only.', RuntimeWarning)
 
 
 def model_directory():

@@ -47,12 +47,14 @@ def main():
         final = runtime.chat(sid, 'Finalize my selection')
         assert final['selection_state']['status'] == 'finalized'
         assert not verify_audit(runtime.audit(sid))
-        print(json.dumps({'status': 'passed', 'products': len(result['products']),
-                          'selected': final['selection_state']['selected_asins'],
-                          'backend': 'actual search_tool'}, indent=2))
+        report = {'status': 'passed', 'products': len(result['products']),
+                  'selected': final['selection_state']['selected_asins'],
+                  'backend': 'actual search_tool'}
     finally:
         if before != tool_hashes():
             raise RuntimeError('search_tool file set or content changed during live verification')
+    report.update(search_tool_unchanged=True, verified_files=len(before))
+    print(json.dumps(report, indent=2))
     return 0
 
 

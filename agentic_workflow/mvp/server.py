@@ -26,6 +26,7 @@ from .control_intent import ControlIntent, parse_control_intent
 from .explanations import explain_product, product_advice, summarize_explanations
 from .localization import localized_agent_message, localized_control_message, message_locale
 from .shadow_policy import shadow_question_board
+from .shopping_guide import describe, build_shopping_guide
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -248,6 +249,7 @@ def build_receipt(trace: dict[str, Any]) -> dict[str, Any]:
         "pre_reason": pre.get("reason"),
         "post_action": post.get("action"),
         "post_reason": post.get("reason"),
+        "question": post.get("question") or pre.get("question"),
         "timings": timings,
     }
 
@@ -886,6 +888,7 @@ class AgentRuntime:
             "products": products,
             "receipt": receipt,
             "selection_state": selection_state,
+            "shopping_guide": build_shopping_guide(products),
         }
         if handoff is not None:
             result["handoff"] = handoff
@@ -991,6 +994,7 @@ class AgentRuntime:
                 catalog_product = self.agent.get_catalog_product(product["parent_asin"]) or {}
                 product["match"] = explain_product(catalog_product, receipt)
                 product["advice"] = product_advice(catalog_product, product["match"])
+                product["shopper_notes"] = describe(product)
             receipt["result_quality"] = summarize_explanations(
                 product["match"] for product in products
             )
@@ -1007,6 +1011,8 @@ class AgentRuntime:
                 "ask_attribute": response.get("ask_attribute"),
                 "usage": response.get("usage", {}),
             }
+            if session.locale == 'zh' and products and not response.get('ask_attribute'):
+                assistant['message'] = build_shopping_guide(products)['intro']
             audit_record = {
                 "turn": turn,
                 "user_message": message,
@@ -1041,6 +1047,7 @@ class AgentRuntime:
             "products": products,
             "receipt": receipt,
             "selection_state": self._selection_state(session),
+            "shopping_guide": build_shopping_guide(products),
         }
 
 
