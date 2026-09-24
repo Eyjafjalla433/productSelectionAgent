@@ -26,6 +26,9 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+search_tool/
+reference/
+
 # PyInstaller
 #   Usually these files are written by a python script from a template
 #   before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -257,3 +260,11 @@ __pycache__/
 /search_tool/artifacts/
 
 /search_tool/models/task_1_us_title_bullet/model.safetensors
+
+# Moved historical generated assets retain their original ignore policy.
+/reference/competition_kit/
+/reference/results/
+/reference/.dist/
+/reference/retrieval-and-reranking/resources/
+/reference/ranking_pipeline/checkpoints/
+/reference/extracted_extras/

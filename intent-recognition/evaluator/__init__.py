@@ -1,2 +1,0 @@
-"""Public evaluation package."""
-

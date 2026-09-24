@@ -1,0 +1,4876 @@
+{
+  "generated_at": "2026-09-24T16:57:44.937802+00:00",
+  "data_source": "synthetic catalog; actual local workflow execution",
+  "turns": [
+    {
+      "user": "我想要一条蓝色棉质连衣裙，价格不超过50美元。",
+      "result": {
+        "schema_version": "show-me-your-agent.chat.v1",
+        "turn": 1,
+        "next_turn": 2,
+        "remaining_turns": 9,
+        "assistant": {
+          "message": "我找到了 3 件通过当前目录条件检查的商品。下面列出了匹配理由和需要注意的地方。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "store": "Harbor & Pine",
+            "price": 39.99,
+            "rating": 4.6,
+            "rating_count": 428,
+            "category": "Casual Dresses",
+            "features": [
+              "100% breathable cotton",
+              "Adjustable waist tie",
+              "Machine washable"
+            ],
+            "evidence": [
+              "fallback_score:0.017930",
+              "preselect_rank:1",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "store": "North Thread",
+            "price": 47.5,
+            "rating": 4.7,
+            "rating_count": 311,
+            "category": "Casual Dresses",
+            "features": [
+              "Cotton-rich fabric",
+              "Two side pockets",
+              "A-line silhouette"
+            ],
+            "evidence": [
+              "fallback_score:0.017666",
+              "preselect_rank:2",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "store": "Seabreeze Studio",
+            "price": 44.0,
+            "rating": 4.3,
+            "rating_count": 156,
+            "category": "Casual Dresses",
+            "features": [
+              "Linen cotton blend",
+              "Button front",
+              "Relaxed fit"
+            ],
+            "evidence": [
+              "fallback_score:0.017410",
+              "preselect_rank:3",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 1,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {},
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "not_applied",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [
+            {
+              "attribute": "brand",
+              "options": [
+                {
+                  "value": "harbor & pine",
+                  "count": 1,
+                  "prompt": "I prefer the brand harbor & pine."
+                },
+                {
+                  "value": "north thread",
+                  "count": 1,
+                  "prompt": "I prefer the brand north thread."
+                },
+                {
+                  "value": "seabreeze studio",
+                  "count": 1,
+                  "prompt": "I prefer the brand seabreeze studio."
+                }
+              ],
+              "coverage": 1.0,
+              "expected_reduction": 0.6667,
+              "interaction_cost": 0.1,
+              "net_value": 0.5667,
+              "would_ask": true
+            }
+          ],
+          "pre_action": "retrieve",
+          "pre_reason": "sufficient_context_or_question_limit",
+          "post_action": "recommend",
+          "post_reason": "ranked_eligible_candidates",
+          "timings": [
+            {
+              "stage": "1_intent",
+              "elapsed_ms": 22.607
+            },
+            {
+              "stage": "3_state",
+              "elapsed_ms": 22.861
+            },
+            {
+              "stage": "4A_pre_policy",
+              "elapsed_ms": 22.878
+            },
+            {
+              "stage": "5_plan",
+              "elapsed_ms": 22.975
+            },
+            {
+              "stage": "2_retrieval",
+              "elapsed_ms": 24.416
+            },
+            {
+              "stage": "4B_ranking",
+              "elapsed_ms": 25.809
+            },
+            {
+              "stage": "4B_post_policy",
+              "elapsed_ms": 25.824
+            }
+          ],
+          "state_changes": [
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "category",
+              "value": "dress"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "color",
+              "value": "blue"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "material",
+              "value": "cotton"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "price_max",
+              "value": 50.0
+            }
+          ],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 0,
+          "new_product_count": 3,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          }
+        },
+        "selection_state": {
+          "schema_version": "show-me-your-agent.selection-state.v1",
+          "selected_asins": [],
+          "selection_count": 0,
+          "max_selections": 3,
+          "rejected_asins": [],
+          "status": "draft",
+          "finalized": false,
+          "finalized_at_utc": null,
+          "finalized_turn": null
+        }
+      }
+    },
+    {
+      "user": "不要涤纶，适合夏天。",
+      "result": {
+        "schema_version": "show-me-your-agent.chat.v1",
+        "turn": 2,
+        "next_turn": 3,
+        "remaining_turns": 8,
+        "assistant": {
+          "message": "我找到了 3 件通过当前目录条件检查的商品。下面列出了匹配理由和需要注意的地方。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "store": "Harbor & Pine",
+            "price": 39.99,
+            "rating": 4.6,
+            "rating_count": 428,
+            "category": "Casual Dresses",
+            "features": [
+              "100% breathable cotton",
+              "Adjustable waist tie",
+              "Machine washable"
+            ],
+            "evidence": [
+              "fallback_score:0.017930",
+              "preselect_rank:1",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "store": "North Thread",
+            "price": 47.5,
+            "rating": 4.7,
+            "rating_count": 311,
+            "category": "Casual Dresses",
+            "features": [
+              "Cotton-rich fabric",
+              "Two side pockets",
+              "A-line silhouette"
+            ],
+            "evidence": [
+              "fallback_score:0.017666",
+              "preselect_rank:2",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "store": "Seabreeze Studio",
+            "price": 44.0,
+            "rating": 4.3,
+            "rating_count": 156,
+            "category": "Casual Dresses",
+            "features": [
+              "Linen cotton blend",
+              "Button front",
+              "Relaxed fit"
+            ],
+            "evidence": [
+              "fallback_score:0.017410",
+              "preselect_rank:3",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [
+            {
+              "attribute": "brand",
+              "options": [
+                {
+                  "value": "harbor & pine",
+                  "count": 1,
+                  "prompt": "I prefer the brand harbor & pine."
+                },
+                {
+                  "value": "north thread",
+                  "count": 1,
+                  "prompt": "I prefer the brand north thread."
+                },
+                {
+                  "value": "seabreeze studio",
+                  "count": 1,
+                  "prompt": "I prefer the brand seabreeze studio."
+                }
+              ],
+              "coverage": 1.0,
+              "expected_reduction": 0.6667,
+              "interaction_cost": 0.1111,
+              "net_value": 0.5556,
+              "would_ask": true
+            }
+          ],
+          "pre_action": "retrieve",
+          "pre_reason": "sufficient_context_or_question_limit",
+          "post_action": "recommend",
+          "post_reason": "ranked_eligible_candidates",
+          "timings": [
+            {
+              "stage": "1_intent",
+              "elapsed_ms": 1.666
+            },
+            {
+              "stage": "3_state",
+              "elapsed_ms": 1.914
+            },
+            {
+              "stage": "4A_pre_policy",
+              "elapsed_ms": 1.934
+            },
+            {
+              "stage": "5_plan",
+              "elapsed_ms": 2.032
+            },
+            {
+              "stage": "2_retrieval",
+              "elapsed_ms": 3.411
+            },
+            {
+              "stage": "4B_ranking",
+              "elapsed_ms": 4.655
+            },
+            {
+              "stage": "4B_post_policy",
+              "elapsed_ms": 4.67
+            }
+          ],
+          "state_changes": [
+            {
+              "kind": "added",
+              "group": "excluded",
+              "slot": "material",
+              "value": [
+                "polyester"
+              ]
+            }
+          ],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          }
+        },
+        "selection_state": {
+          "schema_version": "show-me-your-agent.selection-state.v1",
+          "selected_asins": [],
+          "selection_count": 0,
+          "max_selections": 3,
+          "rejected_asins": [],
+          "status": "draft",
+          "finalized": false,
+          "finalized_at_utc": null,
+          "finalized_turn": null
+        }
+      }
+    },
+    {
+      "user": "比较第一个和第二个",
+      "result": {
+        "schema_version": "show-me-your-agent.chat.v1",
+        "turn": 3,
+        "next_turn": 4,
+        "remaining_turns": 7,
+        "assistant": {
+          "message": "已选中 2 件商品，结构化对比已经准备好。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "store": "Harbor & Pine",
+            "price": 39.99,
+            "rating": 4.6,
+            "rating_count": 428,
+            "category": "Casual Dresses",
+            "features": [
+              "100% breathable cotton",
+              "Adjustable waist tie",
+              "Machine washable"
+            ],
+            "evidence": [
+              "fallback_score:0.017930",
+              "preselect_rank:1",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "store": "North Thread",
+            "price": 47.5,
+            "rating": 4.7,
+            "rating_count": 311,
+            "category": "Casual Dresses",
+            "features": [
+              "Cotton-rich fabric",
+              "Two side pockets",
+              "A-line silhouette"
+            ],
+            "evidence": [
+              "fallback_score:0.017666",
+              "preselect_rank:2",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "store": "Seabreeze Studio",
+            "price": 44.0,
+            "rating": 4.3,
+            "rating_count": 156,
+            "category": "Casual Dresses",
+            "features": [
+              "Linen cotton blend",
+              "Button front",
+              "Relaxed fit"
+            ],
+            "evidence": [
+              "fallback_score:0.017410",
+              "preselect_rank:3",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [],
+          "pre_action": "control",
+          "pre_reason": "selection_compare",
+          "post_action": null,
+          "post_reason": null,
+          "timings": [
+            {
+              "stage": "0_control",
+              "elapsed_ms": 0.0
+            }
+          ],
+          "state_changes": [],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          },
+          "comparison_assist": null,
+          "selection_status": "ready_for_comparison",
+          "selection_decision": {
+            "finalized": false,
+            "finalized_at_utc": null,
+            "finalized_turn": null,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "selection_count": 2
+        },
+        "selection_state": {
+          "schema_version": "show-me-your-agent.selection-state.v1",
+          "selected_asins": [
+            "DEMO-DRESS-001",
+            "DEMO-DRESS-002"
+          ],
+          "selection_count": 2,
+          "max_selections": 3,
+          "rejected_asins": [],
+          "status": "ready_for_comparison",
+          "finalized": false,
+          "finalized_at_utc": null,
+          "finalized_turn": null
+        },
+        "handoff": {
+          "schema_version": "show-me-your-agent.selection.v1",
+          "session_id": "14369f8394d84433",
+          "generated_at_utc": "2026-09-24T16:57:44Z",
+          "status": "ready_for_comparison",
+          "intent_version": 1,
+          "requirements": {
+            "state_version": 3,
+            "hard": {
+              "category": "dress",
+              "color": "blue",
+              "material": "cotton",
+              "price_max": 50.0
+            },
+            "soft": {},
+            "excluded": {
+              "material": [
+                "polyester"
+              ]
+            },
+            "rejected_asins": [],
+            "evidence": {
+              "hard": {
+                "category": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "color": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "material": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "price_max": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                }
+              },
+              "soft": {}
+            }
+          },
+          "selected_products": [
+            {
+              "parent_asin": "DEMO-DRESS-001",
+              "title": "Sky Blue Cotton Summer Midi Dress",
+              "store": "Harbor & Pine",
+              "price": 39.99,
+              "average_rating": 4.6,
+              "rating_number": 428,
+              "categories": [
+                "Clothing",
+                "Women",
+                "Dresses",
+                "Casual Dresses"
+              ],
+              "product_description": [
+                "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear.",
+                "The adjustable waist tie gives a flexible fit without a fitted lining."
+              ],
+              "product_bullet_points": [
+                "100% breathable cotton",
+                "Adjustable waist tie",
+                "Machine washable"
+              ],
+              "details": {
+                "Color": "Sky blue",
+                "Material": "Cotton",
+                "Length": "Midi",
+                "Occasion": "Casual summer"
+              },
+              "selection": {
+                "selected_at_turn": 3,
+                "intent_version": 1,
+                "reason": "Selected by chat command at rank 1"
+              },
+              "last_observed_rank": 1,
+              "ranking_score": 1.0,
+              "requirement_match": {
+                "hard_supported": 4,
+                "hard_total": 4,
+                "soft_supported": 0,
+                "soft_total": 0,
+                "hard_coverage": 1.0,
+                "signals": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$39.99 <= $50.00"
+                  },
+                  {
+                    "tier": "excluded",
+                    "slot": "material",
+                    "value": [
+                      "polyester"
+                    ],
+                    "status": "clear",
+                    "evidence": "no excluded term found"
+                  }
+                ],
+                "disclaimer": "Lexical catalog evidence, not verified variant availability."
+              },
+              "advice": {
+                "pros": [
+                  {
+                    "text": "Supports category: dress",
+                    "source": "description",
+                    "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                  },
+                  {
+                    "text": "Supports material: cotton",
+                    "source": "bullet_point",
+                    "evidence": "100% breathable cotton"
+                  },
+                  {
+                    "text": "Supports price_max: 50.0",
+                    "source": "match_check",
+                    "evidence": "$39.99 <= $50.00"
+                  }
+                ],
+                "cons": [
+                  {
+                    "text": "Variant availability and fit still need seller-page verification",
+                    "source": "system_limit",
+                    "evidence": "catalog records do not verify live variants or inventory"
+                  }
+                ],
+                "catalog_highlights": [
+                  {
+                    "source": "bullet_point",
+                    "evidence": "100% breathable cotton"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Adjustable waist tie"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Machine washable"
+                  }
+                ],
+                "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+              },
+              "comparison_evidence": {
+                "strengths": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$39.99 <= $50.00"
+                  }
+                ],
+                "tradeoffs": [],
+                "unknowns": []
+              }
+            },
+            {
+              "parent_asin": "DEMO-DRESS-002",
+              "title": "Navy Blue Cotton A-Line Pocket Dress",
+              "store": "North Thread",
+              "price": 47.5,
+              "average_rating": 4.7,
+              "rating_number": 311,
+              "categories": [
+                "Clothing",
+                "Women",
+                "Dresses",
+                "Casual Dresses"
+              ],
+              "product_description": [
+                "A navy blue cotton-rich A-line dress with practical side pockets.",
+                "The elastane blend adds stretch but the fabric is not pure cotton."
+              ],
+              "product_bullet_points": [
+                "Cotton-rich fabric",
+                "Two side pockets",
+                "A-line silhouette"
+              ],
+              "details": {
+                "Color": "Navy blue",
+                "Material": "95% cotton, 5% elastane",
+                "Length": "Knee length",
+                "Care": "Cold wash"
+              },
+              "selection": {
+                "selected_at_turn": 3,
+                "intent_version": 1,
+                "reason": "Selected by chat command at rank 2"
+              },
+              "last_observed_rank": 2,
+              "ranking_score": 0.5,
+              "requirement_match": {
+                "hard_supported": 4,
+                "hard_total": 4,
+                "soft_supported": 0,
+                "soft_total": 0,
+                "hard_coverage": 1.0,
+                "signals": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$47.50 <= $50.00"
+                  },
+                  {
+                    "tier": "excluded",
+                    "slot": "material",
+                    "value": [
+                      "polyester"
+                    ],
+                    "status": "clear",
+                    "evidence": "no excluded term found"
+                  }
+                ],
+                "disclaimer": "Lexical catalog evidence, not verified variant availability."
+              },
+              "advice": {
+                "pros": [
+                  {
+                    "text": "Supports category: dress",
+                    "source": "description",
+                    "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                  },
+                  {
+                    "text": "Supports material: cotton",
+                    "source": "bullet_point",
+                    "evidence": "Cotton-rich fabric"
+                  },
+                  {
+                    "text": "Supports price_max: 50.0",
+                    "source": "match_check",
+                    "evidence": "$47.50 <= $50.00"
+                  }
+                ],
+                "cons": [
+                  {
+                    "text": "Variant availability and fit still need seller-page verification",
+                    "source": "system_limit",
+                    "evidence": "catalog records do not verify live variants or inventory"
+                  }
+                ],
+                "catalog_highlights": [
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Cotton-rich fabric"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Two side pockets"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "A-line silhouette"
+                  }
+                ],
+                "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+              },
+              "comparison_evidence": {
+                "strengths": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$47.50 <= $50.00"
+                  }
+                ],
+                "tradeoffs": [],
+                "unknowns": []
+              }
+            }
+          ],
+          "decision": {
+            "finalized": false,
+            "finalized_at_utc": null,
+            "finalized_turn": null,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "comparison_summary": {
+            "rows": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "title": "Sky Blue Cotton Summer Midi Dress",
+                "price": 39.99,
+                "rating": 4.6,
+                "hard_coverage": 1.0,
+                "supported_count": 4,
+                "tradeoff_count": 0,
+                "unknown_count": 0
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "title": "Navy Blue Cotton A-Line Pocket Dress",
+                "price": 47.5,
+                "rating": 4.7,
+                "hard_coverage": 1.0,
+                "supported_count": 4,
+                "tradeoff_count": 0,
+                "unknown_count": 0
+              }
+            ],
+            "lowest_price_asin": "DEMO-DRESS-001",
+            "highest_rating_asin": "DEMO-DRESS-002",
+            "note": "Leaders are descriptive catalog values, not a new ranking decision."
+          },
+          "comparison_contract": {
+            "owner": "B",
+            "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
+            "consumer": "D",
+            "ranking_is_final": true
+          }
+        }
+      }
+    },
+    {
+      "user": "确认最终选择",
+      "result": {
+        "schema_version": "show-me-your-agent.chat.v1",
+        "turn": 4,
+        "next_turn": 5,
+        "remaining_turns": 6,
+        "assistant": {
+          "message": "最终选型已经确认，并生成了带时间和轮次的结构化交接。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "store": "Harbor & Pine",
+            "price": 39.99,
+            "rating": 4.6,
+            "rating_count": 428,
+            "category": "Casual Dresses",
+            "features": [
+              "100% breathable cotton",
+              "Adjustable waist tie",
+              "Machine washable"
+            ],
+            "evidence": [
+              "fallback_score:0.017930",
+              "preselect_rank:1",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "store": "North Thread",
+            "price": 47.5,
+            "rating": 4.7,
+            "rating_count": 311,
+            "category": "Casual Dresses",
+            "features": [
+              "Cotton-rich fabric",
+              "Two side pockets",
+              "A-line silhouette"
+            ],
+            "evidence": [
+              "fallback_score:0.017666",
+              "preselect_rank:2",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "store": "Seabreeze Studio",
+            "price": 44.0,
+            "rating": 4.3,
+            "rating_count": 156,
+            "category": "Casual Dresses",
+            "features": [
+              "Linen cotton blend",
+              "Button front",
+              "Relaxed fit"
+            ],
+            "evidence": [
+              "fallback_score:0.017410",
+              "preselect_rank:3",
+              "strategy:hybrid",
+              "hard_missing:none",
+              "reason:locked rank",
+              "context_boost:0.000000"
+            ],
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [],
+          "pre_action": "control",
+          "pre_reason": "selection_finalize",
+          "post_action": null,
+          "post_reason": null,
+          "timings": [
+            {
+              "stage": "0_control",
+              "elapsed_ms": 0.0
+            }
+          ],
+          "state_changes": [],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          },
+          "comparison_assist": null,
+          "selection_status": "finalized",
+          "selection_decision": {
+            "finalized": true,
+            "finalized_at_utc": "2026-09-24T16:57:44Z",
+            "finalized_turn": 4,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "selection_count": 2
+        },
+        "selection_state": {
+          "schema_version": "show-me-your-agent.selection-state.v1",
+          "selected_asins": [
+            "DEMO-DRESS-001",
+            "DEMO-DRESS-002"
+          ],
+          "selection_count": 2,
+          "max_selections": 3,
+          "rejected_asins": [],
+          "status": "finalized",
+          "finalized": true,
+          "finalized_at_utc": "2026-09-24T16:57:44Z",
+          "finalized_turn": 4
+        },
+        "handoff": {
+          "schema_version": "show-me-your-agent.selection.v1",
+          "session_id": "14369f8394d84433",
+          "generated_at_utc": "2026-09-24T16:57:44Z",
+          "status": "finalized",
+          "intent_version": 1,
+          "requirements": {
+            "state_version": 3,
+            "hard": {
+              "category": "dress",
+              "color": "blue",
+              "material": "cotton",
+              "price_max": 50.0
+            },
+            "soft": {},
+            "excluded": {
+              "material": [
+                "polyester"
+              ]
+            },
+            "rejected_asins": [],
+            "evidence": {
+              "hard": {
+                "category": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "color": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "material": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                },
+                "price_max": {
+                  "source_turn": 1,
+                  "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+                }
+              },
+              "soft": {}
+            }
+          },
+          "selected_products": [
+            {
+              "parent_asin": "DEMO-DRESS-001",
+              "title": "Sky Blue Cotton Summer Midi Dress",
+              "store": "Harbor & Pine",
+              "price": 39.99,
+              "average_rating": 4.6,
+              "rating_number": 428,
+              "categories": [
+                "Clothing",
+                "Women",
+                "Dresses",
+                "Casual Dresses"
+              ],
+              "product_description": [
+                "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear.",
+                "The adjustable waist tie gives a flexible fit without a fitted lining."
+              ],
+              "product_bullet_points": [
+                "100% breathable cotton",
+                "Adjustable waist tie",
+                "Machine washable"
+              ],
+              "details": {
+                "Color": "Sky blue",
+                "Material": "Cotton",
+                "Length": "Midi",
+                "Occasion": "Casual summer"
+              },
+              "selection": {
+                "selected_at_turn": 3,
+                "intent_version": 1,
+                "reason": "Selected by chat command at rank 1"
+              },
+              "last_observed_rank": 1,
+              "ranking_score": 1.0,
+              "requirement_match": {
+                "hard_supported": 4,
+                "hard_total": 4,
+                "soft_supported": 0,
+                "soft_total": 0,
+                "hard_coverage": 1.0,
+                "signals": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$39.99 <= $50.00"
+                  },
+                  {
+                    "tier": "excluded",
+                    "slot": "material",
+                    "value": [
+                      "polyester"
+                    ],
+                    "status": "clear",
+                    "evidence": "no excluded term found"
+                  }
+                ],
+                "disclaimer": "Lexical catalog evidence, not verified variant availability."
+              },
+              "advice": {
+                "pros": [
+                  {
+                    "text": "Supports category: dress",
+                    "source": "description",
+                    "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                  },
+                  {
+                    "text": "Supports material: cotton",
+                    "source": "bullet_point",
+                    "evidence": "100% breathable cotton"
+                  },
+                  {
+                    "text": "Supports price_max: 50.0",
+                    "source": "match_check",
+                    "evidence": "$39.99 <= $50.00"
+                  }
+                ],
+                "cons": [
+                  {
+                    "text": "Variant availability and fit still need seller-page verification",
+                    "source": "system_limit",
+                    "evidence": "catalog records do not verify live variants or inventory"
+                  }
+                ],
+                "catalog_highlights": [
+                  {
+                    "source": "bullet_point",
+                    "evidence": "100% breathable cotton"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Adjustable waist tie"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Machine washable"
+                  }
+                ],
+                "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+              },
+              "comparison_evidence": {
+                "strengths": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$39.99 <= $50.00"
+                  }
+                ],
+                "tradeoffs": [],
+                "unknowns": []
+              }
+            },
+            {
+              "parent_asin": "DEMO-DRESS-002",
+              "title": "Navy Blue Cotton A-Line Pocket Dress",
+              "store": "North Thread",
+              "price": 47.5,
+              "average_rating": 4.7,
+              "rating_number": 311,
+              "categories": [
+                "Clothing",
+                "Women",
+                "Dresses",
+                "Casual Dresses"
+              ],
+              "product_description": [
+                "A navy blue cotton-rich A-line dress with practical side pockets.",
+                "The elastane blend adds stretch but the fabric is not pure cotton."
+              ],
+              "product_bullet_points": [
+                "Cotton-rich fabric",
+                "Two side pockets",
+                "A-line silhouette"
+              ],
+              "details": {
+                "Color": "Navy blue",
+                "Material": "95% cotton, 5% elastane",
+                "Length": "Knee length",
+                "Care": "Cold wash"
+              },
+              "selection": {
+                "selected_at_turn": 3,
+                "intent_version": 1,
+                "reason": "Selected by chat command at rank 2"
+              },
+              "last_observed_rank": 2,
+              "ranking_score": 0.5,
+              "requirement_match": {
+                "hard_supported": 4,
+                "hard_total": 4,
+                "soft_supported": 0,
+                "soft_total": 0,
+                "hard_coverage": 1.0,
+                "signals": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$47.50 <= $50.00"
+                  },
+                  {
+                    "tier": "excluded",
+                    "slot": "material",
+                    "value": [
+                      "polyester"
+                    ],
+                    "status": "clear",
+                    "evidence": "no excluded term found"
+                  }
+                ],
+                "disclaimer": "Lexical catalog evidence, not verified variant availability."
+              },
+              "advice": {
+                "pros": [
+                  {
+                    "text": "Supports category: dress",
+                    "source": "description",
+                    "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                  },
+                  {
+                    "text": "Supports material: cotton",
+                    "source": "bullet_point",
+                    "evidence": "Cotton-rich fabric"
+                  },
+                  {
+                    "text": "Supports price_max: 50.0",
+                    "source": "match_check",
+                    "evidence": "$47.50 <= $50.00"
+                  }
+                ],
+                "cons": [
+                  {
+                    "text": "Variant availability and fit still need seller-page verification",
+                    "source": "system_limit",
+                    "evidence": "catalog records do not verify live variants or inventory"
+                  }
+                ],
+                "catalog_highlights": [
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Cotton-rich fabric"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "Two side pockets"
+                  },
+                  {
+                    "source": "bullet_point",
+                    "evidence": "A-line silhouette"
+                  }
+                ],
+                "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+              },
+              "comparison_evidence": {
+                "strengths": [
+                  {
+                    "tier": "hard",
+                    "slot": "category",
+                    "value": "dress",
+                    "status": "supported",
+                    "evidence": "catalog taxonomy: Dresses"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "color",
+                    "value": "blue",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "material",
+                    "value": "cotton",
+                    "status": "supported",
+                    "evidence": "catalog text"
+                  },
+                  {
+                    "tier": "hard",
+                    "slot": "price_max",
+                    "value": 50.0,
+                    "status": "supported",
+                    "evidence": "$47.50 <= $50.00"
+                  }
+                ],
+                "tradeoffs": [],
+                "unknowns": []
+              }
+            }
+          ],
+          "decision": {
+            "finalized": true,
+            "finalized_at_utc": "2026-09-24T16:57:44Z",
+            "finalized_turn": 4,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "comparison_summary": {
+            "rows": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "title": "Sky Blue Cotton Summer Midi Dress",
+                "price": 39.99,
+                "rating": 4.6,
+                "hard_coverage": 1.0,
+                "supported_count": 4,
+                "tradeoff_count": 0,
+                "unknown_count": 0
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "title": "Navy Blue Cotton A-Line Pocket Dress",
+                "price": 47.5,
+                "rating": 4.7,
+                "hard_coverage": 1.0,
+                "supported_count": 4,
+                "tradeoff_count": 0,
+                "unknown_count": 0
+              }
+            ],
+            "lowest_price_asin": "DEMO-DRESS-001",
+            "highest_rating_asin": "DEMO-DRESS-002",
+            "note": "Leaders are descriptive catalog values, not a new ranking decision."
+          },
+          "comparison_contract": {
+            "owner": "B",
+            "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
+            "consumer": "D",
+            "ranking_is_final": true
+          }
+        }
+      }
+    }
+  ],
+  "handoff": {
+    "schema_version": "show-me-your-agent.selection.v1",
+    "session_id": "14369f8394d84433",
+    "generated_at_utc": "2026-09-24T16:57:44Z",
+    "status": "finalized",
+    "intent_version": 1,
+    "requirements": {
+      "state_version": 3,
+      "hard": {
+        "category": "dress",
+        "color": "blue",
+        "material": "cotton",
+        "price_max": 50.0
+      },
+      "soft": {},
+      "excluded": {
+        "material": [
+          "polyester"
+        ]
+      },
+      "rejected_asins": [],
+      "evidence": {
+        "hard": {
+          "category": {
+            "source_turn": 1,
+            "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+          },
+          "color": {
+            "source_turn": 1,
+            "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+          },
+          "material": {
+            "source_turn": 1,
+            "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+          },
+          "price_max": {
+            "source_turn": 1,
+            "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+          }
+        },
+        "soft": {}
+      }
+    },
+    "selected_products": [
+      {
+        "parent_asin": "DEMO-DRESS-001",
+        "title": "Sky Blue Cotton Summer Midi Dress",
+        "store": "Harbor & Pine",
+        "price": 39.99,
+        "average_rating": 4.6,
+        "rating_number": 428,
+        "categories": [
+          "Clothing",
+          "Women",
+          "Dresses",
+          "Casual Dresses"
+        ],
+        "product_description": [
+          "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear.",
+          "The adjustable waist tie gives a flexible fit without a fitted lining."
+        ],
+        "product_bullet_points": [
+          "100% breathable cotton",
+          "Adjustable waist tie",
+          "Machine washable"
+        ],
+        "details": {
+          "Color": "Sky blue",
+          "Material": "Cotton",
+          "Length": "Midi",
+          "Occasion": "Casual summer"
+        },
+        "selection": {
+          "selected_at_turn": 3,
+          "intent_version": 1,
+          "reason": "Selected by chat command at rank 1"
+        },
+        "last_observed_rank": 1,
+        "ranking_score": 1.0,
+        "requirement_match": {
+          "hard_supported": 4,
+          "hard_total": 4,
+          "soft_supported": 0,
+          "soft_total": 0,
+          "hard_coverage": 1.0,
+          "signals": [
+            {
+              "tier": "hard",
+              "slot": "category",
+              "value": "dress",
+              "status": "supported",
+              "evidence": "catalog taxonomy: Dresses"
+            },
+            {
+              "tier": "hard",
+              "slot": "color",
+              "value": "blue",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "material",
+              "value": "cotton",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "price_max",
+              "value": 50.0,
+              "status": "supported",
+              "evidence": "$39.99 <= $50.00"
+            },
+            {
+              "tier": "excluded",
+              "slot": "material",
+              "value": [
+                "polyester"
+              ],
+              "status": "clear",
+              "evidence": "no excluded term found"
+            }
+          ],
+          "disclaimer": "Lexical catalog evidence, not verified variant availability."
+        },
+        "advice": {
+          "pros": [
+            {
+              "text": "Supports category: dress",
+              "source": "description",
+              "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+            },
+            {
+              "text": "Supports material: cotton",
+              "source": "bullet_point",
+              "evidence": "100% breathable cotton"
+            },
+            {
+              "text": "Supports price_max: 50.0",
+              "source": "match_check",
+              "evidence": "$39.99 <= $50.00"
+            }
+          ],
+          "cons": [
+            {
+              "text": "Variant availability and fit still need seller-page verification",
+              "source": "system_limit",
+              "evidence": "catalog records do not verify live variants or inventory"
+            }
+          ],
+          "catalog_highlights": [
+            {
+              "source": "bullet_point",
+              "evidence": "100% breathable cotton"
+            },
+            {
+              "source": "bullet_point",
+              "evidence": "Adjustable waist tie"
+            },
+            {
+              "source": "bullet_point",
+              "evidence": "Machine washable"
+            }
+          ],
+          "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+        },
+        "comparison_evidence": {
+          "strengths": [
+            {
+              "tier": "hard",
+              "slot": "category",
+              "value": "dress",
+              "status": "supported",
+              "evidence": "catalog taxonomy: Dresses"
+            },
+            {
+              "tier": "hard",
+              "slot": "color",
+              "value": "blue",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "material",
+              "value": "cotton",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "price_max",
+              "value": 50.0,
+              "status": "supported",
+              "evidence": "$39.99 <= $50.00"
+            }
+          ],
+          "tradeoffs": [],
+          "unknowns": []
+        }
+      },
+      {
+        "parent_asin": "DEMO-DRESS-002",
+        "title": "Navy Blue Cotton A-Line Pocket Dress",
+        "store": "North Thread",
+        "price": 47.5,
+        "average_rating": 4.7,
+        "rating_number": 311,
+        "categories": [
+          "Clothing",
+          "Women",
+          "Dresses",
+          "Casual Dresses"
+        ],
+        "product_description": [
+          "A navy blue cotton-rich A-line dress with practical side pockets.",
+          "The elastane blend adds stretch but the fabric is not pure cotton."
+        ],
+        "product_bullet_points": [
+          "Cotton-rich fabric",
+          "Two side pockets",
+          "A-line silhouette"
+        ],
+        "details": {
+          "Color": "Navy blue",
+          "Material": "95% cotton, 5% elastane",
+          "Length": "Knee length",
+          "Care": "Cold wash"
+        },
+        "selection": {
+          "selected_at_turn": 3,
+          "intent_version": 1,
+          "reason": "Selected by chat command at rank 2"
+        },
+        "last_observed_rank": 2,
+        "ranking_score": 0.5,
+        "requirement_match": {
+          "hard_supported": 4,
+          "hard_total": 4,
+          "soft_supported": 0,
+          "soft_total": 0,
+          "hard_coverage": 1.0,
+          "signals": [
+            {
+              "tier": "hard",
+              "slot": "category",
+              "value": "dress",
+              "status": "supported",
+              "evidence": "catalog taxonomy: Dresses"
+            },
+            {
+              "tier": "hard",
+              "slot": "color",
+              "value": "blue",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "material",
+              "value": "cotton",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "price_max",
+              "value": 50.0,
+              "status": "supported",
+              "evidence": "$47.50 <= $50.00"
+            },
+            {
+              "tier": "excluded",
+              "slot": "material",
+              "value": [
+                "polyester"
+              ],
+              "status": "clear",
+              "evidence": "no excluded term found"
+            }
+          ],
+          "disclaimer": "Lexical catalog evidence, not verified variant availability."
+        },
+        "advice": {
+          "pros": [
+            {
+              "text": "Supports category: dress",
+              "source": "description",
+              "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+            },
+            {
+              "text": "Supports material: cotton",
+              "source": "bullet_point",
+              "evidence": "Cotton-rich fabric"
+            },
+            {
+              "text": "Supports price_max: 50.0",
+              "source": "match_check",
+              "evidence": "$47.50 <= $50.00"
+            }
+          ],
+          "cons": [
+            {
+              "text": "Variant availability and fit still need seller-page verification",
+              "source": "system_limit",
+              "evidence": "catalog records do not verify live variants or inventory"
+            }
+          ],
+          "catalog_highlights": [
+            {
+              "source": "bullet_point",
+              "evidence": "Cotton-rich fabric"
+            },
+            {
+              "source": "bullet_point",
+              "evidence": "Two side pockets"
+            },
+            {
+              "source": "bullet_point",
+              "evidence": "A-line silhouette"
+            }
+          ],
+          "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+        },
+        "comparison_evidence": {
+          "strengths": [
+            {
+              "tier": "hard",
+              "slot": "category",
+              "value": "dress",
+              "status": "supported",
+              "evidence": "catalog taxonomy: Dresses"
+            },
+            {
+              "tier": "hard",
+              "slot": "color",
+              "value": "blue",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "material",
+              "value": "cotton",
+              "status": "supported",
+              "evidence": "catalog text"
+            },
+            {
+              "tier": "hard",
+              "slot": "price_max",
+              "value": 50.0,
+              "status": "supported",
+              "evidence": "$47.50 <= $50.00"
+            }
+          ],
+          "tradeoffs": [],
+          "unknowns": []
+        }
+      }
+    ],
+    "decision": {
+      "finalized": true,
+      "finalized_at_utc": "2026-09-24T16:57:44Z",
+      "finalized_turn": 4,
+      "selected_asins": [
+        "DEMO-DRESS-001",
+        "DEMO-DRESS-002"
+      ]
+    },
+    "comparison_summary": {
+      "rows": [
+        {
+          "parent_asin": "DEMO-DRESS-001",
+          "title": "Sky Blue Cotton Summer Midi Dress",
+          "price": 39.99,
+          "rating": 4.6,
+          "hard_coverage": 1.0,
+          "supported_count": 4,
+          "tradeoff_count": 0,
+          "unknown_count": 0
+        },
+        {
+          "parent_asin": "DEMO-DRESS-002",
+          "title": "Navy Blue Cotton A-Line Pocket Dress",
+          "price": 47.5,
+          "rating": 4.7,
+          "hard_coverage": 1.0,
+          "supported_count": 4,
+          "tradeoff_count": 0,
+          "unknown_count": 0
+        }
+      ],
+      "lowest_price_asin": "DEMO-DRESS-001",
+      "highest_rating_asin": "DEMO-DRESS-002",
+      "note": "Leaders are descriptive catalog values, not a new ranking decision."
+    },
+    "comparison_contract": {
+      "owner": "B",
+      "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
+      "consumer": "D",
+      "ranking_is_final": true
+    }
+  },
+  "audit": {
+    "schema_version": "show-me-your-agent.audit.v1",
+    "session_id": "14369f8394d84433",
+    "started_at_utc": "2026-09-24T16:57:44Z",
+    "generated_at_utc": "2026-09-24T16:57:44Z",
+    "agent_mode": "adaptive:model-provider-off",
+    "privacy_note": "Local export. Contains user messages but no hidden labels or full candidate pools. Local only: no model request or shopper message leaves this process.",
+    "model": {
+      "provider": "off",
+      "name": null,
+      "cloud_model": false,
+      "data_boundary": "local_only_no_model",
+      "data_disclosure": "Local only: no model request or shopper message leaves this process."
+    },
+    "integrity": {
+      "algorithm": "sha256-chain",
+      "head": "ecb95d97e12fe6652e50c53a45b881363e7500be563c0d234ecff541ebbded3e",
+      "signed": false,
+      "note": "Detects edits or reordering; it is not an identity signature."
+    },
+    "turn_count": 4,
+    "turns": [
+      {
+        "turn": 1,
+        "user_message": "我想要一条蓝色棉质连衣裙，价格不超过50美元。",
+        "assistant": {
+          "message": "我找到了 3 件通过当前目录条件检查的商品。下面列出了匹配理由和需要注意的地方。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 1,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {},
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "not_applied",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [
+            {
+              "attribute": "brand",
+              "options": [
+                {
+                  "value": "harbor & pine",
+                  "count": 1,
+                  "prompt": "I prefer the brand harbor & pine."
+                },
+                {
+                  "value": "north thread",
+                  "count": 1,
+                  "prompt": "I prefer the brand north thread."
+                },
+                {
+                  "value": "seabreeze studio",
+                  "count": 1,
+                  "prompt": "I prefer the brand seabreeze studio."
+                }
+              ],
+              "coverage": 1.0,
+              "expected_reduction": 0.6667,
+              "interaction_cost": 0.1,
+              "net_value": 0.5667,
+              "would_ask": true
+            }
+          ],
+          "pre_action": "retrieve",
+          "pre_reason": "sufficient_context_or_question_limit",
+          "post_action": "recommend",
+          "post_reason": "ranked_eligible_candidates",
+          "timings": [
+            {
+              "stage": "1_intent",
+              "elapsed_ms": 22.607
+            },
+            {
+              "stage": "3_state",
+              "elapsed_ms": 22.861
+            },
+            {
+              "stage": "4A_pre_policy",
+              "elapsed_ms": 22.878
+            },
+            {
+              "stage": "5_plan",
+              "elapsed_ms": 22.975
+            },
+            {
+              "stage": "2_retrieval",
+              "elapsed_ms": 24.416
+            },
+            {
+              "stage": "4B_ranking",
+              "elapsed_ms": 25.809
+            },
+            {
+              "stage": "4B_post_policy",
+              "elapsed_ms": 25.824
+            }
+          ],
+          "state_changes": [
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "category",
+              "value": "dress"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "color",
+              "value": "blue"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "material",
+              "value": "cotton"
+            },
+            {
+              "kind": "added",
+              "group": "hard",
+              "slot": "price_max",
+              "value": 50.0
+            }
+          ],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 0,
+          "new_product_count": 3,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          }
+        },
+        "integrity": {
+          "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+          "sha256": "d399ed02b0973857a66b11fcdf9f7901246cee7b853e2444e83891895c6fb30e"
+        }
+      },
+      {
+        "turn": 2,
+        "user_message": "不要涤纶，适合夏天。",
+        "assistant": {
+          "message": "我找到了 3 件通过当前目录条件检查的商品。下面列出了匹配理由和需要注意的地方。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [
+            {
+              "attribute": "brand",
+              "options": [
+                {
+                  "value": "harbor & pine",
+                  "count": 1,
+                  "prompt": "I prefer the brand harbor & pine."
+                },
+                {
+                  "value": "north thread",
+                  "count": 1,
+                  "prompt": "I prefer the brand north thread."
+                },
+                {
+                  "value": "seabreeze studio",
+                  "count": 1,
+                  "prompt": "I prefer the brand seabreeze studio."
+                }
+              ],
+              "coverage": 1.0,
+              "expected_reduction": 0.6667,
+              "interaction_cost": 0.1111,
+              "net_value": 0.5556,
+              "would_ask": true
+            }
+          ],
+          "pre_action": "retrieve",
+          "pre_reason": "sufficient_context_or_question_limit",
+          "post_action": "recommend",
+          "post_reason": "ranked_eligible_candidates",
+          "timings": [
+            {
+              "stage": "1_intent",
+              "elapsed_ms": 1.666
+            },
+            {
+              "stage": "3_state",
+              "elapsed_ms": 1.914
+            },
+            {
+              "stage": "4A_pre_policy",
+              "elapsed_ms": 1.934
+            },
+            {
+              "stage": "5_plan",
+              "elapsed_ms": 2.032
+            },
+            {
+              "stage": "2_retrieval",
+              "elapsed_ms": 3.411
+            },
+            {
+              "stage": "4B_ranking",
+              "elapsed_ms": 4.655
+            },
+            {
+              "stage": "4B_post_policy",
+              "elapsed_ms": 4.67
+            }
+          ],
+          "state_changes": [
+            {
+              "kind": "added",
+              "group": "excluded",
+              "slot": "material",
+              "value": [
+                "polyester"
+              ]
+            }
+          ],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          }
+        },
+        "integrity": {
+          "previous_sha256": "d399ed02b0973857a66b11fcdf9f7901246cee7b853e2444e83891895c6fb30e",
+          "sha256": "3b4c1c42d3010a09b0fad6c5551db350b7fd71c142837417df52badbdcfd0e7d"
+        }
+      },
+      {
+        "turn": 3,
+        "user_message": "比较第一个和第二个",
+        "assistant": {
+          "message": "已选中 2 件商品，结构化对比已经准备好。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [],
+          "pre_action": "control",
+          "pre_reason": "selection_compare",
+          "post_action": null,
+          "post_reason": null,
+          "timings": [
+            {
+              "stage": "0_control",
+              "elapsed_ms": 0.0
+            }
+          ],
+          "state_changes": [],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          },
+          "comparison_assist": null,
+          "selection_status": "ready_for_comparison",
+          "selection_decision": {
+            "finalized": false,
+            "finalized_at_utc": null,
+            "finalized_turn": null,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "selection_count": 2
+        },
+        "control": {
+          "action": "compare",
+          "ranks": [
+            1,
+            2
+          ]
+        },
+        "selection_decision": {
+          "finalized": false,
+          "finalized_at_utc": null,
+          "finalized_turn": null,
+          "selected_asins": [
+            "DEMO-DRESS-001",
+            "DEMO-DRESS-002"
+          ]
+        },
+        "integrity": {
+          "previous_sha256": "3b4c1c42d3010a09b0fad6c5551db350b7fd71c142837417df52badbdcfd0e7d",
+          "sha256": "df1a1f506737cdc3a9b46c5b8b6cfbe53e49e2c6e14119659bfbf79c24bcafee"
+        }
+      },
+      {
+        "turn": 4,
+        "user_message": "确认最终选择",
+        "assistant": {
+          "message": "最终选型已经确认，并生成了带时间和轮次的结构化交接。",
+          "ask_attribute": null,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          }
+        },
+        "products": [
+          {
+            "rank": 1,
+            "parent_asin": "DEMO-DRESS-001",
+            "score": 1.0,
+            "title": "Sky Blue Cotton Summer Midi Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$39.99 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A lightweight sky blue cotton midi dress designed for warm-weather everyday wear."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$39.99 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "100% breathable cotton"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Adjustable waist tie"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Machine washable"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 2,
+            "parent_asin": "DEMO-DRESS-002",
+            "score": 0.5,
+            "title": "Navy Blue Cotton A-Line Pocket Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$47.50 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A navy blue cotton-rich A-line dress with practical side pockets."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$47.50 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Cotton-rich fabric"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Two side pockets"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "A-line silhouette"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          },
+          {
+            "rank": 3,
+            "parent_asin": "DEMO-DRESS-003",
+            "score": 0.333333,
+            "title": "Blue Linen Blend Button Front Dress",
+            "match": {
+              "hard_supported": 4,
+              "hard_total": 4,
+              "soft_supported": 0,
+              "soft_total": 0,
+              "hard_coverage": 1.0,
+              "signals": [
+                {
+                  "tier": "hard",
+                  "slot": "category",
+                  "value": "dress",
+                  "status": "supported",
+                  "evidence": "catalog taxonomy: Dresses"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "color",
+                  "value": "blue",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "material",
+                  "value": "cotton",
+                  "status": "supported",
+                  "evidence": "catalog text"
+                },
+                {
+                  "tier": "hard",
+                  "slot": "price_max",
+                  "value": 50.0,
+                  "status": "supported",
+                  "evidence": "$44.00 <= $50.00"
+                },
+                {
+                  "tier": "excluded",
+                  "slot": "material",
+                  "value": [
+                    "polyester"
+                  ],
+                  "status": "clear",
+                  "evidence": "no excluded term found"
+                }
+              ],
+              "disclaimer": "Lexical catalog evidence, not verified variant availability."
+            },
+            "advice": {
+              "pros": [
+                {
+                  "text": "Supports category: dress",
+                  "source": "description",
+                  "evidence": "A relaxed blue button-front dress made from a linen and cotton blend."
+                },
+                {
+                  "text": "Supports material: cotton",
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "text": "Supports price_max: 50.0",
+                  "source": "match_check",
+                  "evidence": "$44.00 <= $50.00"
+                }
+              ],
+              "cons": [
+                {
+                  "text": "Variant availability and fit still need seller-page verification",
+                  "source": "system_limit",
+                  "evidence": "catalog records do not verify live variants or inventory"
+                }
+              ],
+              "catalog_highlights": [
+                {
+                  "source": "bullet_point",
+                  "evidence": "Linen cotton blend"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Button front"
+                },
+                {
+                  "source": "bullet_point",
+                  "evidence": "Relaxed fit"
+                }
+              ],
+              "disclaimer": "Extractive catalog evidence; seller claims and live variant availability are not independently verified."
+            }
+          }
+        ],
+        "receipt": {
+          "state_version": 3,
+          "hard": {
+            "category": "dress",
+            "color": "blue",
+            "material": "cotton",
+            "price_max": 50.0
+          },
+          "soft": {},
+          "excluded": {
+            "material": [
+              "polyester"
+            ]
+          },
+          "rejected_asins": [],
+          "state_evidence": {
+            "hard": {
+              "category": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "color": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "material": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              },
+              "price_max": {
+                "source_turn": 1,
+                "evidence": "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+              }
+            },
+            "soft": {}
+          },
+          "cleared": [],
+          "intent_changed": false,
+          "questions_asked": 0,
+          "shown_count": 3,
+          "candidate_count": 3,
+          "retrieval_stats": {
+            "matched_count": 6,
+            "filtered_count": 3
+          },
+          "novelty_mode": "fallback_reuse",
+          "ranking_method": "hybrid+weighted_soft_context_cpu",
+          "model_assist": null,
+          "model_usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0
+          },
+          "top_evidence": [
+            "fallback_score:0.017930",
+            "preselect_rank:1",
+            "strategy:hybrid",
+            "hard_missing:none",
+            "reason:locked rank",
+            "context_boost:0.000000"
+          ],
+          "shadow_questions": [],
+          "pre_action": "control",
+          "pre_reason": "selection_finalize",
+          "post_action": null,
+          "post_reason": null,
+          "timings": [
+            {
+              "stage": "0_control",
+              "elapsed_ms": 0.0
+            }
+          ],
+          "state_changes": [],
+          "intent_version": 1,
+          "intent_reset": false,
+          "selection_reset": false,
+          "selection_finalization_invalidated": false,
+          "repeat_count": 3,
+          "new_product_count": 0,
+          "result_quality": {
+            "product_count": 3,
+            "fully_supported_count": 3,
+            "average_hard_coverage": 1.0,
+            "soft_supported_count": 0
+          },
+          "comparison_assist": null,
+          "selection_status": "finalized",
+          "selection_decision": {
+            "finalized": true,
+            "finalized_at_utc": "2026-09-24T16:57:44Z",
+            "finalized_turn": 4,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ]
+          },
+          "selection_count": 2
+        },
+        "control": {
+          "action": "finalize",
+          "ranks": []
+        },
+        "selection_decision": {
+          "finalized": true,
+          "finalized_at_utc": "2026-09-24T16:57:44Z",
+          "finalized_turn": 4,
+          "selected_asins": [
+            "DEMO-DRESS-001",
+            "DEMO-DRESS-002"
+          ]
+        },
+        "integrity": {
+          "previous_sha256": "df1a1f506737cdc3a9b46c5b8b6cfbe53e49e2c6e14119659bfbf79c24bcafee",
+          "sha256": "ecb95d97e12fe6652e50c53a45b881363e7500be563c0d234ecff541ebbded3e"
+        }
+      }
+    ]
+  },
+  "audit_valid": true
+}

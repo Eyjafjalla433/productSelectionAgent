@@ -1,0 +1,6 @@
+bm25s
+numpy
+pandas
+torch
+transformers
+pyarrow
