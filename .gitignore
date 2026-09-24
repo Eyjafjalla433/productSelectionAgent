@@ -249,3 +249,11 @@ __marimo__/
 /docs/integration/sync-manifest-*.json
 /scripts/debug_integrated_session.py
 /scripts/debug_single_session.py
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Generated search artifacts
+/search_tool/artifacts/
+
+/search_tool/models/task_1_us_title_bullet/model.safetensors
