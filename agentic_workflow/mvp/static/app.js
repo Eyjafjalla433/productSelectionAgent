@@ -15,6 +15,7 @@ const ui = {
   exportSelection: document.querySelector("#export-selection"),
   comparison: document.querySelector("#comparison"),
   comparisonTable: document.querySelector("#comparison-table"),
+  comparisonDetails: document.querySelector("#comparison-details"),
   comparisonNote: document.querySelector("#comparison-note"),
   storyGuide: document.querySelector("#story-guide"),
   storyProgress: document.querySelector("#story-progress"),
@@ -519,7 +520,7 @@ function renderShortlist() {
     if (draft) {
       const label = document.createElement("small");
       label.className = "comparison-draft-label";
-      label.textContent = "MODEL DRAFT · QUOTE-GATED";
+      label.textContent = "From the listed details";
       item.append(label);
     }
     const pro = draft?.pros?.[0] || product.advice?.pros?.[0];
@@ -569,12 +570,110 @@ function applyComparisonAssist(handoff) {
   const rows = handoff?.comparison_assist?.products || [];
   rows.forEach((row) => {
     const product = shortlisted.get(row.parent_asin);
-    if (product) product.comparisonDraft = row;
+    if (product && (row.pros?.length || row.cons?.length)) product.comparisonDraft = row;
   });
   if (rows.length) renderShortlist();
 }
 
+function renderDescriptionComparison(handoff) {
+  const result = handoff?.comparison_assist;
+  if (result?.schema_version !== 'description-comparison.v1') return false;
+  const products = handoff.selected_products || [];
+  ui.comparison.hidden = products.length === 0;
+  if (!products.length) return true;
+  const titleById = new Map(products.map(product => [product.parent_asin, product.title]));
+  const label = value => String(value).replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
+  const heading = (parent, text) => {
+    const element = document.createElement('h3'); element.textContent = text; parent.append(element);
+  };
+  const sourceDetails = (parent, refs) => {
+    if (!refs?.length) return;
+    const details = document.createElement('details');
+    const summary = document.createElement('summary'); summary.textContent = 'View source'; details.append(summary);
+    refs.forEach(ref => {
+      const quote = document.createElement('blockquote');
+      quote.textContent = ref.quote; details.append(quote);
+    });
+    parent.append(details);
+  };
+  const matrix = result.objective_comparison?.comparison_matrix || [];
+  const tableFor = rows => {
+    const table = document.createElement('table');
+    const head = table.createTHead().insertRow();
+    ['Listed detail', ...products.map(p => p.title)].forEach(text => {
+      const th = document.createElement('th'); th.scope = 'col'; th.textContent = text; head.append(th);
+    });
+    const body = table.createTBody();
+    rows.forEach(row => {
+      const tr = body.insertRow();
+      const th = document.createElement('th'); th.scope = 'row'; th.textContent = label(row.dimension); tr.append(th);
+      products.forEach(product => {
+        const cell = tr.insertCell();
+        const attribute = row.values?.[product.parent_asin];
+        const value = attribute?.value;
+        cell.textContent = value == null ? 'Unknown' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+        if (attribute?.source_type === 'inferred') {
+          const badge = document.createElement('small'); badge.className = 'inference-label'; badge.textContent = 'Inference'; cell.append(badge);
+        }
+        if (attribute?.evidence) sourceDetails(cell, [{quote: attribute.evidence}]);
+      });
+    });
+    return table;
+  };
+  const known = matrix.filter(row => products.some(p => row.values?.[p.parent_asin]?.value != null));
+  const missing = matrix.filter(row => !products.some(p => row.values?.[p.parent_asin]?.value != null));
+  heading(ui.comparisonTable, 'Listed facts');
+  if (known.length) ui.comparisonTable.append(tableFor(known));
+  if (missing.length) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary'); summary.textContent = `Details not supplied (${missing.length})`;
+    details.append(summary, tableFor(missing)); ui.comparisonTable.append(details);
+  }
+  const addPoints = (parent, points, prefix = '') => {
+    if (!points?.length) return;
+    const list = document.createElement('ul');
+    points.forEach(point => {
+      const item = document.createElement('li'); item.textContent = prefix + point.text;
+      sourceDetails(item, point.evidence_refs); list.append(item);
+    });
+    parent.append(list);
+  };
+  const objective = result.objective_comparison || {};
+  const assessments = objective.product_assessments || [];
+  if (assessments.some(row => row.pros?.length || row.cons?.length) || objective.trade_offs?.length) {
+    heading(ui.comparisonDetails, 'What stands out');
+    assessments.forEach(row => {
+      if (!row.pros?.length && !row.cons?.length) return;
+      heading(ui.comparisonDetails, titleById.get(row.parent_asin) || row.parent_asin);
+      addPoints(ui.comparisonDetails, row.pros);
+      addPoints(ui.comparisonDetails, row.cons, 'Consider: ');
+    });
+    addPoints(ui.comparisonDetails, objective.trade_offs);
+  }
+  const personal = result.personalized_comparison || {};
+  if (personal.personalization_applied && personal.products?.some(row => row.fit_reasons?.length || row.cautions?.length)) {
+    const section = document.createElement('section'); section.className = 'personalized-comparison';
+    heading(section, 'For your preferences');
+    personal.products.forEach(row => {
+      if (!row.fit_reasons?.length && !row.cautions?.length) return;
+      heading(section, titleById.get(row.parent_asin) || row.parent_asin);
+      addPoints(section, row.fit_reasons); addPoints(section, row.cautions, 'Check first: ');
+    });
+    ui.comparisonDetails.append(section);
+  }
+  ui.comparisonNote.textContent = result.status === 'offline_preview'
+    ? 'Showing direct catalog facts. Personalized explanations are available when a model is configured.'
+    : result.status === 'partial'
+      ? 'Some explanations could not be completed. The available details are shown; missing values remain unknown.'
+      : 'Based on the supplied listings. Inferences are labeled; unknown details still need checking.';
+  return true;
+}
+
 function renderComparison(handoff) {
+  ui.comparisonTable.replaceChildren();
+  ui.comparisonDetails.replaceChildren();
+  ui.comparisonNote.textContent = '';
+  if (renderDescriptionComparison(handoff)) return;
   const summary = handoff?.comparison_summary;
   const rows = summary?.rows || [];
   ui.comparison.hidden = rows.length === 0;

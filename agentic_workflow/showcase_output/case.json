@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-25T02:31:01.336795+00:00",
+  "generated_at": "2026-09-25T08:26:06.008055+00:00",
   "backend": "demo",
   "data_source": "synthetic catalog; actual local workflow execution",
   "turns": [
@@ -440,6 +440,8 @@
             "price_max": 50.0
           },
           "soft": {},
+          "soft_priority": {},
+          "soft_priority_turn": {},
           "ordered_preferences": {},
           "excluded": {},
           "rejected_asins": [],
@@ -473,6 +475,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -558,31 +561,31 @@
           "timings": [
             {
               "stage": "1_intent",
-              "elapsed_ms": 50.565
+              "elapsed_ms": 57.398
             },
             {
               "stage": "3_state",
-              "elapsed_ms": 51.306
+              "elapsed_ms": 57.774
             },
             {
               "stage": "4A_pre_policy",
-              "elapsed_ms": 51.431
+              "elapsed_ms": 57.819
             },
             {
               "stage": "5_plan",
-              "elapsed_ms": 51.655
+              "elapsed_ms": 57.942
             },
             {
               "stage": "2_retrieval",
-              "elapsed_ms": 54.367
+              "elapsed_ms": 61.67
             },
             {
               "stage": "4B_ranking",
-              "elapsed_ms": 55.905
+              "elapsed_ms": 63.199
             },
             {
               "stage": "4B_post_policy",
-              "elapsed_ms": 55.926
+              "elapsed_ms": 67.966
             }
           ],
           "state_changes": [
@@ -1246,6 +1249,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -1288,6 +1297,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -1373,31 +1383,31 @@
           "timings": [
             {
               "stage": "1_intent",
-              "elapsed_ms": 7.624
+              "elapsed_ms": 30.073
             },
             {
               "stage": "3_state",
-              "elapsed_ms": 8.084
+              "elapsed_ms": 30.681
             },
             {
               "stage": "4A_pre_policy",
-              "elapsed_ms": 8.124
+              "elapsed_ms": 30.75
             },
             {
               "stage": "5_plan",
-              "elapsed_ms": 8.256
+              "elapsed_ms": 31.053
             },
             {
               "stage": "2_retrieval",
-              "elapsed_ms": 9.964
+              "elapsed_ms": 34.128
             },
             {
               "stage": "4B_ranking",
-              "elapsed_ms": 11.476
+              "elapsed_ms": 35.732
             },
             {
               "stage": "4B_post_policy",
-              "elapsed_ms": 11.495
+              "elapsed_ms": 39.786
             }
           ],
           "state_changes": [
@@ -2053,6 +2063,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -2095,6 +2111,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -2153,7 +2170,661 @@
           "focused_product_id": null,
           "can_undo_rejection": false,
           "can_redo_rejection": false,
-          "comparison_assist": null,
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": false,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
+          },
           "selection_status": "ready_for_comparison",
           "selection_decision": {
             "finalized": false,
@@ -2167,6 +2838,7 @@
           "selection_count": 2,
           "rejection_undo": null,
           "rejection_redo": null,
+          "suggested_replies": null,
           "display_mode": "retained_previous_results",
           "price_comparison": null,
           "preference_comparison": null,
@@ -2512,8 +3184,8 @@
         },
         "handoff": {
           "schema_version": "show-me-your-agent.selection.v1",
-          "session_id": "628e8ffbd5994895",
-          "generated_at_utc": "2026-09-25T02:31:01Z",
+          "session_id": "e2ff74eb066642db",
+          "generated_at_utc": "2026-09-25T08:26:05Z",
           "status": "ready_for_comparison",
           "intent_version": 1,
           "requirements": {
@@ -2948,6 +3620,661 @@
             "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
             "consumer": "D",
             "ranking_is_final": true
+          },
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": false,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
           }
         }
       }
@@ -3447,6 +4774,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -3489,6 +4822,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -3547,11 +4881,665 @@
           "focused_product_id": null,
           "can_undo_rejection": false,
           "can_redo_rejection": false,
-          "comparison_assist": null,
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": true,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
+          },
           "selection_status": "finalized",
           "selection_decision": {
             "finalized": true,
-            "finalized_at_utc": "2026-09-25T02:31:01Z",
+            "finalized_at_utc": "2026-09-25T08:26:06Z",
             "finalized_turn": 4,
             "selected_asins": [
               "DEMO-DRESS-001",
@@ -3561,6 +5549,7 @@
           "selection_count": 2,
           "rejection_undo": null,
           "rejection_redo": null,
+          "suggested_replies": null,
           "display_mode": "retained_previous_results",
           "price_comparison": null,
           "preference_comparison": null,
@@ -3795,7 +5784,7 @@
           "can_redo_rejection": false,
           "status": "finalized",
           "finalized": true,
-          "finalized_at_utc": "2026-09-25T02:31:01Z",
+          "finalized_at_utc": "2026-09-25T08:26:06Z",
           "finalized_turn": 4
         },
         "shopping_guide": {
@@ -3906,8 +5895,8 @@
         },
         "handoff": {
           "schema_version": "show-me-your-agent.selection.v1",
-          "session_id": "628e8ffbd5994895",
-          "generated_at_utc": "2026-09-25T02:31:01Z",
+          "session_id": "e2ff74eb066642db",
+          "generated_at_utc": "2026-09-25T08:26:06Z",
           "status": "finalized",
           "intent_version": 1,
           "requirements": {
@@ -4303,7 +6292,7 @@
           ],
           "decision": {
             "finalized": true,
-            "finalized_at_utc": "2026-09-25T02:31:01Z",
+            "finalized_at_utc": "2026-09-25T08:26:06Z",
             "finalized_turn": 4,
             "selected_asins": [
               "DEMO-DRESS-001",
@@ -4342,6 +6331,661 @@
             "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
             "consumer": "D",
             "ranking_is_final": true
+          },
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": true,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
           }
         }
       }
@@ -4349,8 +6993,8 @@
   ],
   "handoff": {
     "schema_version": "show-me-your-agent.selection.v1",
-    "session_id": "628e8ffbd5994895",
-    "generated_at_utc": "2026-09-25T02:31:01Z",
+    "session_id": "e2ff74eb066642db",
+    "generated_at_utc": "2026-09-25T08:26:06Z",
     "status": "finalized",
     "intent_version": 1,
     "requirements": {
@@ -4746,7 +7390,7 @@
     ],
     "decision": {
       "finalized": true,
-      "finalized_at_utc": "2026-09-25T02:31:01Z",
+      "finalized_at_utc": "2026-09-25T08:26:06Z",
       "finalized_turn": 4,
       "selected_asins": [
         "DEMO-DRESS-001",
@@ -4785,13 +7429,668 @@
       "instruction": "Compare only supported catalog facts; label missing or ambiguous attributes as unknown.",
       "consumer": "D",
       "ranking_is_final": true
+    },
+    "comparison_assist": {
+      "schema_version": "description-comparison.v1",
+      "session_id": "e2ff74eb066642db",
+      "intent_version": 1,
+      "state_version": 3,
+      "selected_asins": [
+        "DEMO-DRESS-001",
+        "DEMO-DRESS-002"
+      ],
+      "status": "offline_preview",
+      "product_profiles": [
+        {
+          "parent_asin": "DEMO-DRESS-001",
+          "category": "clothing",
+          "category_source": "agent_hint",
+          "attributes": {
+            "brand": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "model": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "material": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "color": {
+              "value": "Sky blue",
+              "evidence": "Sky blue",
+              "source_field": "details.Color",
+              "source_type": "explicit"
+            },
+            "size": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "weight": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "dimensions": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "price": {
+              "value": "39.99",
+              "evidence": "39.99",
+              "source_field": "price",
+              "source_type": "explicit"
+            },
+            "rating": {
+              "value": "4.6",
+              "evidence": "4.6",
+              "source_field": "average_rating",
+              "source_type": "explicit"
+            },
+            "compatibility": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "included_items": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "care": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "warranty": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "fit": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "fabric_composition": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "breathability": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "stretch": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "closure": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            }
+          }
+        },
+        {
+          "parent_asin": "DEMO-DRESS-002",
+          "category": "clothing",
+          "category_source": "agent_hint",
+          "attributes": {
+            "brand": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "model": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "material": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "color": {
+              "value": "Navy blue",
+              "evidence": "Navy blue",
+              "source_field": "details.Color",
+              "source_type": "explicit"
+            },
+            "size": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "weight": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "dimensions": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "price": {
+              "value": "47.5",
+              "evidence": "47.5",
+              "source_field": "price",
+              "source_type": "explicit"
+            },
+            "rating": {
+              "value": "4.7",
+              "evidence": "4.7",
+              "source_field": "average_rating",
+              "source_type": "explicit"
+            },
+            "compatibility": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "included_items": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "care": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "warranty": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "fit": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "fabric_composition": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "breathability": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "stretch": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            },
+            "closure": {
+              "value": null,
+              "evidence": null,
+              "source_field": null,
+              "source_type": null
+            }
+          }
+        }
+      ],
+      "objective_comparison": {
+        "absolute_winner": null,
+        "product_assessments": [
+          {
+            "parent_asin": "DEMO-DRESS-001",
+            "pros": [],
+            "cons": []
+          },
+          {
+            "parent_asin": "DEMO-DRESS-002",
+            "pros": [],
+            "cons": []
+          }
+        ],
+        "comparison_matrix": [
+          {
+            "dimension": "brand",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "model",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "material",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "color",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": "Sky blue",
+                "evidence": "Sky blue",
+                "source_field": "details.Color",
+                "source_type": "explicit"
+              },
+              "DEMO-DRESS-002": {
+                "value": "Navy blue",
+                "evidence": "Navy blue",
+                "source_field": "details.Color",
+                "source_type": "explicit"
+              }
+            }
+          },
+          {
+            "dimension": "size",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "weight",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "dimensions",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "price",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": "39.99",
+                "evidence": "39.99",
+                "source_field": "price",
+                "source_type": "explicit"
+              },
+              "DEMO-DRESS-002": {
+                "value": "47.5",
+                "evidence": "47.5",
+                "source_field": "price",
+                "source_type": "explicit"
+              }
+            }
+          },
+          {
+            "dimension": "rating",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": "4.6",
+                "evidence": "4.6",
+                "source_field": "average_rating",
+                "source_type": "explicit"
+              },
+              "DEMO-DRESS-002": {
+                "value": "4.7",
+                "evidence": "4.7",
+                "source_field": "average_rating",
+                "source_type": "explicit"
+              }
+            }
+          },
+          {
+            "dimension": "compatibility",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "included_items",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "care",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "warranty",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "fit",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "fabric_composition",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "breathability",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "stretch",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          },
+          {
+            "dimension": "closure",
+            "values": {
+              "DEMO-DRESS-001": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              },
+              "DEMO-DRESS-002": {
+                "value": null,
+                "evidence": null,
+                "source_field": null,
+                "source_type": null
+              }
+            }
+          }
+        ],
+        "trade_offs": [],
+        "unknowns": [
+          {
+            "parent_asin": "DEMO-DRESS-001",
+            "attributes": [
+              "brand",
+              "model",
+              "material",
+              "size",
+              "weight",
+              "dimensions",
+              "compatibility",
+              "included_items",
+              "care",
+              "warranty",
+              "fit",
+              "fabric_composition",
+              "breathability",
+              "stretch",
+              "closure"
+            ]
+          },
+          {
+            "parent_asin": "DEMO-DRESS-002",
+            "attributes": [
+              "brand",
+              "model",
+              "material",
+              "size",
+              "weight",
+              "dimensions",
+              "compatibility",
+              "included_items",
+              "care",
+              "warranty",
+              "fit",
+              "fabric_composition",
+              "breathability",
+              "stretch",
+              "closure"
+            ]
+          }
+        ]
+      },
+      "personalized_comparison": {
+        "personalization_applied": false,
+        "products": [
+          {
+            "parent_asin": "DEMO-DRESS-001",
+            "fit_reasons": [],
+            "cautions": []
+          },
+          {
+            "parent_asin": "DEMO-DRESS-002",
+            "fit_reasons": [],
+            "cautions": []
+          }
+        ],
+        "ranking_changed": false
+      },
+      "products": [
+        {
+          "parent_asin": "DEMO-DRESS-001",
+          "pros": [],
+          "cons": []
+        },
+        {
+          "parent_asin": "DEMO-DRESS-002",
+          "pros": [],
+          "cons": []
+        }
+      ],
+      "provider": null,
+      "model": null,
+      "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "latency_ms": 1.149,
+      "warning": "model_not_configured",
+      "provenance": {
+        "stages": [],
+        "ranking_is_final": true,
+        "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+      },
+      "cached": true,
+      "usage_this_call": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      }
     }
   },
   "audit": {
     "schema_version": "show-me-your-agent.audit.v1",
-    "session_id": "628e8ffbd5994895",
-    "started_at_utc": "2026-09-25T02:31:01Z",
-    "generated_at_utc": "2026-09-25T02:31:01Z",
+    "session_id": "e2ff74eb066642db",
+    "started_at_utc": "2026-09-25T08:26:05Z",
+    "generated_at_utc": "2026-09-25T08:26:06Z",
     "agent_mode": "adaptive:model-provider-off",
     "privacy_note": "Local export. Contains user messages but no hidden labels or full candidate pools. Local only: no model request or shopper message leaves this process.",
     "model": {
@@ -4803,7 +8102,7 @@
     },
     "integrity": {
       "algorithm": "sha256-chain",
-      "head": "f5ef65e096d5f86f2e77c4ddbd2b85eff6c353a4f57ea0f8520c7aaa96a36e3b",
+      "head": "8ec90e0307384f7e5fed55e7da430e2d17c3711087dd607bf61cc18cac6be30b",
       "signed": false,
       "note": "Detects edits or reordering; it is not an identity signature."
     },
@@ -5086,6 +8385,8 @@
             "price_max": 50.0
           },
           "soft": {},
+          "soft_priority": {},
+          "soft_priority_turn": {},
           "ordered_preferences": {},
           "excluded": {},
           "rejected_asins": [],
@@ -5119,6 +8420,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -5204,31 +8506,31 @@
           "timings": [
             {
               "stage": "1_intent",
-              "elapsed_ms": 50.565
+              "elapsed_ms": 57.398
             },
             {
               "stage": "3_state",
-              "elapsed_ms": 51.306
+              "elapsed_ms": 57.774
             },
             {
               "stage": "4A_pre_policy",
-              "elapsed_ms": 51.431
+              "elapsed_ms": 57.819
             },
             {
               "stage": "5_plan",
-              "elapsed_ms": 51.655
+              "elapsed_ms": 57.942
             },
             {
               "stage": "2_retrieval",
-              "elapsed_ms": 54.367
+              "elapsed_ms": 61.67
             },
             {
               "stage": "4B_ranking",
-              "elapsed_ms": 55.905
+              "elapsed_ms": 63.199
             },
             {
               "stage": "4B_post_policy",
-              "elapsed_ms": 55.926
+              "elapsed_ms": 67.966
             }
           ],
           "state_changes": [
@@ -5275,7 +8577,7 @@
         },
         "integrity": {
           "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
-          "sha256": "251d83d104813ca7718e9970cdeb0b0f7b57bef5a711b440b9f633fac615c60c"
+          "sha256": "08d2474587493d43e201039d6ae573efcd47fbd12d41b07ff4c01cf8080d339b"
         }
       },
       {
@@ -5613,6 +8915,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -5655,6 +8963,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -5740,31 +9049,31 @@
           "timings": [
             {
               "stage": "1_intent",
-              "elapsed_ms": 7.624
+              "elapsed_ms": 30.073
             },
             {
               "stage": "3_state",
-              "elapsed_ms": 8.084
+              "elapsed_ms": 30.681
             },
             {
               "stage": "4A_pre_policy",
-              "elapsed_ms": 8.124
+              "elapsed_ms": 30.75
             },
             {
               "stage": "5_plan",
-              "elapsed_ms": 8.256
+              "elapsed_ms": 31.053
             },
             {
               "stage": "2_retrieval",
-              "elapsed_ms": 9.964
+              "elapsed_ms": 34.128
             },
             {
               "stage": "4B_ranking",
-              "elapsed_ms": 11.476
+              "elapsed_ms": 35.732
             },
             {
               "stage": "4B_post_policy",
-              "elapsed_ms": 11.495
+              "elapsed_ms": 39.786
             }
           ],
           "state_changes": [
@@ -5802,8 +9111,8 @@
           "can_redo_rejection": false
         },
         "integrity": {
-          "previous_sha256": "251d83d104813ca7718e9970cdeb0b0f7b57bef5a711b440b9f633fac615c60c",
-          "sha256": "52f08cee25988563e13516e9ff90e5670226657cc1d6dbce430a9b6bce81c3eb"
+          "previous_sha256": "08d2474587493d43e201039d6ae573efcd47fbd12d41b07ff4c01cf8080d339b",
+          "sha256": "f2969fac7bf413357accf11181e3d561b7dfa913fdc39c91bb3df81c6f78695a"
         }
       },
       {
@@ -6141,6 +9450,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -6183,6 +9498,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -6241,7 +9557,661 @@
           "focused_product_id": null,
           "can_undo_rejection": false,
           "can_redo_rejection": false,
-          "comparison_assist": null,
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": false,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
+          },
           "selection_status": "ready_for_comparison",
           "selection_decision": {
             "finalized": false,
@@ -6255,6 +10225,7 @@
           "selection_count": 2,
           "rejection_undo": null,
           "rejection_redo": null,
+          "suggested_replies": null,
           "display_mode": "retained_previous_results",
           "price_comparison": null,
           "preference_comparison": null,
@@ -6283,8 +10254,8 @@
           ]
         },
         "integrity": {
-          "previous_sha256": "52f08cee25988563e13516e9ff90e5670226657cc1d6dbce430a9b6bce81c3eb",
-          "sha256": "b5523981dca45a2fe353eddb7148239adc243d07d17cca4688e21eef89e4558a"
+          "previous_sha256": "f2969fac7bf413357accf11181e3d561b7dfa913fdc39c91bb3df81c6f78695a",
+          "sha256": "365a72f03e654eb9b6f3ac1a445af83c37ec58183c018c2191e8ed0441024b03"
         }
       },
       {
@@ -6622,6 +10593,12 @@
               "summer"
             ]
           },
+          "soft_priority": {
+            "use_case": 1.0
+          },
+          "soft_priority_turn": {
+            "use_case": null
+          },
           "ordered_preferences": {},
           "excluded": {
             "material": [
@@ -6664,6 +10641,7 @@
           "negative_feedback": false,
           "requested_more": false,
           "requirements_changed": true,
+          "preference_priority_shift": null,
           "declined_options": false,
           "intent_changed": false,
           "category_changed": false,
@@ -6722,11 +10700,665 @@
           "focused_product_id": null,
           "can_undo_rejection": false,
           "can_redo_rejection": false,
-          "comparison_assist": null,
+          "comparison_assist": {
+            "schema_version": "description-comparison.v1",
+            "session_id": "e2ff74eb066642db",
+            "intent_version": 1,
+            "state_version": 3,
+            "selected_asins": [
+              "DEMO-DRESS-001",
+              "DEMO-DRESS-002"
+            ],
+            "status": "offline_preview",
+            "product_profiles": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Sky blue",
+                    "evidence": "Sky blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "39.99",
+                    "evidence": "39.99",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.6",
+                    "evidence": "4.6",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "category": "clothing",
+                "category_source": "agent_hint",
+                "attributes": {
+                  "brand": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "model": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "material": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "color": {
+                    "value": "Navy blue",
+                    "evidence": "Navy blue",
+                    "source_field": "details.Color",
+                    "source_type": "explicit"
+                  },
+                  "size": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "weight": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "dimensions": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "price": {
+                    "value": "47.5",
+                    "evidence": "47.5",
+                    "source_field": "price",
+                    "source_type": "explicit"
+                  },
+                  "rating": {
+                    "value": "4.7",
+                    "evidence": "4.7",
+                    "source_field": "average_rating",
+                    "source_type": "explicit"
+                  },
+                  "compatibility": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "included_items": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "care": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "warranty": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fit": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "fabric_composition": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "breathability": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "stretch": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  },
+                  "closure": {
+                    "value": null,
+                    "evidence": null,
+                    "source_field": null,
+                    "source_type": null
+                  }
+                }
+              }
+            ],
+            "objective_comparison": {
+              "absolute_winner": null,
+              "product_assessments": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "pros": [],
+                  "cons": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "pros": [],
+                  "cons": []
+                }
+              ],
+              "comparison_matrix": [
+                {
+                  "dimension": "brand",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "model",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "material",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "color",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "Sky blue",
+                      "evidence": "Sky blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "Navy blue",
+                      "evidence": "Navy blue",
+                      "source_field": "details.Color",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "size",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "weight",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "dimensions",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "price",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "39.99",
+                      "evidence": "39.99",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "47.5",
+                      "evidence": "47.5",
+                      "source_field": "price",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "rating",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": "4.6",
+                      "evidence": "4.6",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": "4.7",
+                      "evidence": "4.7",
+                      "source_field": "average_rating",
+                      "source_type": "explicit"
+                    }
+                  }
+                },
+                {
+                  "dimension": "compatibility",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "included_items",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "care",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "warranty",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fit",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "fabric_composition",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "breathability",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "stretch",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                },
+                {
+                  "dimension": "closure",
+                  "values": {
+                    "DEMO-DRESS-001": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    },
+                    "DEMO-DRESS-002": {
+                      "value": null,
+                      "evidence": null,
+                      "source_field": null,
+                      "source_type": null
+                    }
+                  }
+                }
+              ],
+              "trade_offs": [],
+              "unknowns": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "attributes": [
+                    "brand",
+                    "model",
+                    "material",
+                    "size",
+                    "weight",
+                    "dimensions",
+                    "compatibility",
+                    "included_items",
+                    "care",
+                    "warranty",
+                    "fit",
+                    "fabric_composition",
+                    "breathability",
+                    "stretch",
+                    "closure"
+                  ]
+                }
+              ]
+            },
+            "personalized_comparison": {
+              "personalization_applied": false,
+              "products": [
+                {
+                  "parent_asin": "DEMO-DRESS-001",
+                  "fit_reasons": [],
+                  "cautions": []
+                },
+                {
+                  "parent_asin": "DEMO-DRESS-002",
+                  "fit_reasons": [],
+                  "cautions": []
+                }
+              ],
+              "ranking_changed": false
+            },
+            "products": [
+              {
+                "parent_asin": "DEMO-DRESS-001",
+                "pros": [],
+                "cons": []
+              },
+              {
+                "parent_asin": "DEMO-DRESS-002",
+                "pros": [],
+                "cons": []
+              }
+            ],
+            "provider": null,
+            "model": null,
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            },
+            "latency_ms": 1.149,
+            "warning": "model_not_configured",
+            "provenance": {
+              "stages": [],
+              "ranking_is_final": true,
+              "evidence_check": "quote occurrence only; semantic correctness requires evaluation"
+            },
+            "cached": true,
+            "usage_this_call": {
+              "prompt_tokens": 0,
+              "completion_tokens": 0
+            }
+          },
           "selection_status": "finalized",
           "selection_decision": {
             "finalized": true,
-            "finalized_at_utc": "2026-09-25T02:31:01Z",
+            "finalized_at_utc": "2026-09-25T08:26:06Z",
             "finalized_turn": 4,
             "selected_asins": [
               "DEMO-DRESS-001",
@@ -6736,6 +11368,7 @@
           "selection_count": 2,
           "rejection_undo": null,
           "rejection_redo": null,
+          "suggested_replies": null,
           "display_mode": "retained_previous_results",
           "price_comparison": null,
           "preference_comparison": null,
@@ -6753,7 +11386,7 @@
         },
         "selection_decision": {
           "finalized": true,
-          "finalized_at_utc": "2026-09-25T02:31:01Z",
+          "finalized_at_utc": "2026-09-25T08:26:06Z",
           "finalized_turn": 4,
           "selected_asins": [
             "DEMO-DRESS-001",
@@ -6761,8 +11394,8 @@
           ]
         },
         "integrity": {
-          "previous_sha256": "b5523981dca45a2fe353eddb7148239adc243d07d17cca4688e21eef89e4558a",
-          "sha256": "f5ef65e096d5f86f2e77c4ddbd2b85eff6c353a4f57ea0f8520c7aaa96a36e3b"
+          "previous_sha256": "365a72f03e654eb9b6f3ac1a445af83c37ec58183c018c2191e8ed0441024b03",
+          "sha256": "8ec90e0307384f7e5fed55e7da430e2d17c3711087dd607bf61cc18cac6be30b"
         }
       }
     ]

@@ -11,6 +11,12 @@ from .retrieval import (requirements_from_state, StateAwareRetriever, color_matc
                         material_matches, size_matches, style_matches)
 
 
+def _text_list(value):
+    if isinstance(value, str):
+        return [value] if value.strip() else []
+    return [text for text in value if isinstance(text, str) and text.strip()] if isinstance(value, list) else []
+
+
 class SearchToolAdapter:
     mode = 'search_tool'
 
@@ -69,11 +75,19 @@ class SearchToolAdapter:
             row = by_id.get(product_id, {})
             if not row.get('found'):
                 continue
+            product_details = deepcopy(row.get('details')) if isinstance(row.get('details'), dict) else {}
+            for field, key in (('Brand', 'brand'), ('Color', 'color')):
+                if row.get(key):
+                    product_details[field] = row[key]
+            bullets = (_text_list(row.get('product_bullet_points')) or
+                       _text_list(row.get('features')) or _text_list(row.get('bullet_point')))
+            descriptions = (_text_list(row.get('product_description')) or
+                            _text_list(row.get('description')))
             product = {
                 'parent_asin': product_id, 'title': row.get('title', ''),
                 'store': row.get('brand', ''), 'categories': [],
-                'features': [row.get('bullet_point', '')], 'description': [],
-                'details': {'Brand': row.get('brand', ''), 'Color': row.get('color', '')},
+                'features': bullets, 'description': descriptions,
+                'details': product_details,
                 'price': None, 'average_rating': None, 'rating_number': None,
                 'product_url': row.get('product_url', ''), 'url_verified': False,
             }

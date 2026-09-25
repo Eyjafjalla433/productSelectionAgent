@@ -171,6 +171,14 @@ button { color: inherit; }
 .comparison tbody th { width: 105px; background: #f4f4ef; font: 8px var(--mono); }
 .comparison tbody td { font: 9px/1.35 var(--mono); }
 .comparison-note { margin-top: 8px; }
+.comparison h3 { margin: 12px 0 8px; font-size: 13px; }
+.comparison details { margin-top: 8px; }
+.comparison summary { cursor: pointer; color: var(--blue); font-size: 11px; }
+.comparison blockquote { margin: 6px 0; padding-left: 8px; border-left: 2px solid var(--line); overflow-wrap: anywhere; }
+.comparison-details { font-size: 12px; line-height: 1.5; }
+.comparison-details li { margin-bottom: 8px; }
+.inference-label { display: block; margin-top: 4px; color: var(--blue); }
+.personalized-comparison { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 4px; }
 .story-guide { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #aeb7ff; background: #e9ecff; }
 .story-guide > div { display: flex; justify-content: space-between; gap: 12px; font: 9px var(--mono); }
 .story-guide > div span { color: var(--blue); }

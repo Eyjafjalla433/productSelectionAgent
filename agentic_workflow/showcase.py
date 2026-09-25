@@ -61,6 +61,57 @@ def run_case(backend='demo'):
             'turns': turns, 'handoff': handoff, 'audit': audit, 'audit_valid': True}
 
 
+def description_section(handoff):
+    result = (handoff or {}).get('comparison_assist') or {}
+    if result.get('schema_version') != 'description-comparison.v1':
+        return ''
+    products = handoff['selected_products']
+    titles = {product['parent_asin']: product['title'] for product in products}
+    rows, missing = [], []
+    for row in result['objective_comparison']['comparison_matrix']:
+        if not any(row['values'].get(p['parent_asin'], {}).get('value') is not None for p in products):
+            missing.append(row['dimension'].replace('_', ' '))
+            continue
+        cells = []
+        for product in products:
+            attribute = row['values'].get(product['parent_asin'], {})
+            value = attribute.get('value')
+            text = 'Unknown' if value is None else str(value)
+            if attribute.get('source_type') == 'inferred':
+                text += ' (Inference)'
+            evidence = (f'<details><summary>View source</summary><p>{escape(str(attribute["evidence"]))}</p></details>'
+                        if attribute.get('evidence') else '')
+            cells.append(f'<td>{escape(text)}{evidence}</td>')
+        rows.append(f'<tr><th>{escape(row["dimension"].replace("_", " ").title())}</th>{"".join(cells)}</tr>')
+    headings = ''.join(f'<th>{escape(product["title"])}</th>' for product in products)
+    facts = f'<div class="table-wrap"><table><thead><tr><th>Listed detail</th>{headings}</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
+    unknowns = (f'<details><summary>Details not supplied ({len(missing)})</summary><p>Unknown: {escape(", ".join(missing))}</p></details>'
+                if missing else '')
+
+    def points(rows, fields):
+        content = []
+        for row in rows:
+            entries = [point for field in fields for point in row.get(field, [])]
+            if not entries:
+                continue
+            items = ''.join('<li>' + escape(point['text']) + '<details><summary>View source</summary>' +
+                            ''.join('<p>' + escape(ref['quote']) + '</p>' for ref in point['evidence_refs']) +
+                            '</details></li>' for point in entries)
+            content.append(f'<h4>{escape(titles.get(row["parent_asin"], row["parent_asin"]))}</h4><ul>{items}</ul>')
+        return ''.join(content)
+
+    objective = points(result['objective_comparison']['product_assessments'], ('pros', 'cons'))
+    personal = result['personalized_comparison']
+    advice = points(personal['products'], ('fit_reasons', 'cautions')) if personal['personalization_applied'] else ''
+    note = ('Direct catalog facts only; no model was configured.' if result['status'] == 'offline_preview' else
+            'Some explanations could not be completed.' if result['status'] == 'partial' else
+            'Based on the supplied listings. Inferences and unknowns need checking.')
+    return ('<section class="selected-comparison"><h3>Your saved options: listed facts</h3>' + facts + unknowns +
+            ('<h3>What stands out</h3>' + objective if objective else '') +
+            ('<h3>For your preferences</h3>' + advice if advice else '') +
+            f'<p class="muted">{note}</p></section>')
+
+
 def render(report):
     labels = ['Your request', 'Refine preferences', 'Compare options', 'Save selection']
     sections = []
@@ -83,7 +134,7 @@ def render(report):
             <div class="bubble agent"><label>SHOPPING AGENT · ACTUAL RESPONSE</label><p>{escape(result['assistant']['message'])}</p></div>
             <details><summary>View the full turn result</summary><pre>{pretty(result)}</pre></details></div>
             <aside><h3>Your preferences, remembered</h3><p>Showing {len(result['products'])} options this turn, up to 10.</p><p class="muted">{guide['ranking_note']}</p><details><summary>View remembered requirements</summary><pre>{pretty(state)}</pre></details></aside></div>
-            {comparison}{final}<div class="products">{cards}</div>{remaining}</section>''')
+            {comparison}{description_section(result.get('handoff'))}{final}<div class="products">{cards}</div>{remaining}</section>''')
     tabs = ''.join(f'<button class="tab" data-step="{i}" type="button">0{i+1} {label}</button>' for i, label in enumerate(labels))
     document = Path(__file__).with_name('showcase_template.html').read_text(encoding='utf-8')
     data = json.dumps(report, ensure_ascii=False).replace('<', '\\u003c')

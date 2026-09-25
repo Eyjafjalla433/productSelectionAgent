@@ -1,4 +1,4 @@
-"""Run workflow regressions in an isolated copy without reference or search assets."""
+"""Run workflow regressions with the description dependency, without search assets."""
 from pathlib import Path
 import shutil
 import subprocess
@@ -11,6 +11,11 @@ def main():
     with tempfile.TemporaryDirectory(prefix='agentic-workflow-') as directory:
         target = Path(directory) / 'agentic_workflow'
         shutil.copytree(root, target, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        # Copy the dependency for integration tests; never import or modify the
+        # original shared package while running this isolated suite.
+        description = root.parent / 'description_module'
+        shutil.copytree(description, Path(directory) / 'description_module',
+                        ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         # -I excludes inherited PYTHONPATH and user site packages. Only the
         # isolated directory is explicitly added; no original repo paths.
         script = '''

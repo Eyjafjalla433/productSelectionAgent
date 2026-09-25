@@ -494,27 +494,28 @@ class AgentRuntime:
         self.lock = threading.RLock()
 
     @classmethod
-    def create(cls, catalog: Path, *, orchestration_mode: str = "adaptive", provider: Any = None, session_ttl_seconds: float = 3600.0, max_sessions: int = 128, scenarios: tuple[dict[str, Any], ...] = SCENARIOS) -> "AgentRuntime":
+    def create(cls, catalog: Path | None, *, orchestration_mode: str = "adaptive", provider: Any = None, session_ttl_seconds: float = 3600.0, max_sessions: int = 128, scenarios: tuple[dict[str, Any], ...] = SCENARIOS, **agent_options) -> "AgentRuntime":
         from agent import Agent
-        from shopping_agent.comparison_enhancer import ComparisonEnhancer
+        from shopping_agent.description_adapter import DescriptionComparisonAdapter
         from shopping_agent.requirement_enhancer import RequirementEnhancer
 
         enhancer = RequirementEnhancer(provider) if provider is not None else None
+        agent_options.setdefault('trace_enabled', True)
+        agent_options.setdefault('requirement_enhancer', enhancer)
         return cls(
             Agent(
                 catalog_path=catalog,
-                trace_enabled=True,
                 orchestration_mode=orchestration_mode,
-                requirement_enhancer=enhancer,
+                **agent_options,
             ),
             orchestration_mode=orchestration_mode,
             model_provider=provider.name if provider is not None else "off",
             model_name=provider.model if provider is not None else None,
             model_cloud=(
-                urlsplit(provider.base_url).hostname not in {"127.0.0.1", "localhost", "::1"}
+                urlsplit(getattr(provider, 'base_url', '')).hostname not in {"127.0.0.1", "localhost", "::1"}
                 if provider is not None else False
             ),
-            comparison_enhancer=ComparisonEnhancer(provider) if provider is not None else None,
+            comparison_enhancer=DescriptionComparisonAdapter(provider),
             session_ttl_seconds=session_ttl_seconds,
             max_sessions=max_sessions,
             scenarios=scenarios,
@@ -885,6 +886,9 @@ class AgentRuntime:
                         "intent_version": session.intent_version,
                         "state_version": latest_receipt.get("state_version"),
                         "selected_asins": list(session.selections),
+                        "requirements": handoff['requirements'],
+                        "products": selected_products,
+                        "engine": getattr(self.comparison_enhancer, 'cache_identity', None),
                     },
                     sort_keys=True,
                     separators=(",", ":"),

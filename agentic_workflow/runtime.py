@@ -1,5 +1,4 @@
 """Product-facing runtime using the external US search tool."""
-from .agent import Agent
 from mvp.server import AgentRuntime
 
 SEARCH_SCENARIOS = (
@@ -15,6 +14,6 @@ SEARCH_SCENARIOS = (
 )
 
 
-def create_runtime(**agent_options):
-    return AgentRuntime(Agent(trace_enabled=True, **agent_options),
-                        orchestration_mode='adaptive', scenarios=SEARCH_SCENARIOS)
+def create_runtime(*, provider=None, **agent_options):
+    return AgentRuntime.create(None, provider=provider, scenarios=SEARCH_SCENARIOS,
+                               **agent_options)

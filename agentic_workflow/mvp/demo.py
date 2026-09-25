@@ -125,6 +125,10 @@ class TerminalDemo:
             "  model tokens: "
             f"{int(usage.get('prompt_tokens') or 0) + int(usage.get('completion_tokens') or 0)}"
         )
+        comparison = (result.get('handoff') or {}).get('comparison_assist')
+        if comparison:
+            print('\n  SELECTED PRODUCT COMPARISON')
+            print(json.dumps(comparison, ensure_ascii=True, indent=2))
 
     def handoff(self) -> None:
         handoff = self.runtime.selection_handoff(self.session_id)
@@ -132,6 +136,7 @@ class TerminalDemo:
             "status": handoff["status"],
             "requirements": handoff["requirements"],
             "decision": handoff["decision"],
+            "comparison_assist": handoff.get('comparison_assist'),
             "products": [
                 {
                     "parent_asin": row["parent_asin"],

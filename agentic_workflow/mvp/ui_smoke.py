@@ -141,7 +141,28 @@ def main():
           renderProducts(comparisonProducts, false, {comparison_takeaway:'The listing titles show different sizes: #1 M, #2 S, #3 L.'});
           check(ui.products.querySelector('.shopping-top-three p').textContent.includes('#1 M, #2 S, #3 L'),
             'size contrast appears in the comparison panel');
-          return {passed:true, labels, checks:31};
+          const descriptionHandoff = {selected_products:[
+            {parent_asin:'A',title:'Cotton dress'}, {parent_asin:'B',title:'Second dress'}],
+            comparison_assist:{schema_version:'description-comparison.v1',status:'completed',
+              objective_comparison:{comparison_matrix:[
+                {dimension:'material',values:{A:{value:'Cotton',source_type:'inferred',evidence:'Cotton blend'},B:{value:null}}},
+                {dimension:'warranty',values:{A:{value:null},B:{value:null}}}],
+                product_assessments:[{parent_asin:'A',pros:[{text:'Soft fabric <img src=x>',evidence_refs:[{quote:'Cotton blend'}]}]}],
+                trade_offs:[]},
+              personalized_comparison:{personalization_applied:true,products:[
+                {parent_asin:'A',fit_reasons:[{text:'An option for your cotton preference.',evidence_refs:[{quote:'Cotton blend'}]}]}]}}};
+          renderComparison(descriptionHandoff);
+          check(!ui.comparison.hidden && ui.comparisonTable.querySelector('thead').textContent.includes('Cotton dressSecond dress'), 'description selection order');
+          check(ui.comparisonTable.textContent.includes('Unknown') && ui.comparisonTable.textContent.includes('Inference'), 'unknown and inferred values labeled');
+          check(ui.comparisonTable.textContent.includes('Details not supplied (1)'), 'missing dimensions grouped');
+          check(ui.comparisonDetails.querySelector('.personalized-comparison').textContent.includes('cotton preference'), 'personal advice separate from facts');
+          check(ui.comparisonDetails.textContent.includes('<img src=x>') && !ui.comparisonDetails.querySelector('img'), 'model prose rendered as text');
+          descriptionHandoff.comparison_assist.status = 'partial';
+          renderComparison(descriptionHandoff);
+          check(ui.comparisonNote.textContent.includes('could not be completed'), 'partial comparison explained');
+          renderComparison(null);
+          check(ui.comparison.hidden && !ui.comparisonDetails.children.length, 'old description cleared');
+          return {passed:true, labels, checks:38};
         })()''')
         print(json.dumps(report, ensure_ascii=False))
     finally:
