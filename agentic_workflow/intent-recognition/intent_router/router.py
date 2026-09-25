@@ -30,19 +30,19 @@ MATERIAL_ALIASES = {
 }
 CATEGORY_PATTERNS = {
     "t-shirt": ("t-shirt", "t-shirts", "tshirt", "tshirts", "tee", "tees", "t shirt", "t shirts", "T恤", "短袖T恤"),
-    "shirt": ("shirt", "blouse", "衬衫", "上衣"),
+    "shirt": ("shirt", "shirts", "blouse", "blouses", "衬衫", "上衣"),
     "jersey": ("jersey", "jerseys", "球衣"),
-    "dress": ("dress", "gown", "连衣裙", "裙装"),
-    "jacket": ("jacket", "coat", "hoodie", "blazer", "夹克", "外套", "卫衣", "西装"),
+    "dress": ("dress", "dresses", "gown", "gowns", "连衣裙", "裙装"),
+    "jacket": ("jacket", "jackets", "coat", "coats", "hoodie", "hoodies", "blazer", "blazers", "夹克", "外套", "卫衣", "西装"),
     "pants": ("pants", "jeans", "leggings", "trousers", "裤子", "牛仔裤", "打底裤"),
     "shorts": ("shorts", "短裤"),
-    "skirt": ("skirt", "半身裙", "短裙"),
-    "shoes": ("shoes", "sneakers", "boots", "sandals", "heels", "loafers", "鞋", "运动鞋", "靴子", "凉鞋", "高跟鞋"),
-    "earrings": ("earrings", "hoop", "耳环", "耳饰"),
-    "necklace": ("necklace", "pendant", "项链", "吊坠"),
-    "ring": ("ring", "戒指"),
-    "bracelet": ("bracelet", "bangle", "手链", "手镯"),
-    "bag": ("bag", "handbag", "backpack", "purse", "包", "手提包", "背包"),
+    "skirt": ("skirt", "skirts", "半身裙", "短裙"),
+    "shoes": ("shoe", "shoes", "sneaker", "sneakers", "boot", "boots", "sandal", "sandals", "heel", "heels", "loafer", "loafers", "鞋", "运动鞋", "靴子", "凉鞋", "高跟鞋"),
+    "earrings": ("earring", "earrings", "hoop", "hoops", "耳环", "耳饰"),
+    "necklace": ("necklace", "necklaces", "pendant", "pendants", "项链", "吊坠"),
+    "ring": ("ring", "rings", "戒指"),
+    "bracelet": ("bracelet", "bracelets", "bangle", "bangles", "手链", "手镯"),
+    "bag": ("bag", "bags", "handbag", "handbags", "backpack", "backpacks", "purse", "purses", "包", "手提包", "背包"),
 }
 USE_CASES = (
     "running", "walking", "hiking", "gym", "work", "office", "wedding", "party",
@@ -84,7 +84,8 @@ BUYING_CUES = {
     "need_statement": ("i need", "i want", "i'm looking for", "i am looking for", "我需要", "我想要", "帮我找", "给我找"),
 }
 BROWSING_CUES = {
-    "exploration": ("exploring", "inspiration", "ideas", "browse", "trends"),
+    "exploration": ("exploring", "inspiration", "ideas", "browse", "browsing",
+                    "just looking", "looking around", "trends"),
     "open_question": ("what should", "what could", "what would"),
     "discovery_request": ("show me", "suggest", "recommend"),
 }
@@ -98,7 +99,7 @@ PRICE_OR_LESS_RE = re.compile(r"\$?\s*(\d+(?:\.\d+)?)\s*(?:or less|or below|or u
 SIZE_WORD_RE = re.compile(r"\b(xxs|xs|xl|xxl|xxxl|small|medium|large|extra large)\b", re.I)
 SIZE_LETTER_RE = re.compile(r"\bsize\s*(s|m|l)\b", re.I)
 NEGATION_RE = re.compile(
-    r"\b(?:no|not|without|avoid)\s+(?:a |an |any )?([a-z][a-z -]{1,30}?)(?=\s+(?:and|but|for|with)\b|[,.;]|$)",
+    r"\b(?:no|not|without|avoid|except|excluding)\s+(?:a |an |any )?([a-z][a-z -]{1,30}?)(?=\s+(?:and|but|for|with)\b|[,.;]|$)",
     re.I,
 )
 KEY_REQUIREMENT_RE = re.compile(r"\bkey requirement is:\s*(.+)$", re.I)
@@ -214,23 +215,45 @@ class IntentRouter:
             values = [value for value in price_range.groups() if value is not None]
             slots["budget_min"] = float(values[0])
             slots["budget_max"] = float(values[1])
-        elif price_cap and not (approximate_target and price_cap.start() < approximate_target.end() and approximate_target.start() < price_cap.end()):
-            slots["budget_max"] = float(next(value for value in price_cap.groups() if value is not None))
-        elif price_floor:
-            slots["budget_min"] = float(next(value for value in price_floor.groups() if value is not None))
-        elif price_target:
+        else:
+            if price_cap and not (approximate_target and price_cap.start() < approximate_target.end() and approximate_target.start() < price_cap.end()):
+                slots["budget_max"] = float(next(value for value in price_cap.groups() if value is not None))
+            if price_floor and not (price_cap and price_cap.start() < price_floor.end()
+                                    and price_floor.start() < price_cap.end()):
+                slots["budget_min"] = float(next(value for value in price_floor.groups() if value is not None))
+        if price_target and not approximate_target:
             slots["budget_target"] = float(price_target.group(1))
 
     @staticmethod
     def _extract_size(text: str, slots: defaultdict[str, list[str] | float]) -> None:
+        def positive(index: int) -> bool:
+            return not re.search(
+                r"\b(?:not|no|avoid|without|rather than|instead of|"
+                r"don't want|do not want)\s+(?:a\s+)?(?:size\s+)?$",
+                text[:index], re.I)
+
+        found: list[tuple[int, str]] = []
         for match in re.finditer(r'(?:尺码|尺寸)(?:是|要|为)?\s*(xxxl|xxl|xxs|xl|xs|s|m|l)(?:码)?(?![a-z])', text, re.I):
-            _append_unique(slots, 'size', match.group(1).lower())
+            found.append((match.start(1), match.group(1).lower()))
         for match in SIZE_WORD_RE.finditer(text):
-            _append_unique(slots, "size", match.group(1).lower())
+            if positive(match.start()):
+                found.append((match.start(1), match.group(1).lower()))
         for match in SIZE_LETTER_RE.finditer(text):
-            _append_unique(slots, "size", match.group(1).lower())
+            if positive(match.start()):
+                found.append((match.start(1), match.group(1).lower()))
+        size_token = r'(?:xxxl|xxl|xxs|xl|xs|s|m|l)'
+        for match in re.finditer(
+                rf"\b(?:size\s*|my size is\s+|i\s+(?:usually\s+)?wear\s+(?:a\s+)?)(?P<first>{size_token})\b"
+                rf"(?:\s+or\s+(?P<second>{size_token})\b)?", text, re.I):
+            if positive(match.start()):
+                found.append((match.start('first'), match.group('first').lower()))
+                if match.group('second'):
+                    found.append((match.start('second'), match.group('second').lower()))
         for match in re.finditer(r"\b(?:size|us)\s*(\d{1,2}(?:\.5)?)\b", text, re.I):
-            _append_unique(slots, "size", match.group(1))
+            if positive(match.start()):
+                found.append((match.start(1), match.group(1)))
+        for _, value in sorted(found):
+            _append_unique(slots, 'size', value)
 
     @staticmethod
     def _extract_exclusions(text: str, slots: defaultdict[str, list[str] | float]) -> None:

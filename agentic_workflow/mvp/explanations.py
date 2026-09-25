@@ -6,7 +6,7 @@ import math
 import re
 from typing import Any, Iterable
 
-from shopping_agent.retrieval import category_matches, pure_cotton_matches, size_matches, color_matches, style_matches
+from shopping_agent.retrieval import category_matches, subtype_matches, material_matches, size_matches, color_matches, style_matches
 from techjam_agent.query import parse_text
 
 
@@ -89,7 +89,8 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 if slot.startswith("feature_")
                 else values
             )
-            if any((pure_cotton_matches(product) if slot == 'material' and value == '100% cotton'
+            if any((material_matches(product, value) if slot == 'material'
+                    else subtype_matches(product, value) if slot == 'subtype'
                     else size_matches(product, value) if slot == 'size'
                     else color_matches(product, value) if slot == 'color'
                     else style_matches(product, value) if slot == 'style'
@@ -99,9 +100,20 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
         signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status, "evidence": evidence})
 
     for slot, raw_values in receipt.get("soft", {}).items():
+        if slot in {'shopping_purpose', 'shopping_occasion', 'budget_floor_target'}:
+            continue  # Conversation context and unverified price floors are not product evidence.
         values = _values(raw_values)
+        if slot == 'fit_avoid':
+            conflicting = [value for value in values if style_matches(product, value)]
+            signals.append({
+                'tier': 'soft', 'slot': slot, 'value': raw_values,
+                'status': 'conflict' if conflicting else 'unknown',
+                'evidence': ('explicit fit label: ' + ', '.join(map(str, conflicting))
+                             if conflicting else 'fit not verified by this listing'),
+            })
+            continue
         matched = [value for value in values if (
-            pure_cotton_matches(product) if slot == 'material' and value == '100% cotton'
+            material_matches(product, value) if slot == 'material'
             else size_matches(product, value) if slot == 'size'
             else color_matches(product, value) if slot == 'color'
             else style_matches(product, value) if slot == 'style'
@@ -120,8 +132,8 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
 
     for slot, raw_values in receipt.get("excluded", {}).items():
         values = _values(raw_values)
-        conflicts = [value for value in values if (pure_cotton_matches(product)
-                     if slot == 'material' and value == '100% cotton'
+        conflicts = [value for value in values if (material_matches(product, value)
+                     if slot == 'material'
                      else color_matches(product, value) if slot == 'color'
                      else style_matches(product, value) if slot == 'style' else _text_match(value, full_terms))]
         signals.append(
@@ -220,6 +232,10 @@ def product_advice(product: dict[str, Any], match: dict[str, Any]) -> dict[str, 
                     "evidence": str(signal.get("evidence") or "excluded term found"),
                 }
             )
+        elif tier == 'soft' and slot == 'fit_avoid' and status == 'conflict':
+            cons.append({'text': f'Listing describes a {_flatten(value)} fit; you preferred to avoid that',
+                         'source': 'match_check',
+                         'evidence': str(signal.get('evidence') or 'catalog fit description')})
 
     rating = product.get("average_rating")
     rating_count = product.get("rating_number")

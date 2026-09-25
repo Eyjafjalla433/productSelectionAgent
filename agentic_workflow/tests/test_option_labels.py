@@ -24,6 +24,36 @@ class OptionLabelTests(unittest.TestCase):
         parsed = TurnIntentRouter().understand_turn('黑色，必须纯棉', pending_question=pending)
         self.assertTrue(any(u.slot == 'material' and u.values == ('100% cotton',) for u in parsed.slot_updates))
 
+    def test_displayed_option_and_extra_detail_are_both_collected(self):
+        question = {'target_slot': 'material', 'constraint_type': 'soft',
+                    'options': ['fleece'], 'option_labels': {'fleece': '抓绒'}}
+        for message in ('抓绒，size M', 'size M, 抓绒', 'fleece and size M'):
+            with self.subTest(message=message):
+                parsed = TurnIntentRouter().understand_turn(message, pending_question=question)
+                self.assertTrue(any(u.slot == 'material' and u.operation == 'set'
+                                    and u.values == ('fleece',) and u.constraint_type == 'soft'
+                                    for u in parsed.slot_updates))
+                self.assertTrue(any(u.slot == 'size' and u.operation == 'set'
+                                    and u.values == ('m',) for u in parsed.slot_updates))
+        parsed = TurnIntentRouter().understand_turn('not fleece, size M', pending_question=question)
+        self.assertFalse(any(u.slot == 'material' and u.operation == 'set'
+                             and u.values == ('fleece',) for u in parsed.slot_updates))
+
+    def test_runtime_option_reply_retains_added_size(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 50-i} for i in range(30)]
+        def details(ids):
+            return [dict(product_id=key, found=True, title=f"Black {'cotton' if int(key)%2 else 'fleece'} tshirt size M") for key in ids]
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details, trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I want a tshirt')
+        self.assertEqual(first['receipt']['question']['target_slot'], 'material')
+        reply = runtime.chat(sid, 'fleece, size M')
+        state = runtime.agent.memory.snapshot(sid)
+        self.assertEqual(state.soft_preferences['material'][0].value, 'fleece')
+        self.assertEqual(state.hard_constraints['size'], 'm')
+        self.assertTrue(reply['products'])
+
     def test_runtime_question_and_answer_keep_canonical_material(self):
         def search(query, top_k):
             return [{'product_id': str(i), 'score': 50-i} for i in range(30)]

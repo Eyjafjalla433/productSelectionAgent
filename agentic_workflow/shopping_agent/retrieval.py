@@ -113,6 +113,25 @@ def pure_cotton_matches(product):
     return all(float(value) == 100 for value in percentages)
 
 
+def material_matches(product, value):
+    """Require an affirmative local material mention; certify pure cotton separately."""
+    if str(value).casefold() == '100% cotton':
+        return pure_cotton_matches(product)
+    words = re.findall(r'[a-z0-9]+', str(value).casefold())
+    if not words:
+        return False
+    pattern = r'\b' + r'[\s-]+'.join(map(re.escape, words)) + r'\b'
+    for key in ('title', 'features', 'description', 'details'):
+        source = _text(product.get(key))
+        for match in re.finditer(pattern, source, re.I):
+            if re.search(r'\b(?:not|no|without)\s*$', source[:match.start()], re.I):
+                continue
+            if re.match(r'[-\s]+free\b', source[match.end():], re.I):
+                continue
+            return True
+    return False
+
+
 CATEGORY_TAXONOMY_LABELS = {
     "dress": {"dress", "gown"},
     "shirt": {"shirt", "dress shirt", "casual button down shirt", "blouse"},
@@ -196,12 +215,29 @@ def category_matches(product, value):
     return matched, "title fallback (taxonomy unavailable)"
 
 
+def subtype_matches(product, value):
+    """Require a stated garment subtype in taxonomy or title, not loose description text."""
+    if str(value).casefold() != 'jeans':
+        return False
+    raw_categories = product.get('categories') or ()
+    if isinstance(raw_categories, str):
+        raw_categories = (raw_categories,)
+    sources = [*map(str, raw_categories), str(product.get('title') or '')]
+    pattern = re.compile(r'\bjeans\b|\bjean[ -]+(?:pants?|trousers?)\b', re.I)
+    return any(match and not re.search(r'\b(?:not|no|without)\s*$', source[:match.start()], re.I)
+               for source in sources for match in (pattern.search(source),))
+
+
 def requirements_from_state(state, *, relax_soft=False):
     hard = state.hard_constraints
     return Requirements(
         category=str(hard.get("category", "")),
         hard_constraints=tuple(str(v) for key, value in hard.items() if key not in {"category", "price_min", "price_max"} for v in sequence(value)),
-        soft_preferences=() if relax_soft else tuple(str(v) for prefs in state.soft_preferences.values() for p in prefs for v in sequence(p.value)),
+        soft_preferences=() if relax_soft else tuple(
+            str(v) for name, prefs in state.soft_preferences.items()
+            if name not in {'shopping_purpose', 'shopping_occasion', 'budget_floor_target',
+                            'fit_avoid', 'size'}
+            for p in prefs for v in sequence(p.value)),
     )
 
 
@@ -274,14 +310,16 @@ class StateAwareRetriever:
                 required = terms(v)
                 if name == "category":
                     return category_matches(product, v)[0]
+                if name == 'subtype':
+                    return subtype_matches(product, v)
                 if name == 'size':
                     return size_matches(product, v)
                 if name == 'color':
                     return color_matches(product, v)
                 if name == 'style':
                     return style_matches(product, v)
-                if name == 'material' and v == '100% cotton':
-                    return pure_cotton_matches(product)
+                if name == 'material':
+                    return material_matches(product, v)
                 if name == "brand":
                     brand_terms = terms(product.get("store")) | terms(product.get("details"))
                     return bool(required) and required <= brand_terms
@@ -300,10 +338,10 @@ class StateAwareRetriever:
                 if any(color_matches(product, value) for value in values):
                     return False
                 continue
-            if name == 'material' and '100% cotton' in values:
-                if pure_cotton_matches(product):
+            if name == 'material':
+                if any(material_matches(product, value) for value in values):
                     return False
-                values = [v for v in values if v != '100% cotton']
+                continue
             if any(terms(v) and terms(v) <= product_terms for v in values):
                 return False
         return True
@@ -358,7 +396,11 @@ class StateAwareRetriever:
         if blocked:
             warnings.append(f"Explicit feedback excluded {len(set(provenance) & blocked)} product(s).")
         seen = set(state.shown_asins)
-        if seen and eligible:
+        prefer_new = (state.suggestions.get('requested_more') or
+                      state.suggestions.get('negative_feedback') or
+                      (not state.suggestions.get('requirements_changed')
+                       and not state.suggestions.get('decision_help')))
+        if seen and eligible and prefer_new:
             unseen = [asin for asin in eligible if asin not in seen]
             if unseen:
                 eligible = unseen

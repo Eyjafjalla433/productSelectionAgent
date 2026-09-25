@@ -42,6 +42,27 @@ def composition_summary(snippets, locale='zh'):
 
 def answer_product_question(product, rank, attribute, locale):
     prefix = f'第 {rank} 款：' if locale == 'zh' else f'#{rank}: '
+    if attribute.startswith('material_check:'):
+        wanted = attribute.removeprefix('material_check:')
+        pure = wanted.startswith('pure ')
+        fiber = wanted.removeprefix('pure ')
+        if pure and fiber != 'cotton':
+            return prefix + f"I can't confirm that {fiber} purity from the available listing."
+        details = product.get('details') or {}
+        snippets = [str(value) for key, value in details.items() if re.search(r'material|fabric|composition', key, re.I)] if isinstance(details, dict) else []
+        for key in ('features', 'description', 'title'):
+            raw = product.get(key) or []
+            snippets.extend([raw] if isinstance(raw, str) else list(raw))
+        summary, ambiguous = composition_summary(snippets, 'en')
+        if ambiguous:
+            return prefix + 'I cannot confirm this from the listing because its composition varies or conflicts. Check the exact variant.'
+        if summary:
+            amounts = {name: float(amount) for amount, name in re.findall(r'(\d+(?:\.\d+)?)%\s+([a-z]+)', summary)}
+            supported = amounts.get(fiber, 0) == 100 and len(amounts) == 1 if pure else amounts.get(fiber, 0) > 0
+            return prefix + ('Yes. ' if supported else 'No. ') + f'The listing specifies {summary}.'
+        if pure and pure_cotton_matches(product):
+            return prefix + 'Yes. The listing describes it as pure cotton.'
+        return prefix + f"I can't confirm whether it is {'pure ' if pure else ''}{fiber} from the available composition details."
     if attribute == 'unsupported':
         return prefix + ("I can't reliably answer that product question yet. I can check its listed material, price, or fit. Your shopping preferences are unchanged.")
     if attribute == 'fit':

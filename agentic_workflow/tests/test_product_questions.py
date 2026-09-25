@@ -8,6 +8,364 @@ from mvp.product_question import answer_product_question
 
 
 class ProductQuestionTests(unittest.TestCase):
+    def test_term_and_product_question_are_answered_without_changing_the_search(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 24 - i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Regular fit' if int(key) < 12 else 'Loose fit') + ' T-shirt',
+                         bullet_point='60% cotton; 40% polyester') for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt')
+        pending = runtime.agent.memory.pending[sid].copy()
+        count = len(calls)
+        reply = runtime.chat(sid, 'What does regular fit mean? Is #2 pure cotton?')
+        self.assertEqual(len(calls), count)
+        self.assertEqual(runtime.agent.memory.pending[sid], pending)
+        self.assertEqual(reply['receipt']['question']['options'], pending['options'])
+        self.assertEqual(reply['receipt']['hard'], first['receipt']['hard'])
+        self.assertEqual(reply['receipt']['soft'], first['receipt']['soft'])
+        self.assertEqual([item['parent_asin'] for item in reply['products']],
+                         [item['parent_asin'] for item in first['products']])
+        self.assertIn('regular fit', reply['assistant']['message'].casefold())
+        self.assertIn('#2: No.', reply['assistant']['message'])
+        price_reply = runtime.chat(sid, 'What does loose fit mean? How much does #2 cost?')
+        self.assertEqual(len(calls), count)
+        self.assertIn('loose fit', price_reply['assistant']['message'].casefold())
+        self.assertIn('does not list a price', price_reply['assistant']['message'])
+        self.assertEqual(runtime.agent.memory.pending[sid], pending)
+        choice = runtime.chat(sid, 'loose fit')
+        self.assertEqual(choice['receipt']['soft']['style'], ['loose fit'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_term_question_and_new_preference_share_one_turn(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 24 - i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Regular fit' if int(key) < 12 else 'Loose fit') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt')
+        self.assertEqual(first['receipt']['question']['target_slot'], 'style')
+        answer = runtime.chat(sid, 'What does regular fit mean? I prefer loose fit')
+        self.assertIn('regular fit', answer['assistant']['message'].casefold())
+        self.assertEqual(answer['receipt']['soft']['style'], ['loose fit'])
+        self.assertTrue(answer['products'])
+        self.assertTrue(all('loose fit' in item['title'].casefold() for item in answer['products']))
+        restored = runtime.chat(sid, 'Undo')
+        self.assertNotIn('style', restored['receipt']['soft'])
+        self.assertEqual([item['parent_asin'] for item in restored['products']],
+                         [item['parent_asin'] for item in first['products']])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+        new_sid = runtime.new_session()['session_id']
+        opening = runtime.chat(new_sid, 'What does regular fit mean? I need a T-shirt')
+        self.assertIn('regular fit', opening['assistant']['message'].casefold())
+        self.assertEqual(opening['receipt']['hard']['category'], 't-shirt')
+        self.assertNotIn('style', opening['receipt']['soft'])
+        self.assertTrue(opening['products'])
+        self.assertEqual(verify_audit(runtime.audit(new_sid)), [])
+
+    def test_term_question_with_thanks_remains_read_only(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 24 - i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Regular fit' if int(key) < 12 else 'Loose fit') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        runtime.chat(sid, 'I need a T-shirt')
+        pending = runtime.agent.memory.pending[sid].copy()
+        count = len(calls)
+        answer = runtime.chat(sid, 'What does regular fit mean? Thanks')
+        self.assertEqual(len(calls), count)
+        self.assertEqual(runtime.agent.memory.pending[sid], pending)
+        self.assertNotIn('style', answer['receipt']['soft'])
+        self.assertIn('regular fit', answer['assistant']['message'].casefold())
+        browsing = runtime.chat(sid, 'What does regular fit mean? Show me first')
+        self.assertIn('regular fit', browsing['assistant']['message'].casefold())
+        self.assertNotIn('style', browsing['receipt']['soft'])
+        self.assertIsNone(browsing['assistant']['ask_attribute'])
+        self.assertTrue(browsing['products'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_term_question_then_start_over_resets_instead_of_saving_the_term(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 24 - i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Regular fit' if int(key) < 12 else 'Loose fit') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt')
+        result = runtime.chat(sid, 'What does regular fit mean? Start over')
+        self.assertIn('regular fit', result['assistant']['message'].casefold())
+        self.assertEqual(result['receipt']['hard'], {})
+        self.assertEqual(result['receipt']['soft'], {})
+        self.assertEqual(result['products'], [])
+        restored = runtime.chat(sid, 'Undo')
+        self.assertEqual(restored['receipt']['hard']['category'], 't-shirt')
+        self.assertEqual([item['parent_asin'] for item in restored['products']],
+                         [item['parent_asin'] for item in first['products']])
+        runtime.chat(sid, 'Select #1')
+        cleared = runtime.chat(sid, 'What does regular fit mean? Reset everything')
+        self.assertIn('regular fit', cleared['assistant']['message'].casefold())
+        self.assertEqual(cleared['receipt']['hard'], {})
+        self.assertEqual(cleared['selection_state']['selected_asins'], [])
+        returned = runtime.chat(sid, 'Undo')
+        self.assertEqual(returned['receipt']['hard']['category'], 't-shirt')
+        self.assertEqual(returned['selection_state']['selected_asins'],
+                         [first['products'][0]['parent_asin']])
+        scoped = runtime.chat(sid, 'What does regular fit mean? Start over')
+        self.assertEqual(scoped['receipt']['pre_reason'], 'reset_scope_clarification')
+        self.assertIn('regular fit', scoped['assistant']['message'].casefold())
+        self.assertEqual(scoped['selection_state']['selected_asins'],
+                         [first['products'][0]['parent_asin']])
+        cancelled = runtime.chat(sid, 'Cancel')
+        self.assertEqual(cancelled['receipt']['hard']['category'], 't-shirt')
+        runtime.chat(sid, 'Start over')
+        mixed_cancel = runtime.chat(sid, 'What does regular fit mean? Cancel')
+        self.assertEqual(mixed_cancel['receipt']['pre_reason'], 'reset_scope_cancelled')
+        self.assertIn('regular fit', mixed_cancel['assistant']['message'].casefold())
+        self.assertEqual(mixed_cancel['receipt']['hard']['category'], 't-shirt')
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_standalone_apparel_term_question_is_not_a_search_filter(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 12 - i} for i in range(12)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True, title='Cotton T-shirt') for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'What does regular fit mean?')
+        self.assertEqual(calls, [])
+        self.assertEqual(first['products'], [])
+        self.assertEqual(first['receipt']['hard'], {})
+        self.assertEqual(first['receipt']['soft'], {})
+        self.assertIn('regular fit', first['assistant']['message'].casefold())
+
+        browsing = runtime.chat(sid, 'I am just browsing T-shirts')
+        self.assertTrue(browsing['products'])
+        self.assertIsNone(browsing['receipt']['question'])
+        count = len(calls)
+        explanation = runtime.chat(sid, 'What does cotton mean?')
+        self.assertEqual(len(calls), count)
+        self.assertEqual(explanation['receipt']['hard'], browsing['receipt']['hard'])
+        self.assertEqual(explanation['receipt']['soft'], browsing['receipt']['soft'])
+        self.assertEqual([item['parent_asin'] for item in explanation['products']],
+                         [item['parent_asin'] for item in browsing['products']])
+        self.assertIn('cotton', explanation['assistant']['message'].casefold())
+        chosen = runtime.chat(sid, 'I prefer cotton')
+        self.assertEqual(chosen['receipt']['soft']['material'], ['cotton'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_explaining_an_open_choice_does_not_answer_it(self):
+        for first_label, second_label, question_text, target, expected in (
+            ('Regular fit', 'Loose fit', 'What does regular fit mean?', 'style', 'regular fit'),
+            ('Regular fit', 'Loose fit',
+             "What's the difference between regular fit and loose fit?", 'style', 'loose fit'),
+            ('Cotton', 'Polyester', 'What do you mean by fabric?', 'material', 'fabric'),
+        ):
+            with self.subTest(question=question_text):
+                calls = []
+
+                def search(query, top_k):
+                    calls.append(query)
+                    return [{'product_id': str(i), 'score': 30 - i} for i in range(24)]
+
+                def details(ids):
+                    return [dict(product_id=key, found=True,
+                                 title=(first_label if int(key) < 12 else second_label)
+                                 + ' T-shirt') for key in ids]
+
+                runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                             trace_enabled=True), orchestration_mode='adaptive')
+                sid = runtime.new_session()['session_id']
+                first = runtime.chat(sid, 'I need a T-shirt')
+                self.assertEqual(first['receipt']['question']['target_slot'], target)
+                pending = runtime.agent.memory.pending[sid].copy()
+                count = len(calls)
+                explanation = runtime.chat(sid, question_text)
+                self.assertEqual(len(calls), count)
+                self.assertEqual(runtime.agent.memory.pending[sid], pending)
+                self.assertEqual(explanation['receipt']['question']['options'], pending['options'])
+                self.assertNotIn(target, explanation['receipt']['soft'])
+                self.assertNotIn(target, explanation['receipt']['hard'])
+                self.assertEqual([item['parent_asin'] for item in explanation['products']],
+                                 [item['parent_asin'] for item in first['products']])
+                self.assertIn(expected, explanation['assistant']['message'].casefold())
+                choice = runtime.chat(sid, first_label.casefold())
+                self.assertIn(target, choice['receipt']['soft'])
+                self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_why_question_explains_catalog_reason_without_consuming_choice(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 24 - i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Black' if int(key) < 12 else 'White') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt')
+        pending = runtime.agent.memory.pending[sid].copy()
+        count = len(calls)
+        self.assertEqual(pending['target_slot'], 'color')
+        for wording in ('Why are you asking about color?', 'Why do you need to know my color?',
+                        'Why did you ask that?'):
+            with self.subTest(wording=wording):
+                reply = runtime.chat(sid, wording)
+                self.assertEqual(len(calls), count)
+                self.assertEqual(reply['receipt']['pre_reason'], 'shopping_term_help')
+                self.assertIn('black', reply['assistant']['message'].casefold())
+                self.assertIn('white', reply['assistant']['message'].casefold())
+                self.assertIn('optional', reply['assistant']['message'].casefold())
+                self.assertEqual(reply['receipt']['question']['options'], pending['options'])
+                self.assertEqual(runtime.agent.memory.pending[sid], pending)
+                self.assertEqual(reply['products'], first['products'])
+        unrelated = runtime.chat(sid, 'Why are you asking about my phone number?')
+        self.assertEqual(len(calls), count)
+        self.assertIn("wasn't asking for phone number", unrelated['assistant']['message'])
+        self.assertEqual(runtime.agent.memory.pending[sid], pending)
+        chosen = runtime.chat(sid, 'black')
+        self.assertEqual(chosen['receipt']['soft']['color'], ['black'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_why_question_distinguishes_required_context_from_optional_narrowing(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 12-i} for i in range(12)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True, title='Black T-shirt') for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        gift = runtime.chat(sid, 'I want a gift for my dad under $50')
+        self.assertEqual(gift['receipt']['question']['target_slot'], 'category')
+        self.assertFalse(calls)
+        reason = runtime.chat(sid, 'Why are you asking?')
+        self.assertIn('product type', reason['assistant']['message'])
+        self.assertEqual(reason['receipt']['question']['options'],
+                         gift['receipt']['question']['options'])
+        self.assertFalse(calls)
+        chosen = runtime.chat(sid, 'T-shirt')
+        self.assertEqual(chosen['receipt']['hard']['category'], 't-shirt')
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+        other = AgentRuntime(Agent(search_function=search, details_function=details,
+                                   trace_enabled=True), orchestration_mode='adaptive')
+        other_sid = other.new_session()['session_id']
+        budget = other.chat(other_sid, 'I need a T-shirt under $25')
+        self.assertEqual(budget['receipt']['question']['target_slot'], 'budget')
+        count = len(calls)
+        budget_reason = other.chat(other_sid, 'Why are you asking about price?')
+        self.assertEqual(len(calls), count)
+        self.assertIn("don't have prices", budget_reason['assistant']['message'])
+        self.assertEqual(budget_reason['receipt']['question']['options'],
+                         budget['receipt']['question']['options'])
+        self.assertEqual(verify_audit(other.audit(other_sid)), [])
+
+    def test_why_question_and_preference_can_share_one_turn(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 24-i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Black' if int(key) < 12 else 'White') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        runtime.chat(sid, 'I need a T-shirt')
+        reply = runtime.chat(sid, 'Why are you asking about color? I prefer black')
+        self.assertEqual(reply['receipt']['soft']['color'], ['black'])
+        self.assertIn('retrieved listings include black and white', reply['assistant']['message'])
+        self.assertNotIn('answer the open choice', reply['assistant']['message'])
+        self.assertEqual(reply['receipt']['term_question']['applied_request'], 'I prefer black')
+        undone = runtime.chat(sid, 'Undo')
+        self.assertNotIn('color', undone['receipt']['soft'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_why_question_can_share_turn_with_budget_choice(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 12-i} for i in range(12)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True, title='Black T-shirt') for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt under $25')
+        self.assertEqual(first['receipt']['question']['target_slot'], 'budget')
+        reply = runtime.chat(sid, 'Why are you asking about price? Show unpriced ideas')
+        self.assertTrue(reply['products'])
+        self.assertIn("don't have prices", reply['assistant']['message'])
+        self.assertNotIn('price_max', reply['receipt']['hard'])
+        self.assertEqual(reply['receipt']['term_question']['applied_request'],
+                         'Show unpriced ideas')
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_why_question_does_not_block_a_same_turn_reset(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 24-i} for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True,
+                         title=('Black' if int(key) < 12 else 'White') + ' T-shirt')
+                    for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        runtime.chat(sid, 'I need a T-shirt')
+        reset = runtime.chat(sid, 'Why are you asking about color? Start over')
+        self.assertTrue(reset['receipt']['search_reset'])
+        self.assertNotIn('category', reset['receipt']['hard'])
+        self.assertIn('retrieved listings include black and white', reset['assistant']['message'])
+        self.assertEqual(reset['receipt']['term_question']['applied_request'], 'Start over')
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
     def test_short_followups_reference_focus_not_requirements(self):
         for text, attribute in [('Material, please', 'material'), ('What about the price?', 'price'),
                                 ('How about its fit?', 'fit'), ('Fabric?', 'material'), ('Cost', 'price')]:
@@ -18,11 +376,14 @@ class ProductQuestionTests(unittest.TestCase):
             self.assertIsNone(parse_control_intent(text))
 
     def test_material_yes_no_questions_do_not_become_requirements(self):
-        for message in ('Is the second one cotton?', 'Is #2 pure cotton?',
-                        'Is the second one made from 100% cotton?', 'Is #2 a cotton blend?'):
+        for message, target in (('Is the second one cotton?', 'cotton'),
+                                ('Is #2 pure cotton?', 'pure cotton'),
+                                ('Is the second one made from 100% cotton?', 'pure cotton'),
+                                ('Is #2 a cotton blend?', 'cotton')):
             control = parse_control_intent(message)
             self.assertIsNotNone(control)
-            self.assertEqual((control.action, control.ranks, control.attribute), ('detail', (2,), 'material'))
+            self.assertEqual((control.action, control.ranks, control.attribute),
+                             ('detail', (2,), f'material_check:{target}'))
         self.assertTrue(parse_control_intent('Is it polyester?').uses_focus)
         for message in ('I need pure cotton', 'Is #2 cotton? Also change to blue'):
             self.assertIsNone(parse_control_intent(message))
@@ -43,6 +404,20 @@ class ProductQuestionTests(unittest.TestCase):
                          '#2: The listing specifies 60% cotton, 40% polyester.')
         self.assertEqual(answer_product_question({'title': 'Pure cotton tee'}, 1, 'material', 'en'),
                          '#1: The listing describes it as pure cotton.')
+
+    def test_direct_composition_answers_use_verified_percentage_evidence(self):
+        blend = {'features': ['60% cotton; 40% polyester']}
+        self.assertEqual(answer_product_question(blend, 2, 'material_check:pure cotton', 'en'),
+                         '#2: No. The listing specifies 60% cotton, 40% polyester.')
+        self.assertEqual(answer_product_question(blend, 2, 'material_check:cotton', 'en'),
+                         '#2: Yes. The listing specifies 60% cotton, 40% polyester.')
+        self.assertEqual(answer_product_question(blend, 2, 'material_check:linen', 'en'),
+                         '#2: No. The listing specifies 60% cotton, 40% polyester.')
+        self.assertIn('Yes.', answer_product_question({'title': 'Pure cotton tee'}, 2, 'material_check:pure cotton', 'en'))
+        self.assertIn("can't confirm", answer_product_question({'title': 'Cotton tee'}, 2, 'material_check:pure cotton', 'en'))
+        self.assertIn('varies or conflicts', answer_product_question(
+            {'features': ['100% cotton; heather colors 60% cotton, 40% polyester']},
+            2, 'material_check:pure cotton', 'en'))
 
     def test_english_summary_does_not_hide_material_uncertainty(self):
         for source in ('Not 100% cotton', 'Shell 100% cotton; lining 100% nylon',
@@ -157,7 +532,7 @@ class ProductQuestionTests(unittest.TestCase):
         self.assertEqual(len(calls), count)
         self.assertEqual(runtime.agent.memory.pending[sid], pending)
         material_check = runtime.chat(sid, 'Is it pure cotton?')
-        self.assertEqual(material_check['assistant']['message'], '#2: The listing specifies 60% cotton, 40% polyester.')
+        self.assertEqual(material_check['assistant']['message'], '#2: No. The listing specifies 60% cotton, 40% polyester.')
         self.assertEqual(len(calls), count)
         self.assertEqual(runtime.agent.memory.snapshot(sid).hard_constraints, state.hard_constraints)
         self.assertEqual(runtime.agent.memory.pending[sid], pending)

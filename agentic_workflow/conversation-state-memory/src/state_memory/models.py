@@ -37,6 +37,7 @@ class Slot:
     source_turn: int
     confidence: float = 1.0
     priority: float = 1.0
+    priority_turn: int | None = None
     constraint_type: ConstraintType = ConstraintType.HARD
     evidence: str = ""
 
@@ -50,6 +51,9 @@ class SessionState:
     hard_slots: dict[str, Slot] = field(default_factory=dict)
     soft_slots: dict[str, Slot] = field(default_factory=dict)
     rejected_values: dict[str, list[Any]] = field(default_factory=dict)
+    deferred_category_details: dict[str, dict[str, Any]] = field(default_factory=dict)
+    shared_price_slots: dict[str, Slot] = field(default_factory=dict)
+    active_item_price_category: str | None = None
     rejected_asins: list[str] = field(default_factory=list)
     shown_asins: list[str] = field(default_factory=list)
     candidate_count: int | None = None

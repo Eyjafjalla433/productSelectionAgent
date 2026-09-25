@@ -59,7 +59,7 @@ class RequirementEnhancer:
 
     def enhance(self, message: str, deterministic: Iterable[SlotUpdate]) -> EnhancementOutcome:
         deterministic = tuple(deterministic)
-        occupied = {update.slot for update in deterministic if update.operation in {"set", "clear"}}
+        occupied = {update.slot for update in deterministic if update.operation in {"set", "clear", "demote_soft", "promote_soft", "remove_value"}}
         user_payload = {
             "current_user_message": message,
             "deterministic_updates": [asdict(update) for update in deterministic],

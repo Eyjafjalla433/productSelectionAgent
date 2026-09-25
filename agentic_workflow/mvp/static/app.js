@@ -118,12 +118,21 @@ function renderReplyOptions(receipt = {}) {
     choices.push("Replace", "Keep both", "Keep original");
   } else if (Array.isArray(question?.options)) {
     question.options.slice(0, 4).forEach((value) => {
+      if (typeof value === "string") choices.push(
+        question.target_slot === "category" ? (question.option_labels?.[value] || value) : value);
+    });
+  } else if (Array.isArray(receipt.suggested_replies)) {
+    receipt.suggested_replies.slice(0, 4).forEach((value) => {
       if (typeof value === "string") choices.push(value);
     });
   }
-  if (question && question.target_slot !== "category") choices.push("Show me first");
+  if (question && !["category", "reset_scope"].includes(question.target_slot)) choices.push("Show me first");
   if (receipt.can_undo_requirements) choices.push("Undo");
   if (receipt.can_redo_requirements) choices.push("Redo");
+  if (receipt.can_undo_rejection) choices.push("Undo rejection");
+  if (receipt.can_redo_rejection) choices.push("Redo rejection");
+  if ([receipt.hard, receipt.soft, receipt.excluded].some(values =>
+    values && Object.keys(values).length)) choices.push("Start over");
   [...new Set(choices)].forEach((text) => {
     const button = document.createElement("button");
     button.type = "button";
@@ -324,7 +333,7 @@ function productColor(text) {
   return palette[sum % palette.length];
 }
 
-function renderProducts(products, retained = false) {
+function renderProducts(products, retained = false, guide = null) {
   ui.products.replaceChildren();
   if (products.length) {
     const panel = document.createElement('section');
@@ -332,7 +341,7 @@ function renderProducts(products, retained = false) {
     const heading = document.createElement('h3');
     heading.textContent = products.length >= 3 ? 'Compare the top three' : 'Take a closer look';
     const note = document.createElement('p');
-    note.textContent = 'Ranked by search relevance, not sales.' + (products.some(p => p.price == null) ? ' Prices are unavailable; budget fit still needs checking.' : '');
+    note.textContent = 'Ranked by search relevance, not sales.' + (products.some(p => p.price == null) ? ' Prices are unavailable; budget fit still needs checking.' : '') + (guide?.comparison_takeaway ? ` ${guide.comparison_takeaway}` : '');
     const table = document.createElement('table');
     const head = table.createTHead().insertRow();
     ['Rank / Product', 'Standout features', 'Other details'].forEach(label => {
@@ -416,7 +425,7 @@ function renderProducts(products, retained = false) {
         if (sessionId !== requestSession) return;
         syncSelection(state, products);
         renderComparison(null);
-        renderProducts(products, retained);
+        renderProducts(products, retained, guide);
       } catch (error) {
         if (sessionId !== requestSession) return;
         addMessage("agent", `Selection update failed: ${error.message}`);
@@ -736,7 +745,7 @@ ui.composer.addEventListener("submit", async (event) => {
     applyComparisonAssist(data.handoff);
     renderComparison(data.handoff);
     addMessage("agent", data.assistant.message, data.assistant.ask_attribute);
-    renderProducts(data.products, data.receipt?.display_mode || false);
+    renderProducts(data.products, data.receipt?.display_mode || false, data.shopping_guide);
     renderState(data.receipt);
     renderReceipt(data.receipt);
     renderReplyOptions(data.receipt);

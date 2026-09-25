@@ -13,7 +13,7 @@ import math
 import re
 from collections import Counter
 from typing import Any, Iterable
-from shopping_agent.retrieval import product_colors, style_matches
+from shopping_agent.retrieval import material_matches, product_colors, style_matches
 
 
 MATERIALS = (
@@ -72,6 +72,13 @@ def _single_style(product):
     return next(iter(values)) if len(values) == 1 else ''
 
 
+def _single_material(product):
+    # A question must use the same affirmative evidence as ranking and hard
+    # filtering. Otherwise a "cotton-free" item can inflate the cotton group.
+    values = {value for value in MATERIALS if material_matches(product, value)}
+    return next(iter(values)) if len(values) == 1 else ''
+
+
 def _price_band(value: object) -> str:
     try:
         price = float(value)
@@ -95,7 +102,7 @@ def product_facets(product: dict[str, Any]) -> dict[str, str]:
         "category": str(categories[-1]).strip().casefold() if categories else "",
         "brand": str(product.get("store") or "").strip().casefold(),
         "budget": _price_band(product.get("price")),
-        "material": _single_phrase(text, MATERIALS),
+        "material": _single_material(product),
         "color": _single_color(product),
         "style": _single_style(product),
         "use_case": _single_phrase(text, USE_CASES),

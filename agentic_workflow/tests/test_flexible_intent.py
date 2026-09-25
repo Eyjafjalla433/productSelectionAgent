@@ -2,8 +2,10 @@ import unittest
 from dataclasses import replace
 
 from agentic_workflow import Agent
+from mvp.audit import verify_audit
+from mvp.server import AgentRuntime
 from shopping_agent.policy import missing_detail_question
-from shopping_agent.retrieval import category_matches
+from shopping_agent.retrieval import category_matches, requirements_from_state
 
 
 class FlexibleIntentTests(unittest.TestCase):
@@ -39,6 +41,51 @@ class FlexibleIntentTests(unittest.TestCase):
                                    'material': ('cotton',), 'size': ('m',), 'budget_target': (30.0,)}.items():
                     self.assertEqual(sets[key], value)
 
+    def test_rejected_product_type_does_not_override_new_type(self):
+        for message, expected in (
+            ('Actually, not a T-shirt, a dress under $50', 'dress'),
+            ('Forget the T-shirt, I need a blue dress under $50', 'dress'),
+            ('I need a T-shirt, not a dress', 't-shirt'),
+        ):
+            with self.subTest(message=message):
+                parsed = self.agent.router.understand_turn(
+                    message, pending_question={'target_slot': 'color', 'constraint_type': 'soft'})
+                category_sets = [update.values for update in parsed.slot_updates
+                                 if update.slot == 'category' and update.operation == 'set']
+                self.assertEqual(category_sets, [(expected,)])
+        for message in ("I don't want a dress or a jacket",
+                        'Not a T-shirt or a dress', 'Not a T-shirt'):
+            with self.subTest(message=message):
+                parsed = self.agent.router.understand_turn(message)
+                self.assertFalse(any(update.slot == 'category' and update.operation == 'set'
+                                     for update in parsed.slot_updates))
+
+    def test_category_correction_interrupts_optional_question_and_can_be_undone(self):
+        def search(query, top_k):
+            return [{'product_id': f'{category}:{i}', 'score': 48 - i}
+                    for category in ('tee', 'dress') for i in range(24)]
+
+        def details(ids):
+            return [dict(product_id=key, found=True, price=35,
+                         title=(('Black' if int(key.split(':')[1]) < 12 else 'White') + ' T-shirt'
+                                if key.startswith('tee:') else 'Blue dress')) for key in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'I need a T-shirt')
+        self.assertEqual(first['receipt']['question']['target_slot'], 'color')
+        changed = runtime.chat(sid, 'Actually, not a T-shirt, a blue dress')
+        self.assertEqual(changed['receipt']['hard']['category'], 'dress')
+        self.assertEqual(changed['receipt']['hard']['color'], 'blue')
+        self.assertTrue(changed['products'])
+        self.assertTrue(all('dress' in item['title'].lower() for item in changed['products']))
+        restored = runtime.chat(sid, 'Undo')
+        self.assertEqual(restored['receipt']['hard']['category'], 't-shirt')
+        self.assertEqual([item['parent_asin'] for item in restored['products']],
+                         [item['parent_asin'] for item in first['products']])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
     def test_pending_category_answer_can_supply_many_values(self):
         self.agent.respond('test', 'Hello', 1)
         result = self.agent.respond('test', 'black cotton tshirt around $30', 2)
@@ -50,6 +97,75 @@ class FlexibleIntentTests(unittest.TestCase):
         self.assertEqual(state.soft_preferences['budget_target'][0].value, 30)
         question = missing_detail_question(state, 'feature', 'negative_feedback')
         self.assertNotIn(question.question['target_slot'], {'category', 'color', 'material', 'style', 'use_case', 'budget'})
+
+    def test_gift_opening_keeps_context_and_budget_before_product_type(self):
+        first = self.agent.respond('test', 'I need a gift for my dad under $50', 1)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(first['ask_attribute'], 'category')
+        self.assertEqual(self.calls, [])
+        self.assertEqual(state.hard_constraints, {'price_max': 50.0})
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for dad')
+        self.assertIn('your dad under $50', first['message'])
+        self.assertEqual(state.pending_question['options'], ['t-shirt', 'shoes', 'bag'])
+        second = self.agent.respond('test', 'A black T-shirt', 2)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(state.hard_constraints['category'], 't-shirt')
+        self.assertEqual(state.hard_constraints['color'], 'black')
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for dad')
+        self.assertNotIn('gift for dad', requirements_from_state(state).soft_preferences)
+        self.assertNotIn('gift for dad', self.calls[-1][0])
+        self.assertEqual(len(self.calls), 1)  # Context alone is not a reason to retry search.
+        self.assertTrue(self.calls)
+
+    def test_gift_is_not_inferred_from_negation(self):
+        parsed = self.agent.router.understand_turn('I need a T-shirt, not a gift')
+        self.assertFalse(any(u.slot == 'shopping_purpose' and u.operation == 'set' for u in parsed.slot_updates))
+
+    def test_gift_recipient_change_can_be_undone(self):
+        self.agent.respond('test', 'A gift for my dad', 1)
+        self.agent.respond('test', 'Actually, for my mom instead', 2)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for mom')
+        self.agent.respond('test', 'Undo', 3)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for dad')
+
+    def test_category_and_recipient_correction_can_arrive_together(self):
+        self.agent.respond('test', 'A gift for my dad', 1)
+        self.agent.respond('test', 'Actually, a black T-shirt for my mom instead', 2)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(state.hard_constraints['category'], 't-shirt')
+        self.assertEqual(state.hard_constraints['color'], 'black')
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for mom')
+
+    def test_gift_context_survives_product_type_switch_and_can_be_withdrawn(self):
+        self.agent.respond('test', 'A gift for my dad', 1)
+        self.agent.respond('test', 'A black T-shirt', 2)
+        self.agent.respond('test', 'Actually, show me shoes', 3)
+        state = self.agent.memory.snapshot('test')
+        self.assertEqual(state.hard_constraints['category'], 'shoes')
+        self.assertEqual(state.soft_preferences['shopping_purpose'][0].value, 'gift for dad')
+        self.agent.respond('test', 'Not a gift anymore', 4)
+        self.assertNotIn('shopping_purpose', self.agent.memory.snapshot('test').soft_preferences)
+        self.agent.respond('test', 'Undo', 5)
+        self.assertEqual(self.agent.memory.snapshot('test').soft_preferences['shopping_purpose'][0].value, 'gift for dad')
+
+    def test_gift_purpose_is_acknowledged_without_becoming_product_evidence(self):
+        self.agent.respond('test', 'A gift for my dad', 1)
+        result = self.agent.respond('test', 'A black T-shirt', 2)
+        self.assertIn('gift for your dad', result['message'])
+        self.assertNotIn('gift for dad', self.calls[-1][0])
+
+    def test_unsure_gift_shopper_gets_honest_starting_points(self):
+        self.agent.respond('test', 'A gift for my dad', 1)
+        result = self.agent.respond('test', 'Surprise me', 2)
+        self.assertEqual(self.calls, [])
+        self.assertIn('gift for your dad', result['message'])
+        self.assertIn('needs a product type', result['message'])
+
+    def test_gift_card_does_not_trigger_gift_purpose(self):
+        parsed = self.agent.router.understand_turn('I need a gift card')
+        self.assertFalse(any(u.slot == 'shopping_purpose' and u.operation == 'set' for u in parsed.slot_updates))
 
     def test_followup_selects_an_unknown_dimension(self):
         self.agent.respond('test', 'black cotton tshirt regular fit around $30', 1)

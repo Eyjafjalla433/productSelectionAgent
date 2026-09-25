@@ -54,7 +54,10 @@ def describe(product, source_product=None):
     source = product if source_product is None else source_product
     fits = [(label, style_evidence(source, value)) for value, label in (
         ('slim fit', '修身版型'), ('loose fit', '宽松版型'), ('regular fit', '常规版型'))]
-    supported = [(label, quote) for label, quote in fits if quote]
+    fit_alternatives = re.compile(
+        r'\b(?:slim|fitted|bodycon|loose|relaxed|oversized|regular|standard)\b\s*(?:or|/)\s*'
+        r'\b(?:slim|fitted|bodycon|loose|relaxed|oversized|regular|standard)\b', re.I)
+    supported = [(label, quote) for label, quote in fits if quote and not fit_alternatives.search(quote)]
     # Mixed-variant descriptions must not present opposing cuts as one fact.
     if len(supported) == 1:
         label, quote = supported[0]
@@ -67,10 +70,11 @@ def describe(product, source_product=None):
             highlights.append({'label': label or match.group() + ' 款', 'group': group, 'quote': text})
             break
     # Title size is not a claim about availability or recommended fit.
-    size = re.search(r'\b(XXXL|XXL|XL|XXS|XS|Medium|Small|Large)\b|\bsize\s+([SML])\b', snippets[0], re.I)
-    if size:
-        value = (size.group(1) or size.group(2)).upper()
-        label = {'MEDIUM': 'M', 'SMALL': 'S', 'LARGE': 'L'}.get(value, value)
+    sizes = re.findall(r'\b(XXXL|XXL|XL|XXS|XS|Medium|Small|Large)\b|\bsize\s+([SML])\b', snippets[0], re.I)
+    listed_sizes = {{'MEDIUM': 'M', 'SMALL': 'S', 'LARGE': 'L'}.get((named or short).upper(), (named or short).upper())
+                    for named, short in sizes}
+    if len(listed_sizes) == 1:
+        label = next(iter(listed_sizes))
         highlights.append({'label': f'Listed size {label}', 'group': 'detail', 'quote': snippets[0]})
     for highlight in highlights:
         highlight['label'] = ENGLISH_LABELS.get(highlight['label'], highlight['label'])
@@ -85,7 +89,29 @@ def describe(product, source_product=None):
 def build_shopping_guide(products):
     rows = [deepcopy(product['shopper_notes']) if 'shopper_notes' in product
             else describe(product) for product in products[:10]]
+    top_three = rows[:3]
+    listed_sizes = [next((highlight['label'].removeprefix('Listed size ')
+                          for highlight in row.get('evidence', ())
+                          if highlight.get('label', '').startswith('Listed size ')), None)
+                    for row in top_three]
+    size_takeaway = (
+        'The listing titles show different sizes: ' +
+        ', '.join(f"#{row['rank']} {size}" for row, size in zip(top_three, listed_sizes)) +
+        '. Confirm size availability and fit with the seller.'
+        if len(top_three) == 3 and all(listed_sizes) and len(set(listed_sizes)) > 1 else ''
+    )
+    listed_fits = [next((highlight['label'] for highlight in row.get('evidence', ())
+                         if highlight.get('label') in {'Slim fit', 'Loose fit', 'Regular fit'}), None)
+                   for row in top_three]
+    fit_takeaway = (
+        'The listings describe different cuts: ' +
+        ', '.join(f"#{row['rank']} {fit.lower()}" for row, fit in zip(top_three, listed_fits)) +
+        '. Check each seller\'s size chart before deciding.'
+        if len(top_three) == 3 and all(listed_fits) and len(set(listed_fits)) > 1 else ''
+    )
+    comparison_takeaway = ' '.join(filter(None, (size_takeaway, fit_takeaway)))
     return {'top_three': rows[:3], 'other_options': rows[3:], 'count': len(rows),
+            'comparison_takeaway': comparison_takeaway,
             'ranking_note': 'Ranked by search relevance, not sales.',
             'data_note': 'Prices are unavailable; budget fit still needs checking.' if any(p['price'] is None for p in rows) else '',
             'intro': (f'Here are {len(rows)} options. The table compares the top three.' if len(rows) > 3 else f'Let’s take a look at these {len(rows)} options.') if rows else ''}
@@ -109,6 +135,11 @@ def preference_tradeoff(products, locale='en'):
         raw = signal.get('value', [])
         values = raw if isinstance(raw, (list, tuple)) else [raw]
         wanted = ' / '.join(labels.get(str(v), str(v)) if locale == 'zh' else str(v) for v in values)
+        if slot == 'size' and locale != 'zh':
+            shown = ' or '.join(str(value).upper() for value in values)
+            return (f'{count} of these listings explicitly mention size {shown}; check the seller\'s size chart for availability and fit.'
+                    if count else
+                    f'I could not verify size {shown} in these listings; check the seller\'s size chart before buying.')
         if locale == 'zh':
             return (f'其中 {count} 款的资料符合你偏好的{wanted}，其余先当备选。' if count
                     else f'你偏好的{wanted}，这批资料还没确认到；先把这些当作备选。')

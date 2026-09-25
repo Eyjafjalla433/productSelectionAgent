@@ -14,12 +14,13 @@ class SlotUpdate:
 
     ``set`` replaces the current value in the specified hard/soft tier;
     ``clear`` removes both tiers and exclusions for this slot;
+    ``remove_value`` removes only named positive values, preserving alternatives;
     ``exclude`` adds rejected values; ``remove_exclusion`` only allows them again.
     A set does not implicitly remove exclusions: the producer must say so.
     """
 
     slot: str
-    operation: Literal["set", "clear", "exclude", "remove_exclusion"]
+    operation: Literal["set", "clear", "demote_soft", "promote_soft", "remove_value", "exclude", "remove_exclusion"]
     values: tuple[str | float | bool, ...] = ()
     constraint_type: Literal["hard", "soft"] | None = None
     confidence: float | None = None
@@ -31,13 +32,13 @@ class SlotUpdate:
         # New interfaces use price_*; the existing IntentResult dictionaries
         # remain unchanged for legacy consumers.
         object.__setattr__(self, "slot", {"budget_min": "price_min", "budget_max": "price_max"}.get(self.slot, self.slot))
-        if self.operation not in {"set", "clear", "exclude", "remove_exclusion"}:
+        if self.operation not in {"set", "clear", "demote_soft", "promote_soft", "remove_value", "exclude", "remove_exclusion"}:
             raise ValueError("unsupported slot operation")
         if not isinstance(self.values, (tuple, list)):
             raise ValueError("values must be a sequence, not a scalar string")
         object.__setattr__(self, "values", tuple(self.values))
-        if (self.operation == "clear") != (len(self.values) == 0):
-            raise ValueError("clear takes no values; other operations require values")
+        if (self.operation in {"clear", "demote_soft", "promote_soft"}) != (len(self.values) == 0):
+            raise ValueError("priority and clear operations take no values; other operations require values")
         if self.operation == "set":
             if self.constraint_type not in {"hard", "soft"}:
                 raise ValueError("set requires an explicit hard/soft tier")

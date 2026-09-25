@@ -71,8 +71,10 @@ def render(report):
                  'Exclusions': receipt.get('excluded', {})}
         cards = ''.join(product_card(p) for p in result['products'][:3])
         guide = build_shopping_guide(result['products'])
+        takeaway = (f'<p class="comparison-takeaway">{escape(guide["comparison_takeaway"])}</p>'
+                    if guide['comparison_takeaway'] else '')
         rows = ''.join(f'<tr><td><b>#{p["rank"]}</b> {escape(p["title"])}</td><td>{escape(p["feature"]) or "—"}</td><td>{escape(p["detail"]) or "—"}</td></tr>' for p in guide['top_three'])
-        comparison = f'<div class="table-wrap"><table><caption>Top three comparison</caption><thead><tr><th>Rank / Product</th><th>Standout features</th><th>Other details</th></tr></thead><tbody>{rows}</tbody></table></div><p class="muted">{guide["data_note"]}</p>'
+        comparison = f'<div class="table-wrap"><table><caption>Top three comparison</caption><thead><tr><th>Rank / Product</th><th>Standout features</th><th>Other details</th></tr></thead><tbody>{rows}</tbody></table></div>{takeaway}<p class="muted">{guide["data_note"]}</p>'
         others = ''.join(f'<article class="other-option"><b>#{p["rank"]} {escape(p["title"])}</b><p>{escape(" · ".join(filter(None, (p["feature"], p["detail"]))))}</p></article>' for p in guide['other_options'])
         remaining = f'<section class="remaining"><h3>More options to consider</h3>{others}</section>' if others else ''
         final = f'<div class="confirmed">✓ Saved {len(report["handoff"]["selected_products"])} options for later. No order has been placed.</div>' if i == 3 else ''

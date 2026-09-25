@@ -42,6 +42,16 @@ def main():
           renderReplyOptions({question:{target_slot:'color', options:['black','white']}, can_undo_requirements:true});
           const labels = [...ui.replyOptions.children].map(b => b.textContent);
           check(labels.join('|') === 'black|white|Show me first|Undo', 'grounded choices');
+          renderReplyOptions({hard:{category:'t-shirt'}});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Start over', 'reset visible for an active search');
+          renderReplyOptions({question:{target_slot:'category', options:['t-shirt','dress'],
+            option_labels:{'t-shirt':'T-shirt',dress:'Dress'}}});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'T-shirt|Dress', 'category labels');
+          renderReplyOptions({question:{target_slot:'reset_scope', options:['Reset search only','Reset everything','Cancel']}});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Reset search only|Reset everything|Cancel', 'reset scope choices');
+          renderReplyOptions({suggested_replies:['T-shirt','Dress']});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'T-shirt|Dress', 'reoffered starting points');
+          renderReplyOptions({question:{target_slot:'color', options:['black','white']}, can_undo_requirements:true});
           ui.message.value = 'my draft'; ui.message.dispatchEvent(new Event('input'));
           check([...ui.replyOptions.children].every(b=>b.disabled), 'protect draft');
           ui.replyOptions.firstChild.click(); check(ui.message.value === 'my draft', 'draft unchanged');
@@ -62,6 +72,10 @@ def main():
           renderReplyOptions({}); check(ui.replyOptions.hidden && !ui.replyOptions.children.length, 'stale options removed');
           renderReplyOptions({can_redo_requirements:true});
           check(ui.replyOptions.children.length === 1 && ui.replyOptions.firstChild.textContent === 'Redo', 'redo availability');
+          renderReplyOptions({can_undo_rejection:true, can_redo_rejection:true});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Undo rejection|Redo rejection', 'product feedback corrections');
+          renderReplyOptions({question:{target_slot:'similarity_attribute', options:['fit','color','fabric']}});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'fit|color|fabric|Show me first', 'grounded similarity choices');
           renderReplyOptions({question:{target_slot:'material', options:['fleece'], option_labels:{fleece:'抓绒'}}});
           check(ui.replyOptions.firstChild.textContent === 'fleece', 'English options regardless of legacy labels');
           shortlisted.clear();
@@ -119,7 +133,15 @@ def main():
           }]}, []);
           check(!shortlisted.get('new').comparisonDraft, 'stale model comparison removed');
           check(ui.shortlistItems.textContent.includes('Not all current requirements'), 'saved choice recheck warning');
-          return {passed:true, labels, checks:24};
+          const comparisonProducts = [1,2,3].map(rank => ({rank, parent_asin:`demo-${rank}`,
+            title:`Shirt ${rank}`, category:'t-shirt', store:'Demo', price:null,
+            shopper_notes:{feature:'Cotton', detail:`Listed size ${['M','S','L'][rank-1]}`},
+            evidence:[], match:{hard_supported:0,hard_total:0,soft_supported:0,soft_total:0,signals:[]},
+            advice:{pros:[],cons:[]}}));
+          renderProducts(comparisonProducts, false, {comparison_takeaway:'The listing titles show different sizes: #1 M, #2 S, #3 L.'});
+          check(ui.products.querySelector('.shopping-top-three p').textContent.includes('#1 M, #2 S, #3 L'),
+            'size contrast appears in the comparison panel');
+          return {passed:true, labels, checks:31};
         })()''')
         print(json.dumps(report, ensure_ascii=False))
     finally:

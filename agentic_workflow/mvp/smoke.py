@@ -11,7 +11,7 @@ from .audit import verify_audit
 from .server import AgentRuntime, find_catalog
 
 
-DEFAULT_QUERY = "我想要一条蓝色棉质连衣裙，价格不超过50美元。"
+DEFAULT_QUERY = "I want a blue cotton dress under $50."
 
 
 def _usage(result: dict[str, Any]) -> int:
@@ -35,8 +35,8 @@ def run_smoke(catalog: Path) -> dict[str, Any]:
     for parent_asin in chosen:
         runtime.update_selection(session_id, parent_asin=parent_asin, selected=True)
 
-    compared = runtime.chat(session_id, "比较第一个和第二个")
-    finalized = runtime.chat(session_id, "确认最终选择")
+    compared = runtime.chat(session_id, "Compare the first and second options")
+    finalized = runtime.chat(session_id, "Finalize my selection")
     finalized_handoff = runtime.selection_handoff(session_id)
 
     if finalized_handoff.get("status") != "finalized":
@@ -44,7 +44,7 @@ def run_smoke(catalog: Path) -> dict[str, Any]:
     if finalized_handoff.get("decision", {}).get("selected_asins") != chosen:
         raise RuntimeError("finalized ASIN order did not match the selected products")
 
-    changed = runtime.chat(session_id, "改成红色")
+    changed = runtime.chat(session_id, "Actually, change the color to red")
     reopened_handoff = runtime.selection_handoff(session_id)
     if not changed.get("receipt", {}).get("selection_finalization_invalidated"):
         raise RuntimeError("requirement change did not invalidate the finalized selection")
