@@ -7,6 +7,7 @@ import re
 from typing import Any, Iterable
 
 from shopping_agent.retrieval import category_matches, subtype_matches, material_matches, size_matches, color_matches, style_matches
+from shopping_agent.retrieval import breathable_matches
 from techjam_agent.query import parse_text
 
 
@@ -60,6 +61,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
 
     for slot, raw in receipt.get("hard", {}).items():
         values = _values(raw)
+        matched_values = []
         status = "not_evidenced"
         evidence = "not found in catalog text"
         if slot in {"price_min", "price_max"}:
@@ -69,6 +71,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 threshold = float(values[0])
                 supported = price >= threshold if slot == "price_min" else price <= threshold
                 status = "supported" if supported else "conflict"
+                matched_values = values if supported else []
                 operator = ">=" if slot == "price_min" else "<="
                 evidence = f"${price:.2f} {operator} ${threshold:.2f}"
         else:
@@ -81,7 +84,9 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 elif matches:
                     status = "conflict"
                     evidence = matches[0][1]
-                signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status, "evidence": evidence})
+                matched_values = [value for value, (matched, _) in zip(values, matches) if matched]
+                signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status,
+                                "evidence": evidence, "matched_values": matched_values})
                 continue
             corpus = brand_terms if slot == "brand" else full_terms
             evidence_values = (
@@ -89,15 +94,19 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 if slot.startswith("feature_")
                 else values
             )
-            if any((material_matches(product, value) if slot == 'material'
+            matched_values = [raw_value for raw_value, value in zip(values, evidence_values)
+                    if (breathable_matches(product) if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+                    else material_matches(product, value) if slot == 'material'
                     else subtype_matches(product, value) if slot == 'subtype'
                     else size_matches(product, value) if slot == 'size'
                     else color_matches(product, value) if slot == 'color'
                     else style_matches(product, value) if slot == 'style'
-                    else _text_match(value, corpus)) for value in evidence_values):
+                    else _text_match(value, corpus))]
+            if matched_values:
                 status = "supported"
                 evidence = "store/details" if slot == "brand" else "catalog text"
-        signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status, "evidence": evidence})
+        signals.append({"tier": "hard", "slot": slot, "value": raw, "status": status,
+                        "evidence": evidence, "matched_values": matched_values})
 
     for slot, raw_values in receipt.get("soft", {}).items():
         if slot in {'shopping_purpose', 'shopping_occasion', 'budget_floor_target'}:
@@ -107,13 +116,15 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
             conflicting = [value for value in values if style_matches(product, value)]
             signals.append({
                 'tier': 'soft', 'slot': slot, 'value': raw_values,
+                'conflicting_values': conflicting,
                 'status': 'conflict' if conflicting else 'unknown',
                 'evidence': ('explicit fit label: ' + ', '.join(map(str, conflicting))
                              if conflicting else 'fit not verified by this listing'),
             })
             continue
         matched = [value for value in values if (
-            material_matches(product, value) if slot == 'material'
+            breathable_matches(product) if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+            else material_matches(product, value) if slot == 'material'
             else size_matches(product, value) if slot == 'size'
             else color_matches(product, value) if slot == 'color'
             else style_matches(product, value) if slot == 'style'
@@ -124,6 +135,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 "tier": "soft",
                 "slot": slot,
                 "value": raw_values,
+                "matched_values": matched,
                 "status": "unknown" if slot == 'budget_target' and price is None else "supported" if matched else "not_evidenced",
                 "evidence": ("target budget requires a price comparison" if slot == 'budget_target'
                              else f"matched: {', '.join(map(str, matched))}" if matched else "not found in catalog text"),
@@ -132,7 +144,9 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
 
     for slot, raw_values in receipt.get("excluded", {}).items():
         values = _values(raw_values)
-        conflicts = [value for value in values if (material_matches(product, value)
+        conflicts = [value for value in values if (breathable_matches(product)
+                     if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+                     else material_matches(product, value)
                      if slot == 'material'
                      else color_matches(product, value) if slot == 'color'
                      else style_matches(product, value) if slot == 'style' else _text_match(value, full_terms))]
@@ -141,6 +155,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
                 "tier": "excluded",
                 "slot": slot,
                 "value": raw_values,
+                "conflicting_values": conflicts,
                 "status": "conflict" if conflicts else "clear",
                 "evidence": f"found: {', '.join(map(str, conflicts))}" if conflicts else "no excluded term found",
             }
@@ -201,7 +216,11 @@ def product_advice(product: dict[str, Any], match: dict[str, Any]) -> dict[str, 
         status = signal.get("status")
         slot = str(signal.get("slot") or "requirement")
         value = signal.get("value")
+        if status == 'conflict' and 'conflicting_values' in signal:
+            value = signal['conflicting_values']
         if status == "supported" and tier in {"hard", "soft"}:
+            if 'matched_values' in signal:
+                value = signal['matched_values']
             evidence_value = (
                 " ".join(parse_text(str(value)).retrieval_terms)
                 if slot.startswith("feature_")

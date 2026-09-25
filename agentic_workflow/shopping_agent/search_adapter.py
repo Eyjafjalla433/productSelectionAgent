@@ -8,7 +8,7 @@ import importlib
 from techjam_agent.contracts import Candidate, PRODUCT_FIELDS, RankedCandidate
 from techjam_agent.contracts_v2 import RetrievalResultV2, RetrievalStats, RankingResultV2
 from .retrieval import (requirements_from_state, StateAwareRetriever, color_matches,
-                        material_matches, size_matches, style_matches)
+                        material_matches, size_matches, style_matches, breathable_matches)
 
 
 def _text_list(value):
@@ -121,10 +121,10 @@ class SearchToolAdapter:
             candidate_limit=request.candidate_limit, candidates=tuple(candidates),
             stats=RetrievalStats(), state_snapshot=state.to_dict(),
             legacy_requirements=requirements,
-            warnings=(('search_tool scores retained; catalog-supported soft color, fit, or fabric preferences may reorder results; '
+            warnings=(('search_tool scores retained; catalog-supported soft color, fit, fabric, or breathability preferences may reorder results; '
                        'price, inventory and variants are unknown.')
                       if ordered_color or any(state.soft_preferences.get(name) for name in
-                                              ('style', 'material', 'fit_avoid', 'size')) else
+                                              ('style', 'material', 'fit_avoid', 'size', 'feature')) else
                       'search_tool ranking retained; price, inventory and variants are unknown.',
                       *(("budget_unverifiable: search_tool returned products without prices.",)
                         if price_blocked and any(key in state.hard_constraints
@@ -141,6 +141,9 @@ class SearchToolAdapter:
                   if row.get('value')]
         materials = [(str(row['value']), float(row['weight'])) for row in soft.get('material', ())
                      if row.get('value')]
+        breathability_weight = max((float(row['weight']) for row in soft.get('feature', ())
+                                    if str(row.get('value', '')).strip().casefold() == 'breathable'),
+                                   default=0.0)
         avoid_fits = [str(row.get('value')) for row in
                       soft.get('fit_avoid', ())
                       if row.get('value')]
@@ -156,6 +159,8 @@ class SearchToolAdapter:
         matched_material = {candidate.parent_asin: any(
             material_matches(candidate.product, material) for material, _ in materials)
             for candidate in candidates}
+        breathable = {candidate.parent_asin: bool(breathability_weight and breathable_matches(candidate.product))
+                      for candidate in candidates}
         weighted_match = {}
         for candidate in candidates:
             product = candidate.product
@@ -166,6 +171,7 @@ class SearchToolAdapter:
                       default=0.0)
                 + max((weight for material, weight in materials
                        if material_matches(product, material)), default=0.0)
+                + (breathability_weight if breathable[candidate.parent_asin] else 0.0)
             )
         disfavored = {candidate.parent_asin: any(style_matches(candidate.product, value)
                                                  for value in avoid_fits)
@@ -179,6 +185,7 @@ class SearchToolAdapter:
         color_reranked = bool(ordered_color and any(preferred_color.values())
                               and not all(preferred_color.values()))
         size_reranked = bool(sizes and any(sized.values()) and not all(sized.values()))
+        breathable_reranked = any(breathable.values()) and not all(breathable.values())
         avoid_reranked = bool(avoid_fits and any(disfavored.values())
                               and not all(disfavored.values()))
         weighted_reranked = len({round(value, 8) for value in weighted_match.values()}) > 1
@@ -196,13 +203,15 @@ class SearchToolAdapter:
             (('catalog-supported primary color preference',) if preferred_color[candidate.parent_asin] else ()) +
             (('catalog-supported soft style match',) if matched[candidate.parent_asin] else ()) +
             (('catalog-supported soft material match',) if matched_material[candidate.parent_asin] else ()) +
+            (('catalog-supported soft breathability match',) if breathable[candidate.parent_asin] else ()) +
             (('catalog-supported soft size match',) if sized[candidate.parent_asin] else ()) +
             (('explicit fit label conflicts with soft avoidance',)
              if disfavored[candidate.parent_asin] else ()))
             for index, candidate in enumerate(candidates[:top_k], 1))
         result = RankingResultV2(retrieval.candidate_set_id, retrieval.session_id,
             retrieval.turn, retrieval.state_version, rows,
-            ('search_tool+weighted_catalog_preferences' if weighted_reranked and material_reranked and
+            ('search_tool+supported_soft_preferences' if weighted_reranked and breathable_reranked else
+             'search_tool+weighted_catalog_preferences' if weighted_reranked and material_reranked and
              (color_reranked or preference_reranked) else
              'search_tool+supported_soft_material_first' if weighted_reranked and material_reranked else
              'search_tool+supported_primary_color_first' if weighted_reranked and color_reranked else

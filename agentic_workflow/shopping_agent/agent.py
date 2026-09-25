@@ -424,7 +424,7 @@ class FinalAgent:
                     fresh = sum(row['parent_asin'] not in state.shown_asins
                                 for row in recommendations)
                     response['message'] = (
-                        f"I hear you—those didn't work. I found {fresh} options you haven't seen yet "
+                        f"I hear you—those didn't work. I found {fresh} {'option' if fresh == 1 else 'options'} you haven't seen yet "
                         f"for {description}{budget}. Let's see whether these feel closer."
                         if fresh else
                         "I hear you—those didn't work. This search hasn't turned up a fresh verified option; "
@@ -434,15 +434,24 @@ class FinalAgent:
                       all(row['parent_asin'] in state.shown_asins for row in recommendations)):
                     response['message'] = (
                         "I couldn't find any new verified options under the current search. "
-                        "I've kept these earlier matches visible so we can compare them "
+                        + ("I've kept the earlier match visible so we can look at its details "
+                           if len(recommendations) == 1 else
+                           "I've kept these earlier matches visible so we can compare them ") +
                         "or change a detail that matters to you."
                     )
                 else:
-                    response['message'] = f"Got it — {description}{budget}. I've pulled together {len(recommendations)} options so you can compare their details."
+                    response['message'] = (
+                        f"Got it — {description}{budget}. I found one option to look at. "
+                        "We can check its details or adjust your preferences."
+                        if len(recommendations) == 1 else
+                        f"Got it — {description}{budget}. I've pulled together {len(recommendations)} options so you can compare their details.")
                 if decision.reason == 'browse_first':
-                    response['message'] = (f"Here are {len(recommendations)} {description} options to browse. "
+                    response['message'] = ((f"Here's one {description} option to look at. "
+                                           "No need to narrow things down yet—ask about its details "
+                                           "or tell me what you'd change.") if len(recommendations) == 1 else
+                                          (f"Here are {len(recommendations)} {description} options to browse. "
                                            "No need to narrow things down yet—tell me what catches your eye, "
-                                           "or ask me to compare a couple.")
+                                           "or ask me to compare a couple."))
                 bypassed = state.suggestions.get('bypassed_optional_question')
                 if bypassed:
                     response['message'] += f" We can leave {bypassed.replace('_', ' ')} open for now."

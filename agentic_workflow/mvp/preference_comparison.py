@@ -19,7 +19,7 @@ def _price(value: Any) -> float | None:
 
 
 def _signal_label(signal: dict[str, Any]) -> str:
-    value = signal.get('value')
+    value = signal.get('matched_values', signal.get('value'))
     if isinstance(value, (list, tuple)):
         value = ', '.join(str(item) for item in value)
     slot = signal.get('slot', 'preference')
@@ -44,51 +44,58 @@ def _distinguishing_question(rows: list[dict[str, Any]]) -> dict[str, Any] | Non
     return None
 
 
+def _choice_reference(reference: str, question: dict[str, Any]) -> dict[str, Any] | None:
+    """Resolve one complete reference, without interpreting negation or edits."""
+    choices = question['options']
+    ordinal = re.fullmatch(r'(?:the )?(first|second)(?: one| item| option)?', reference)
+    if ordinal:
+        return choices[0 if ordinal.group(1) == 'first' else 1]
+    reference = reference.removeprefix('the ')
+    matches = []
+    for item in choices:
+        aliases = {str(item['value']).casefold(), f"#{item['rank']}"}
+        if question.get('kind') == 'decision_tradeoff':
+            aliases.add(item['facet'])
+            if item['facet'] == 'fabric':
+                aliases.add('material')
+                if 'cotton' in str(item['value']).casefold():
+                    aliases.add('cotton')
+        if reference in aliases:
+            matches.append(item)
+    return matches[0] if len(matches) == 1 else None
+
+
 def resolve_comparison_reply(message: str, question: dict[str, Any] | None) -> dict[str, Any] | None:
     """Resolve a short reference, optionally followed by another shopping detail."""
     if not question or len(question.get('options', ())) != 2:
         return None
     text = message.strip().casefold().rstrip(' .!?')
-    if question.get('kind') == 'decision_tradeoff':
-        parts = re.fullmatch(r'(?P<ref>[^,]+?)(?:\s*,\s*(?:(?:but|and)\s+)?(?P<extra>.+))?', text)
-        if not parts:
+    correction = re.fullmatch(r'not\s+(.+?)\s*(?:,|—|;|\sbut\s)\s*(.+)', text)
+    if correction:
+        previous = _choice_reference(correction.group(1).strip(), question)
+        chosen = _choice_reference(correction.group(2).strip(), question)
+        if not previous or not chosen or previous['parent_asin'] == chosen['parent_asin']:
             return None
-        reference = re.sub(r'^(?:i (?:prefer|care (?:more )?about)|the)\s+', '', parts.group('ref')).strip()
-        choices = question['options']
-        if reference in {'the first one', 'first one', 'first option'}:
-            option = choices[0]
-        elif reference in {'the second one', 'second one', 'second option'}:
-            option = choices[1]
-        else:
-            matched = [item for item in choices
-                       if reference in {str(item['value']).casefold(), item['facet'],
-                                        'material' if item['facet'] == 'fabric' else item['facet'],
-                                        f"#{item['rank']}"}
-                       or (item['facet'] == 'fabric' and reference == 'cotton'
-                           and 'cotton' in str(item['value']).casefold())]
-            option = matched[0] if len(matched) == 1 else None
-        return {'kind': 'decision_tradeoff', **option,
-                'extra_message': parts.group('extra')} if option else None
-    parts = re.fullmatch(
-        r'(?P<ref>(?:the )?(?:first|second)(?: one| item| option)?|#(?:1|2))'
-        r'(?:(?:\s*,\s*(?:(?:but|and)\s+)?|\s+(?:but|and)\s+)(?P<extra>.+))?',
-        text,
-    )
-    if not parts:
-        return None
-    text = parts.group('ref')
-    ordinal = (0 if re.fullmatch(r'(?:the )?first(?: one| item| option)?', text) else
-               1 if re.fullmatch(r'(?:the )?second(?: one| item| option)?', text) else None)
-    if ordinal is not None:
-        option = question['options'][ordinal]
-    elif re.fullmatch(r'#(?:1|2)', text):
-        option = next((item for item in question['options'] if item['rank'] == int(text[1:])), None)
-        if option is None:
+        base = ({'kind': 'decision_tradeoff'} if question.get('kind') == 'decision_tradeoff'
+                else {'slot': question['slot']})
+        return {**base, **chosen, 'extra_message': None}
+    # Both comparison modes use the same complete-reference rules. Politeness
+    # isn't a new requirement; negation and uncertainty are not stripped away.
+    text = re.sub(r'(?:,\s*|\s+)please$', '', text)
+    text = re.sub(r'^i (?:prefer|care (?:more )?about)\s+', '', text)
+    option = _choice_reference(text, question)
+    extra = None
+    if option is None:
+        clauses = re.split(r'\s*,\s*(?:(?:but|and)\s+)?|\s+(?:but|and)\s+', text, maxsplit=1)
+        if len(clauses) != 2:
             return None
-    else:
+        option = _choice_reference(clauses[0], question)
+        extra = clauses[1]
+    if option is None:
         return None
-    return {'slot': question['slot'], **option,
-            'extra_message': parts.group('extra')}
+    base = ({'kind': 'decision_tradeoff'} if question.get('kind') == 'decision_tradeoff'
+            else {'slot': question['slot']})
+    return {**base, **option, 'extra_message': extra}
 
 
 def declines_comparison_question(message: str, question: dict[str, Any] | None) -> bool:
@@ -100,6 +107,26 @@ def declines_comparison_question(message: str, question: dict[str, Any] | None) 
                     'neither', 'neither one', 'no preference', 'no preference between them',
                     'either is fine', 'any is fine', "doesn't matter", 'not sure',
                     "i don't know", 'leave the ranking', 'leave the ranking as it is'}
+
+
+def _known_conflicts(product):
+    return [{'slot': signal.get('slot'), 'tier': signal.get('tier'),
+             'value': signal.get('conflicting_values', signal.get('value')),
+             'evidence': signal.get('evidence')}
+            for signal in (product.get('match') or {}).get('signals', [])
+            if signal.get('status') == 'conflict']
+
+
+def _conflict_text(conflict):
+    value = conflict['value']
+    shown = ', '.join(map(str, value)) if isinstance(value, (list, tuple)) else str(value)
+    if conflict['slot'] == 'fit_avoid':
+        return f'listed as {shown}, which you preferred to avoid'
+    if conflict['tier'] == 'excluded':
+        return f'lists {shown}, which you excluded'
+    label = str(conflict['slot']).replace('_', ' ')
+    kind = 'preference' if conflict['tier'] == 'soft' else 'requirement'
+    return f'conflicts with your {label} {kind} ({shown})'
 
 
 def decision_followup(
@@ -121,8 +148,19 @@ def decision_followup(
                    "You can keep browsing or change the preference.")
         return message, {'recommended_rank': None, 'verified_matches': 0,
                          'basis': 'verified current-page catalog facet'}
-    pick = matches[0]
-    others = len(matches) - 1
+    conflicts = {item['rank']: points for item in matches if (points := _known_conflicts(item))}
+    eligible = [item for item in matches if item['rank'] not in conflicts]
+    conflict_note = ' '.join(f"#{rank} is {_conflict_text(points[0])}." if points[0]['slot'] == 'fit_avoid'
+                             else f"#{rank} {_conflict_text(points[0])}."
+                             for rank, points in list(conflicts.items())[:3])
+    if not eligible:
+        return (f"I've saved {selection['value']} as a preference. The matching listings have a trade-off: "
+                + conflict_note + " I wouldn't recommend one without resolving that. You can keep browsing or change a preference.",
+                {'recommended_rank': None, 'verified_matches': len(matches),
+                 'conflicting_ranks': list(conflicts), 'eligible_matches': 0,
+                 'basis': 'verified current-page catalog facet and known conflicts'})
+    pick = eligible[0]
+    others = len(eligible) - 1
     message = (f"Since {selection['value']} matters to you, start with #{pick['rank']}: "
                f"{pick['title']}. Its listing explicitly supports that detail. ")
     if others:
@@ -130,14 +168,18 @@ def decision_followup(
                     "also support it, so this isn't a unique winner. ")
     message += ("This is a catalog-based starting pick, not proof of quality or fit. "
                 "Check the current price, size, and availability before buying.")
+    if conflict_note:
+        message += ' ' + conflict_note
     return message, {'recommended_rank': pick['rank'], 'parent_asin': pick['parent_asin'],
                      'verified_matches': len(matches),
+                     'conflicting_ranks': list(conflicts), 'eligible_matches': len(eligible),
                      'basis': 'verified current-page catalog facet'}
 
 
 def compare_preferences(
     products: list[dict[str, Any]], catalog_lookup: Callable[[str], dict[str, Any] | None],
-    *, decision_help: bool = False,
+    *, decision_help: bool = False, priorities: dict[str, float] | None = None,
+    ordered_preferences: dict[str, dict[str, str]] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Never claim personal fit, quality, live price, or stock from rank alone."""
     rows = []
@@ -153,12 +195,21 @@ def compare_preferences(
             'title': product['title'],
             'verified_facets': {key: facet['value'] for key, facet in facets.items()},
             'supported_preferences': supported,
+            'known_conflicts': _known_conflicts(product),
+            'first_choice_slots': sorted({signal['slot'] for signal in signals
+                if signal.get('tier') == 'soft' and signal.get('status') == 'supported'
+                and signal.get('slot') in (ordered_preferences or {})
+                and ordered_preferences[signal['slot']]['preferred'] in signal.get('matched_values', [])}),
+            'supported_slots': sorted({signal['slot'] for signal in signals
+                                       if signal.get('tier') == 'soft' and signal.get('status') == 'supported'
+                                       and signal.get('slot') != 'budget_target'}),
             'hard_supported': (product.get('match') or {}).get('hard_supported', 0),
             'price': _price(product.get('price')),
         })
 
     supported_sets = [set(row['supported_preferences']) for row in rows]
     winner = None
+    winner_basis = None
     if len(rows) >= 2:
         leaders = [index for index, signals in enumerate(supported_sets)
                    if signals and all(signals > other for j, other in enumerate(supported_sets) if j != index)
@@ -166,15 +217,77 @@ def compare_preferences(
                            for j, other in enumerate(rows) if j != index)]
         if len(leaders) == 1:
             winner = rows[leaders[0]]['rank']
+            winner_basis = 'supported_preferences'
+
+    # Explicit priorities are tiers, not extra votes for several weak signals.
+    # No recency or relevance score is interpreted as a shopper's priority.
+    slots = {slot for row in rows for slot in row['supported_slots']}
+    priority_values = {slot: (priorities or {}).get(slot, 1.0) for slot in slots}
+    levels = sorted({value for value in priority_values.values()
+                     if isinstance(value, (int, float)) and not isinstance(value, bool)
+                     and math.isfinite(value) and value > 0}, reverse=True)
+    priority_scores = {}
+    if winner is None and len(levels) > 1:
+        priority_scores = {row['parent_asin']: [sum(priority_values[slot] == level
+                                                   for slot in row['supported_slots'])
+                                               for level in levels] for row in rows}
+        leaders = [row for row in rows if all(
+            priority_scores[row['parent_asin']] > priority_scores[other['parent_asin']]
+            and row['hard_supported'] >= other['hard_supported']
+            for other in rows if other is not row)]
+        if len(leaders) == 1:
+            winner = leaders[0]['rank']
+            winner_basis = 'explicit_priority'
+
+    if winner is None and ordered_preferences and len(rows) >= 2:
+        leaders = [row for row in rows if row['first_choice_slots'] and all(
+            set(row['first_choice_slots']) > set(other['first_choice_slots'])
+            and set(row['supported_slots']) >= set(other['supported_slots'])
+            and row['hard_supported'] >= other['hard_supported']
+            for other in rows if other is not row)]
+        if len(leaders) == 1:
+            winner = leaders[0]['rank']
+            winner_basis = 'first_choice'
+
+    blocked_recommendation = next((row for row in rows if row['rank'] == winner and row['known_conflicts']), None)
+    if blocked_recommendation:
+        winner = None
+        winner_basis = None
+
+    decision_slots = []
+    if winner_basis in {'explicit_priority', 'first_choice'}:
+        chosen = next(row for row in rows if row['rank'] == winner)
+        others = [row for row in rows if row is not chosen]
+        if winner_basis == 'first_choice':
+            decision_slots = sorted(set().union(*(
+                set(chosen['first_choice_slots']) - set(other['first_choice_slots']) for other in others)))
+        else:
+            distinguishing_slots = set()
+            for other in others:
+                index = next(index for index, (left, right) in enumerate(zip(
+                    priority_scores[chosen['parent_asin']], priority_scores[other['parent_asin']]))
+                    if left != right)
+                distinguishing_slots.update(slot for slot in
+                    set(chosen['supported_slots']) - set(other['supported_slots'])
+                    if priority_values[slot] == levels[index])
+            decision_slots = sorted(distinguishing_slots)
 
     if winner is None:
         opening = ("I wouldn't call one a clear winner from these listings alone. Here's what I can verify:"
                    if decision_help else
-                   "I can't confidently choose one for you yet. The list order reflects available "
-                   "match signals, not proven quality or how these items will fit you.")
+                   "I can't confidently choose one from these listings alone. Let's look at the differences.")
+    elif winner_basis == 'first_choice':
+        preferred = ', '.join(str(ordered_preferences[slot]['preferred']) for slot in decision_slots)
+        opening = (f"I'd start with #{winner}: its listing supports your first-choice preference for {preferred}. "
+                   "Your fallback is still an option; this isn't a guarantee of quality or fit.")
+    elif winner_basis == 'explicit_priority':
+        labels = ', '.join({'style': 'fit', 'material': 'fabric'}.get(slot, slot.replace('_', ' '))
+                           for slot in decision_slots)
+        opening = (f"I'd start with #{winner}: its listing supports your higher-priority preferences for {labels}. "
+                   "That's based on the details listed, not a guarantee of quality or fit.")
     else:
-        opening = (f"#{winner} is a tentative match for your stated preferences because its listing "
-                   "supports more of them. That does not verify quality or how it will fit you.")
+        opening = (f"I'd start with #{winner}: its listing matches more of what you asked for. "
+                   "That makes it a closer match, not a guarantee of quality or fit.")
 
     shared_facets = {key: value for key, value in rows[0]['verified_facets'].items()
                      if all(row['verified_facets'].get(key) == value for row in rows[1:])}
@@ -183,16 +296,20 @@ def compare_preferences(
     shared_price = prices[0] if all(price is not None and price == prices[0] for price in prices) else None
     descriptions = []
     for row in rows:
-        details = [value for key, value in row['verified_facets'].items() if key not in shared_facets]
         distinct_preferences = [value for value in row['supported_preferences']
                                 if value not in shared_preferences]
+        details = list(dict.fromkeys(value for key, value in row['verified_facets'].items()
+                                     if key not in shared_facets and value not in distinct_preferences))
         if distinct_preferences:
             details.append('matches your ' + ', '.join(distinct_preferences) + ' preference')
+        for conflict in row['known_conflicts']:
+            details.append(_conflict_text(conflict))
         if row['price'] is not None and shared_price is None:
             details.append(f"catalog price ${row['price']:g}")
         if details:
             descriptions.append(f"#{row['rank']}: " + '; '.join(details))
-    shared_details = list(shared_facets.values())
+    shared_details = list(dict.fromkeys(value for value in shared_facets.values()
+                                       if value not in shared_preferences))
     if shared_preferences:
         shared_details.append('matches your ' + ', '.join(sorted(shared_preferences)) + ' preference')
     if shared_price is not None:
@@ -205,13 +322,14 @@ def compare_preferences(
                   if any(price is None for price in prices) and any(price is not None for price in prices)
                   else 'Catalog prices are not live offers.' if all(price is not None for price in prices)
                   else None)
-    next_question = _distinguishing_question(rows) if winner is None else None
+    has_conflicts = any(row['known_conflicts'] for row in rows)
+    next_question = _distinguishing_question(rows) if winner is None and not has_conflicts else None
     message = opening + '\n\n' + '\n'.join(descriptions)
     if price_note:
         message += '\n' + price_note
     if next_question:
         message += '\n\n' + next_question['message']
-    elif decision_help and winner is None and len(rows) >= 3:
+    elif decision_help and winner is None and not has_conflicts and len(rows) >= 3:
         clues = []
         for facet in ('fit', 'fabric', 'color'):
             for row in rows:
@@ -240,6 +358,10 @@ def compare_preferences(
             message += (f"\n\n#{rank} explicitly lists {value}. Does that matter to you, "
                         "or would you like to keep the other options open?")
     return message, {'rows': rows, 'tentative_winner_rank': winner,
+                     'winner_basis': winner_basis, 'priority_levels': levels,
+                     'decision_slots': decision_slots,
+                     'blocked_recommendation_rank': blocked_recommendation['rank'] if blocked_recommendation else None,
+                     'priority_scores': priority_scores,
                      'next_question': next_question['message'] if next_question else None,
                      'question': next_question,
                      'basis': 'displayed listing facts and current-session preferences only'}

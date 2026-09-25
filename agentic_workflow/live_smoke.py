@@ -24,6 +24,33 @@ def tool_hashes():
     return hashes
 
 
+def check_detail_followups(runtime):
+    """Verify reference repair and read-only care questions on the live index."""
+    sid = runtime.new_session()['session_id']
+    first = runtime.chat(sid, 'I need a black T-shirt')
+    assert len(first['products']) >= 2, 'Need two actual products to verify ambiguity recovery'
+    initial_ids = [product['parent_asin'] for product in first['products']]
+    replies = []
+    for message in ('Tell me more about it', 'What are my preferences?',
+                    'the second one, please', 'How do I wash it?'):
+        result = runtime.chat(sid, message)
+        assert [product['parent_asin'] for product in result['products']] == initial_ids
+        assert result['receipt']['hard'] == first['receipt']['hard']
+        assert result['receipt']['soft'] == first['receipt']['soft']
+        assert result['receipt']['new_product_count'] == 0
+        assert not re.search(r'[\u3400-\u9fff]', result['assistant']['message'])
+        assert not runtime.agent.errors, runtime.agent.errors
+        replies.append(result)
+    assert 'Which product' in replies[0]['assistant']['message']
+    assert 'which product' in replies[1]['assistant']['message']
+    assert '#2:' in replies[2]['assistant']['message']
+    assert '#2:' in replies[3]['assistant']['message']
+    assert replies[3]['receipt']['pre_reason'] == 'product_detail'
+    assert not verify_audit(runtime.audit(sid))
+    return {'turns': 5, 'products': len(initial_ids), 'audit_valid': True,
+            'care_reply': replies[3]['assistant']['message']}
+
+
 def check_conversation(runtime):
     """Exercise recovery against actual search results, not injected candidates."""
     sid = runtime.new_session()['session_id']
@@ -756,6 +783,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--query', default='I need a blue cotton dress.')
     parser.add_argument('--conversation', action='store_true', help='Also verify multi-turn correction, pause, undo and uncertainty')
+    parser.add_argument('--detail-followups', action='store_true', help='Verify product-reference repair and care questions')
     args = parser.parse_args()
     problems = check_search_tool()
     if problems:
@@ -781,6 +809,8 @@ def main():
         report = {'status': 'passed', 'products': len(result['products']),
                   'selected': final['selection_state']['selected_asins'],
                   'backend': 'actual search_tool'}
+        if args.detail_followups:
+            report['detail_followups'] = check_detail_followups(runtime)
         if args.conversation:
             report['comfort_question'] = check_comfort_question(runtime)
             report['conversation'] = check_conversation(runtime)

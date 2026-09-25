@@ -455,8 +455,8 @@ class RuntimeTests(unittest.TestCase):
         runtime = AgentRuntime(FakeAgent(), model_provider="fake", comparison_enhancer=enhancer)
         session_id = runtime.new_session()["session_id"]
         result = runtime.chat(session_id, "Compare #1")
-        self.assertIn("Select at least one shown product", result["assistant"]["message"])
-        self.assertEqual(result["handoff"]["status"], "draft")
+        self.assertIn("What are you shopping for?", result["assistant"]["message"])
+        self.assertIsNone(result.get("handoff"))
         self.assertEqual(result["selection_state"]["selection_count"], 0)
         self.assertEqual(result["assistant"]["usage"], {"prompt_tokens": 0, "completion_tokens": 0})
         self.assertEqual(enhancer.calls, 0)

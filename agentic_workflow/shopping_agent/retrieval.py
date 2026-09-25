@@ -75,6 +75,15 @@ FIT_PHRASES = {
 }
 
 
+def breathable_matches(product):
+    """Require an affirmative listing claim without contradictory wording."""
+    fields = [_text(product.get(key)) for key in ('title', 'features', 'description', 'details')]
+    denial = (r"\b(?:not|never|less|non|isn't|isn’t)"
+              r"(?:[\s-]+(?:a|an|very|particularly|especially))*[\s-]+breathable\b")
+    return (any(re.search(r'\bbreathable\b', field, re.I) for field in fields)
+            and not any(re.search(denial, field, re.I) for field in fields))
+
+
 def style_matches(product, value):
     return bool(style_evidence(product, value))
 
@@ -326,6 +335,8 @@ class StateAwareRetriever:
                 if name.startswith("feature_"):
                     # Strip metadata labels with the same module-2 query parser.
                     required = terms(" ".join(parse_text(str(v)).retrieval_terms))
+                if (name == 'feature' or name.startswith('feature_')) and required == {'breathable'}:
+                    return breathable_matches(product)
                 return bool(required) and required <= product_terms
             if not any(matches(v) for v in sequence(value)):
                 return False
@@ -342,7 +353,9 @@ class StateAwareRetriever:
                 if any(material_matches(product, value) for value in values):
                     return False
                 continue
-            if any(terms(v) and terms(v) <= product_terms for v in values):
+            if any(breathable_matches(product)
+                   if (name == 'feature' or name.startswith('feature_')) and terms(v) == {'breathable'}
+                   else bool(terms(v)) and terms(v) <= product_terms for v in values):
                 return False
         return True
 

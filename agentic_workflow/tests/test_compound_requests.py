@@ -253,18 +253,19 @@ class CompoundRequestTests(unittest.TestCase):
                 self.assertEqual(restored['receipt']['hard']['color'], 'black')
                 self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
-    def test_unsupported_mixed_shortlist_command_does_not_silently_drop_refinement(self):
+    def test_compare_and_refine_keeps_previous_product_references(self):
         self.assertEqual(plan_selection_and_requirements('Compare #1 and #2, then show me blue ones')[0].action,
                          'compare')
         runtime = self.runtime()
         sid = runtime.new_session()['session_id']
         black = runtime.chat(sid, 'black tshirt')
         reply = runtime.chat(sid, 'Compare #1 and #2, then show me blue ones')
-        self.assertEqual(reply['receipt']['hard']['color'], 'black')
-        self.assertEqual(reply['selection_state']['selected_asins'], [])
-        self.assertEqual([p['parent_asin'] for p in reply['products']],
-                         [p['parent_asin'] for p in black['products']])
-        self.assertIn("I heard more than one action", reply['assistant']['message'])
+        self.assertEqual(reply['receipt']['hard']['color'], 'blue')
+        expected = [product['parent_asin'] for product in black['products'][:2]]
+        self.assertEqual(reply['selection_state']['selected_asins'], expected)
+        self.assertEqual([product['parent_asin'] for product in reply['handoff']['selected_products']], expected)
+        self.assertTrue(all('Blue' in product['title'] for product in reply['products']))
+        self.assertEqual(reply['handoff']['requirements']['hard']['color'], 'blue')
         self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
     def test_keep_and_change_category_requires_explicit_order(self):

@@ -25,6 +25,8 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from .audit import GENESIS_DIGEST, SCHEMA_VERSION, chain_digest
+from .control_intent import parse_comparison_reference
+from .control_intent import parse_detail_followup, is_uncertain_reply
 from .control_intent import ControlIntent, has_unhandled_shortlist_mix, parse_control_intent, parse_detail_reference, plan_compound_turn, plan_selection_and_requirements, plan_shortlist_actions, plan_rejection_and_similarity, plan_similarity_and_requirements, plan_similarity_and_cheaper
 from .similarity import facets_not_in_preferences, parse_facet_reply, repair_facet_reply, requirement_from_facets, supported_facets
 from .explanations import explain_product, product_advice, summarize_explanations
@@ -34,6 +36,7 @@ from .shopping_guide import describe, build_shopping_guide, preference_tradeoff
 from .product_question import answer_product_question
 from .question_help import explain_pending_question, explain_shopping_term, split_term_question_and_request
 from .preference_comparison import compare_preferences, decision_followup, declines_comparison_question, resolve_comparison_reply
+from shopping_agent.retrieval import breathable_matches
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,8 +114,11 @@ class Session:
     focused_product_id: str | None = None
     focused_by_result_set: dict[tuple[str, ...], str] = field(default_factory=dict)
     pending_detail_attribute: str | None = None
+    last_detail_attribute: str | None = None
     pending_similarity: dict[str, Any] | None = None
     pending_comparison: dict[str, Any] | None = None
+    pending_compare_reference: bool = False
+    pending_comparison_requirements: str | None = None
     pending_comfort: dict[str, Any] | None = None
     pending_reset_scope: bool = False
     reset_snapshots: dict[int, dict[str, Any]] = field(default_factory=dict)
@@ -153,7 +159,11 @@ def _event_map(trace: dict[str, Any]) -> dict[str, Any]:
 def _soft_values(soft: dict[str, Any]) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {}
     for key, values in soft.items():
-        result[key] = [str(item.get("value", item)) if isinstance(item, dict) else str(item) for item in values]
+        alternatives = []
+        for item in values:
+            value = item.get('value', item) if isinstance(item, dict) else item
+            alternatives.extend(value if isinstance(value, (list, tuple)) else [value])
+        result[key] = list(dict.fromkeys(str(value) for value in alternatives))
     return result
 
 
@@ -193,7 +203,13 @@ def _preference_summary(receipt: dict[str, Any], *, include_next_step: bool = Tr
             return shown
         if slot.startswith('feature_') or slot == 'feature':
             return shown
-        return f'{shown} {slot}' if slot in {'brand', 'material', 'style', 'use_case'} else f'{slot}: {shown}'
+        if slot in {'material', 'style'}:
+            return shown
+        if slot == 'use_case':
+            return f'for {shown}'
+        if slot == 'brand':
+            return f'by {shown}'
+        return f'{slot.replace("_", " ")}: {shown}'
 
     parts = []
     category = state['hard'].get('category')
@@ -282,11 +298,44 @@ def _state_changes(
 
 def _correction_acknowledgement(message: str, receipt: dict[str, Any]) -> str | None:
     """Explain applied corrections from the state diff, never from wording alone."""
-    if not re.search(r'\b(?:actually|instead|change|switch|rather)\b', message, re.I):
-        return None
     if receipt.get('intent_reset') or receipt.get('requirement_undo') or receipt.get('requirement_redo'):
         return None
     changes = receipt.get('state_changes') or []
+    relaxed = []
+    for change in changes:
+        slot = change.get('slot')
+        if (change.get('group') != 'hard' or change.get('kind') != 'removed'
+                or slot not in {'color', 'material', 'size', 'style', 'feature'}
+                or slot in (receipt.get('hard') or {})):
+            continue
+        previous = change.get('previous')
+        previous = list(previous) if isinstance(previous, (list, tuple)) else [previous]
+        current = (receipt.get('soft') or {}).get(slot, [])
+        if previous and previous == current:
+            relaxed.append(' or '.join(str(item).upper() if slot == 'size' else str(item)
+                                       for item in previous))
+    if relaxed:
+        confirmation = ("I'll keep " + ' and '.join(relaxed) + " as "
+                        + ("a preference, not a must-have." if len(relaxed) == 1
+                           else "preferences, not must-haves."))
+        required = []
+        for change in changes:
+            slot = change.get('slot')
+            if (change.get('group') != 'hard' or change.get('kind') not in {'added', 'updated'}
+                    or slot not in {'color', 'material', 'size', 'style', 'feature'}
+                    or change.get('value') != (receipt.get('hard') or {}).get(slot)):
+                continue
+            raw = change.get('value')
+            values = list(raw) if isinstance(raw, (list, tuple)) else [raw]
+            if values and all(value is not None for value in values):
+                label = ' or '.join(str(value).upper() if slot == 'size' else str(value)
+                                    for value in values)
+                required.append('size ' + label if slot == 'size' else label)
+        if required:
+            confirmation += " I'll require " + ' and '.join(required) + "."
+        return confirmation
+    if not re.search(r'\b(?:actually|instead|change|switch|rather)\b', message, re.I):
+        return None
     supported = {'color', 'material', 'size', 'budget_target', 'price_min', 'price_max', 'style'}
     if not changes or any(
         change.get('group') in {'soft_priority', 'soft_priority_turn'} or
@@ -819,12 +868,21 @@ class AgentRuntime:
             "finalized_turn": session.finalized_turn if finalized else None,
         }
 
-    def selection_handoff(self, session_id: str) -> dict[str, Any]:
+    def selection_handoff(self, session_id: str, *, comparison_asins: tuple[str, ...] | None = None, retry_partial: bool = False, requirements_receipt: dict[str, Any] | None = None) -> dict[str, Any]:
         with self.lock:
             session = self._session(session_id)
-            latest_receipt = session.audit_turns[-1]["receipt"] if session.audit_turns else {}
+            if comparison_asins is not None:
+                displayed = set().union(*session.shown_by_intent.values())
+                if (not 1 <= len(comparison_asins) <= MAX_SELECTIONS or
+                        len(set(comparison_asins)) != len(comparison_asins) or
+                        any(asin not in displayed for asin in comparison_asins)):
+                    raise ValueError('Comparison requires one to three distinct products shown in this session')
+            latest_receipt = (requirements_receipt if requirements_receipt is not None else
+                              session.audit_turns[-1]["receipt"] if session.audit_turns else {})
             selected_products: list[dict[str, Any]] = []
-            for parent_asin, selection in session.selections.items():
+            current_asins = comparison_asins if comparison_asins is not None else tuple(session.selections)
+            for parent_asin in current_asins:
+                selection = session.selections.get(parent_asin, {})
                 catalog_product = self.agent.get_catalog_product(parent_asin)
                 if not isinstance(catalog_product, dict):
                     continue
@@ -836,8 +894,8 @@ class AgentRuntime:
                     )
                     if observed:
                         break
-                match = observed.get("match", {})
-                advice = observed.get("advice") or product_advice(catalog_product, match)
+                match = explain_product(catalog_product, latest_receipt)
+                advice = product_advice(catalog_product, match)
                 selected_products.append(
                     {
                         **self._bounded_catalog_product(catalog_product),
@@ -849,7 +907,6 @@ class AgentRuntime:
                         "comparison_evidence": self._comparison_evidence(match),
                     }
                 )
-            current_asins = tuple(session.selections)
             finalized = bool(current_asins and current_asins == session.finalized_asins and session.finalized_at_utc)
             handoff = {
                 "schema_version": SELECTION_SCHEMA_VERSION,
@@ -866,6 +923,8 @@ class AgentRuntime:
                     "evidence": latest_receipt.get("state_evidence", {}),
                 },
                 "selected_products": selected_products,
+                "comparison_scope": "requested_products" if comparison_asins is not None else "saved_options",
+                "saved_asins": list(session.selections),
                 "decision": {
                     "finalized": finalized,
                     "finalized_at_utc": session.finalized_at_utc if finalized else None,
@@ -885,7 +944,7 @@ class AgentRuntime:
                     {
                         "intent_version": session.intent_version,
                         "state_version": latest_receipt.get("state_version"),
-                        "selected_asins": list(session.selections),
+                        "selected_asins": list(current_asins),
                         "requirements": handoff['requirements'],
                         "products": selected_products,
                         "engine": getattr(self.comparison_enhancer, 'cache_identity', None),
@@ -893,7 +952,8 @@ class AgentRuntime:
                     sort_keys=True,
                     separators=(",", ":"),
                 )
-                if session.comparison_cache_key == cache_key and session.comparison_cache is not None:
+                if (session.comparison_cache_key == cache_key and session.comparison_cache is not None
+                        and not (retry_partial and session.comparison_cache.get('status') == 'partial')):
                     assist = deepcopy(session.comparison_cache)
                     assist["cached"] = True
                     assist["usage_this_call"] = {"prompt_tokens": 0, "completion_tokens": 0}
@@ -956,41 +1016,92 @@ class AgentRuntime:
         compound_answers: list[str] | None = None,
         compound_contexts: list[dict[str, Any] | None] | None = None,
         compound_focus: str | None = None,
+        compound_pending_attribute: str | None = None,
         shortlist_actions: tuple[ControlIntent, ...] | None = None,
         preface: str | None = None,
+        comparison_retry_asins: tuple[str, ...] | None = None,
     ) -> dict[str, Any]:
         by_rank = {int(product["rank"]): product for product in session.last_products}
+        if control.action == 'compare' and control.attribute == 'displayed_pair' and len(by_rank) == 2:
+            control = ControlIntent('compare', tuple(by_rank), 'displayed_pair')
         requested = [rank for rank in control.ranks if rank in by_rank]
         ignored = [rank for rank in control.ranks if rank not in by_rank]
         action = control.action
+        if action not in {'detail', 'detail_uncertain', 'preferences'}:
+            session.last_detail_attribute = None
         previous_selection = deepcopy(session.selections)
         handoff: dict[str, Any] | None = None
         price_comparison: dict[str, Any] | None = None
-        preference_comparison: dict[str, Any] | None = None
+        preference_comparison: dict[str, Any] | None = (
+            {'question': deepcopy(session.pending_comparison)}
+            if action in {'detail', 'multi_detail'} and session.pending_comparison else None)
         review_comparison: dict[str, Any] | None = None
         comfort_question: dict[str, Any] | None = None
         rank_explanation: dict[str, Any] | None = None
         similarity_question: dict[str, Any] | None = None
+        if action in {'preferences', 'detail', 'multi_detail'} and session.pending_comfort:
+            comfort_question = {'scope': 'current_display', 'offered_facets': deepcopy(session.pending_comfort)}
+            similarity_question = {'target_slot': 'comfort', 'options': list(session.pending_comfort)}
         preference_state: dict[str, Any] | None = None
         session_choice_state: dict[str, Any] | None = None
         selection_changed = False
         feedback_changed = False
+        comparison_blocked = False
         rejected_feedback: list[str] = []
         liked_feedback: list[str] = []
         rejection_action_ids: tuple[str, ...] = ()
 
-        if action == 'question_help':
+        if action == 'retry_comparison':
+            detail = "I've retried the comparison for the same products."
+        elif action == 'detail_skip':
+            session.pending_detail_attribute = None
+            detail = "No problem—we can leave that question. Your products and preferences are unchanged."
+        elif action == 'detail_uncertain':
+            detail = ("No rush. The products are still here. You can give me an item number "
+                      "when you're ready, ask something else, or say Never mind to leave that question.")
+        elif action == 'comparison_uncertain':
+            detail = ("No rush. You can give me the item numbers when you're ready, "
+                      "or say Never mind to leave the comparison.")
+            if session.pending_comparison_requirements:
+                detail += " I haven't applied the pending preference update."
+        elif action == 'comparison_skip':
+            deferred = session.pending_comparison_requirements
+            session.pending_compare_reference = False
+            session.pending_comparison_requirements = None
+            detail = ("No problem—we can leave that comparison. "
+                      + ("I haven't applied the pending preference update. " if deferred else '')
+                      + "Your products, preferences, and saved options are unchanged.")
+        elif action == 'question_help':
             detail = control.attribute or 'The current choices are still open.'
         elif action == 'preferences':
             previous_receipt = session.audit_turns[-1]['receipt'] if session.audit_turns else {}
             detail, preference_state = _preference_summary(previous_receipt, include_next_step=False)
             choice_detail, session_choice_state = _session_choice_summary(session, self.agent)
-            detail = ('Here is what I am using in this session. This is not an account-wide memory report. '
-                      + detail + ' ' + choice_detail +
-                      ' Tell me what to change, or say Undo to reverse your last requirement edit.')
+            memory_question = bool(re.search(r'\b(?:remember|know about me|information.*about me)\b', message, re.I))
+            intro = ("Here's what you've shared in this session—not an account-wide memory report. "
+                     if memory_question else "Here's what we're looking for in this session: ")
+            choices = (' ' + choice_detail if memory_question or
+                       session_choice_state['saved_asins'] or session_choice_state['hidden_asins'] else '')
+            detail = (intro + detail + choices +
+                      ' We can change any of that, or say Undo to take back your last search change.')
+            if session.pending_detail_attribute:
+                detail += ' You can still tell me which product you meant using its displayed rank.'
+            if session.pending_compare_reference:
+                if session.pending_comparison_requirements:
+                    detail += (f' Your update "{session.pending_comparison_requirements}" is waiting for item numbers; '
+                               "it isn't saved yet. Tell me which items to compare, or say Never mind.")
+                else:
+                    detail += ' You can still tell me which items to compare, or say Never mind.'
             pending_question = getattr(getattr(self.agent, 'memory', None), 'pending', {}).get(session_id)
             if pending_question:
                 detail += ' You can still answer the earlier question or keep browsing.'
+            if session.pending_comfort:
+                detail += ' You can still tell me whether ' + ' or '.join(session.pending_comfort) + ' matters for comfort.'
+            if session.pending_comparison:
+                preference_comparison = {'question': deepcopy(session.pending_comparison)}
+                options = session.pending_comparison.get('options', [])
+                choices = ' or '.join(str(option['value']) for option in options)
+                detail += f' We can still compare what matters to you: {choices}. Either is fine, too.'
             pending = session.pending_similarity
             if pending:
                 facets = pending['facets']
@@ -1160,16 +1271,20 @@ class AgentRuntime:
         elif action == 'multi_detail':
             detail = '\n\n'.join(compound_answers or [])
             session.focused_product_id = compound_focus
+            last_context = (compound_contexts or [None])[-1]
+            session.last_detail_attribute = last_context.get('attribute') if last_context else None
             result_key = tuple(product['parent_asin'] for product in session.last_products)
             if compound_focus:
                 session.focused_by_result_set[result_key] = compound_focus
             else:
                 session.focused_by_result_set.pop(result_key, None)
-            session.pending_detail_attribute = None
+            session.pending_detail_attribute = compound_pending_attribute
         elif action == 'detail':
             if control.uses_focus:
                 requested = [rank for rank, product in by_rank.items()
                              if product['parent_asin'] == session.focused_product_id]
+                if not requested and len(by_rank) == 1:
+                    requested = list(by_rank)
             if len(requested) == 1:
                 rank = requested[0]
                 session.focused_product_id = by_rank[rank]['parent_asin']
@@ -1178,6 +1293,7 @@ class AgentRuntime:
                 session.pending_detail_attribute = None
                 product = self.agent.get_catalog_product(by_rank[rank]['parent_asin']) or {}
                 detail = answer_product_question(product, rank, control.attribute, session.locale)
+                session.last_detail_attribute = control.attribute
             else:
                 session.focused_product_id = None
                 result_key = tuple(product['parent_asin'] for product in session.last_products)
@@ -1202,17 +1318,20 @@ class AgentRuntime:
                 result_key = tuple(row['parent_asin'] for row in session.last_products)
                 session.focused_by_result_set[result_key] = session.focused_product_id
                 matches = list(dict.fromkeys(
-                    str(signal.get('value', '')).strip() for signal in product.get('match', {}).get('signals', ())
+                    (', '.join(map(str, matched)) if isinstance(matched, (list, tuple)) else str(matched)).strip()
+                    for signal in product.get('match', {}).get('signals', ())
+                    for matched in [signal.get('matched_values', signal.get('value', ''))]
                     if signal.get('status') == 'supported' and signal.get('tier') == 'hard'
-                    and str(signal.get('value', '')).strip()
+                    and matched
                 ))[:3]
                 soft_matches = list(dict.fromkeys(
-                    (signal.get('slot'), ', '.join(map(str, signal['value']))
-                     if isinstance(signal.get('value'), (list, tuple)) else str(signal.get('value')))
+                    (signal.get('slot'), ', '.join(map(str, matched))
+                     if isinstance(matched, (list, tuple)) else str(matched))
                     for signal in product.get('match', {}).get('signals', ())
+                    for matched in [signal.get('matched_values', signal.get('value'))]
                     if signal.get('status') == 'supported' and signal.get('tier') == 'soft'
                     and signal.get('slot') in {'color', 'style', 'material', 'size'}
-                    and signal.get('value')
+                    and matched
                 ))
                 highlights = list(dict.fromkeys(
                     ' '.join(str(row.get('evidence', '')).split())[:100]
@@ -1314,16 +1433,22 @@ class AgentRuntime:
                     for product in session.last_products:
                         source = self.agent.get_catalog_product(product['parent_asin']) or {}
                         fields = [str(source.get('title') or '')]
+                        if label == 'breathability':
+                            if breathable_matches(source):
+                                ranks.append(int(product['rank']))
+                            continue
                         fields.extend(str(item) for item in (source.get('features') or ()))
-                        negation = (r'\b(?:not|less|non)\s+breathable\b' if label == 'breathability'
-                                    else r'\b(?:not|never)\s+(?:a\s+)?relaxed[ -]fit\b')
-                        if any(re.search(pattern, field, re.I) and not re.search(negation, field, re.I)
-                               for field in fields):
+                        negation = (r"\b(?:not|never|less|non|isn't|isn’t)"
+                                    r"(?:[\s-]+(?:a|an|very|particularly|especially))*[\s-]+"
+                                    + (r'breathable\b' if label == 'breathability' else r'relaxed[ -]fit\b'))
+                        if (any(re.search(pattern, field, re.I) for field in fields)
+                                and not any(re.search(negation, field, re.I) for field in fields)):
                             ranks.append(int(product['rank']))
                     if ranks and len(ranks) < len(session.last_products):
                         facets[label] = {'value': value, 'listing_ranks': ranks}
                 if facets:
                     session.pending_comfort = facets
+                    similarity_question = {'target_slot': 'comfort', 'options': list(facets)}
                     comfort_question['offered_facets'] = facets
                     choices = ' or '.join(facets)
                     prompt = ("If that's what you mean, tell me and I'll prioritize that listed detail."
@@ -1488,8 +1613,31 @@ class AgentRuntime:
                 else:
                     detail, preference_comparison = compare_preferences(
                         chosen, self.agent.get_catalog_product,
-                        decision_help=control.attribute == 'buying_advice')
+                        decision_help=control.attribute == 'buying_advice',
+                        priorities=(session.audit_turns[-1]['receipt'].get('soft_priority', {})
+                                    if session.audit_turns else {}),
+                        ordered_preferences=(session.audit_turns[-1]['receipt'].get('ordered_preferences', {})
+                                             if session.audit_turns else {}))
                     session.pending_comparison = preference_comparison['question']
+        elif action == 'compare' and control.attribute == 'displayed_pair' and len(by_rank) != 2:
+            comparison_blocked = True
+            session.pending_compare_reference = bool(by_rank)
+            detail = ("Which two displayed items do you mean? Tell me their ranks, such as #1 and #2."
+                      if len(by_rank) > 2 else
+                      "There's only one displayed item. We need another item for a two-product comparison."
+                      if by_rank else "I don't have any results to compare yet. What are you shopping for?")
+        elif action == 'compare' and ignored:
+            comparison_blocked = True
+            session.pending_compare_reference = bool(by_rank)
+            missing = ', '.join(f'#{rank}' for rank in ignored)
+            detail = (f"I can't find {missing} in the current results. Which displayed items would you like to compare?"
+                      + (" Your saved options are still here." if session.selections else ''))
+            if not by_rank:
+                detail = "I don't have any results to compare yet. What are you shopping for?"
+        elif action == 'compare' and len(requested) > MAX_SELECTIONS:
+            comparison_blocked = True
+            session.pending_compare_reference = True
+            detail = "I can compare up to three items at a time. Which two or three should we start with? Your saved options are unchanged."
         elif action in {"select", "compare"}:
             added: list[int] = []
             already_selected: list[int] = []
@@ -1529,11 +1677,18 @@ class AgentRuntime:
             if capped:
                 detail += f" Shortlist limit {MAX_SELECTIONS}; skipped {', '.join(f'#{rank}' for rank in capped)}."
             if action == "compare":
-                detail += (
-                    " The structured comparison handoff is ready."
-                    if session.selections else
-                    " Select at least one shown product before comparing."
-                )
+                if not control.ranks and session.selections:
+                    detail = (f"Let's look at your {len(session.selections)} saved options side by side."
+                              if len(session.selections) > 1 else
+                              "Here are the listed details for your saved item.")
+                elif session.selections:
+                    detail = (f"Comparing {', '.join(f'#{rank}' for rank in requested)} below. "
+                              + (f"Saved {', '.join(f'#{rank}' for rank in added)} to your shortlist. " if added else '')
+                              + ("Your shortlist is full, so the extra items are compared here without saving them."
+                                 if capped else "Your other saved options are still there." if
+                                 len(session.selections) > len(requested) else ''))
+                else:
+                    detail = "Select at least one shown product before comparing, or tell me the item numbers you'd like to compare."
         elif action == "reject":
             for rank in requested:
                 parent_asin = by_rank[rank]["parent_asin"]
@@ -1621,7 +1776,7 @@ class AgentRuntime:
                 "The structured selection handoff draft is ready."
                 if session.selections else "Select at least one shown product before finalizing."
             )
-        if ignored:
+        if ignored and not comparison_blocked:
             detail += f" Ignored unavailable rank(s): {', '.join(f'#{rank}' for rank in ignored)}."
         if action in {'undo_rejection', 'redo_rejection', 'detail'} and session.pending_similarity:
             pending = session.pending_similarity
@@ -1668,8 +1823,18 @@ class AgentRuntime:
             session.finalized_at_utc = None
             session.finalized_turn = None
             session.finalized_asins = ()
-        if action in {"compare", "handoff", "finalize"}:
-            handoff = self.selection_handoff(session_id)
+        if action in {"compare", "handoff", "finalize", "retry_comparison"} and not comparison_blocked:
+            compared_asins = (comparison_retry_asins if action == 'retry_comparison' else
+                              tuple(by_rank[rank]['parent_asin'] for rank in requested)
+                              if action == 'compare' and control.ranks else None)
+            handoff = self.selection_handoff(session_id, comparison_asins=compared_asins,
+                                             retry_partial=action in {'compare', 'retry_comparison'})
+            if action == 'retry_comparison' and control.attribute == 'saved_options':
+                handoff['comparison_scope'] = 'saved_options'
+            if (handoff.get('comparison_assist') or {}).get('status') == 'partial':
+                detail += " Some explanations couldn't be completed; the available facts are below."
+                if action in {'compare', 'retry_comparison'}:
+                    detail += " You can say 'try again' to retry the comparison."
         if action in {'reset_scope', 'reset_skip'} and control.attribute:
             detail = control.attribute + '\n\n' + detail
         detail = detail if action in {'question_help', 'detail', 'multi_detail', 'price_compare', 'review_compare', 'comfort_question', 'comfort_skip', 'decline', 'reset_scope', 'reset_skip', 'explain_rank', 'preference_compare', 'preference_compare_skip'} else localized_control_message(
@@ -1707,6 +1872,10 @@ class AgentRuntime:
                 "state_changes": [],
                 "pre_action": "control",
                 "pre_reason": ('shopping_term_help' if action == 'question_help' else
+                               'comparison_reference_skip' if action == 'comparison_skip' else
+                               'comparison_reference_uncertain' if action == 'comparison_uncertain' else
+                               'product_detail_uncertain' if action == 'detail_uncertain' else
+                               'product_detail_skip' if action == 'detail_skip' else
                                'product_detail' if action in {'detail', 'multi_detail'} else
                                'price_comparison' if action == 'price_compare' else
                                'preference_comparison' if action == 'preference_compare' else
@@ -1729,6 +1898,7 @@ class AgentRuntime:
                     "completion_tokens": comparison_usage["completion_tokens"],
                 },
                 "comparison_assist": handoff.get("comparison_assist") if handoff else None,
+                "comparison_scope": handoff.get('comparison_scope') if handoff else None,
                 "selection_status": handoff.get("status") if handoff else None,
                 "selection_decision": handoff.get("decision") if handoff else None,
                 "selection_count": len(session.selections),
@@ -1746,7 +1916,7 @@ class AgentRuntime:
                              if action in {'question_help', 'preferences'} or preface else similarity_question),
                 "suggested_replies": ([option['value'] for option in preference_comparison['question']['options']]
                                       + ['Either is fine']
-                                      if preference_comparison and (preference_comparison.get('question') or {}).get('kind') == 'decision_tradeoff'
+                                      if preference_comparison and (preference_comparison.get('question') or {}).get('options')
                                       else None),
                 "display_mode": "retained_previous_results",
                 "new_product_count": 0,
@@ -1776,6 +1946,20 @@ class AgentRuntime:
                                      if action == 'similar' and shortlist_actions else None),
             }
         )
+        receipt['comparison_reference_question'] = None
+        if session.pending_compare_reference:
+            receipt['comparison_reference_question'] = {
+                'displayed_ranks': list(by_rank),
+                'pending_requirements': session.pending_comparison_requirements,
+            }
+            receipt['suggested_replies'] = ['Never mind']
+        receipt['detail_question'] = None
+        if session.pending_detail_attribute and action in {'detail', 'multi_detail', 'detail_uncertain', 'preferences'}:
+            ranks = [int(product['rank']) for product in session.last_products[:3]]
+            receipt['detail_question'] = {'attribute': session.pending_detail_attribute, 'ranks': ranks}
+            receipt['suggested_replies'] = [f'#{rank}' for rank in ranks] + ['Never mind']
+        if action in {'compare', 'retry_comparison'} and (handoff or {}).get('comparison_assist', {}).get('status') == 'partial':
+            receipt['suggested_replies'] = ['Try again']
         if feedback_state is not None:
             receipt["state_version"] = feedback_state["state_version"]
             receipt["rejected_asins"] = list(feedback_state["rejected_asins"])
@@ -1843,6 +2027,19 @@ class AgentRuntime:
             if turn_limit is not None and session.next_turn > turn_limit:
                 raise ApiError(HTTPStatus.CONFLICT, "This conversation has reached its configured turn limit.", "turn_limit")
             turn = session.next_turn
+            previous_turn = session.audit_turns[-1] if session.audit_turns else {}
+            previous_control = previous_turn.get('control') or {}
+            previous_comparison = previous_turn.get('receipt', {}).get('comparison_assist') or {}
+            if (re.fullmatch(r'(?:please )?(?:retry|try again|retry the comparison|try the comparison again)[.!?]*',
+                             message.strip(), re.I)
+                    and (previous_control.get('action') in {'compare', 'retry_comparison'} or
+                         previous_turn.get('receipt', {}).get('compound_comparison'))
+                    and previous_comparison.get('status') == 'partial'
+                    and session.comparison_cache is not None
+                    and session.comparison_cache.get('selected_asins') == previous_comparison.get('selected_asins')):
+                return self._control_turn(session_id, session, message, turn,
+                                          ControlIntent('retry_comparison', attribute=previous_turn['receipt'].get('comparison_scope')),
+                                          comparison_retry_asins=tuple(previous_comparison['selected_asins']))
             pending_questions = getattr(getattr(self.agent, 'memory', None), 'pending', {})
             pending_question = pending_questions.get(session_id)
             question_reason = explain_pending_question(message, pending_question)
@@ -1909,9 +2106,56 @@ class AgentRuntime:
                 return self._control_turn(session_id, session, message, turn,
                                           ControlIntent('reset_scope',
                                                         attribute=term_request[0] if term_request else None))
-            direct_control = parse_control_intent(conversation_message)
+            # Resolve contextual detail follow-ups before deciding that a new
+            # request abandons a pending comparison. The later detail handler
+            # uses the same topic; a short correction is still a read-only detour.
+            direct_control = (parse_control_intent(conversation_message) or
+                              parse_detail_followup(conversation_message,
+                                                    session.pending_detail_attribute or
+                                                    session.last_detail_attribute))
+            if is_uncertain_reply(conversation_message):
+                if session.pending_detail_attribute:
+                    return self._control_turn(session_id, session, message, turn,
+                                              ControlIntent('detail_uncertain'))
+                if session.pending_compare_reference:
+                    return self._control_turn(session_id, session, message, turn,
+                                              ControlIntent('comparison_uncertain'))
+            if session.pending_compare_reference and re.fullmatch(
+                    r'(?:never mind|nevermind|skip that comparison|forget that comparison|cancel)[.!?]*',
+                    conversation_message.strip(), re.I):
+                return self._control_turn(session_id, session, message, turn, ControlIntent('comparison_skip'))
+            if session.pending_detail_attribute and re.fullmatch(
+                    r'(?:never mind|nevermind|skip that question|forget that question|cancel)[.!?]*',
+                    conversation_message.strip(), re.I):
+                return self._control_turn(session_id, session, message, turn, ControlIntent('detail_skip'))
+            resolved_detail_detour = bool(direct_control and direct_control.action == 'detail' and (
+                (not direct_control.uses_focus and len(direct_control.ranks) == 1
+                 and direct_control.ranks[0] in {int(product['rank']) for product in session.last_products})
+                or (direct_control.uses_focus and (len(session.last_products) == 1 or any(
+                    product['parent_asin'] == session.focused_product_id for product in session.last_products)))))
+            if session.pending_compare_reference and not (
+                    resolved_detail_detour or direct_control and direct_control.action == 'preferences'):
+                session.pending_compare_reference = False
+                deferred_requirements = session.pending_comparison_requirements
+                session.pending_comparison_requirements = None
+                reference_reply = parse_comparison_reference(conversation_message)
+                if reference_reply is None:
+                    explicit_reply = re.fullmatch(r'(?:please\s+)?compare\s+(.+)',
+                                                  conversation_message.strip(), re.I)
+                    if explicit_reply:
+                        reference_reply = parse_comparison_reference(explicit_reply.group(1))
+                if reference_reply:
+                    displayed_ranks = {int(product['rank']) for product in session.last_products}
+                    if deferred_requirements and 1 <= len(reference_reply.ranks) <= MAX_SELECTIONS and all(
+                            rank in displayed_ranks for rank in reference_reply.ranks):
+                        conversation_message = deferred_requirements + ', Compare ' + ' and '.join(
+                            f'#{rank}' for rank in reference_reply.ranks)
+                        direct_control = None
+                    else:
+                        session.pending_comparison_requirements = deferred_requirements
+                        return self._control_turn(session_id, session, message, turn, reference_reply)
             comfort_pending = session.pending_comfort
-            session.pending_comfort = None  # A comfort choice is valid only on the next turn.
+            session.pending_comfort = None  # Read-only detours restore this after planning.
             if comfort_pending and direct_control is not None and direct_control.action == 'decline':
                 return self._control_turn(session_id, session, message, turn,
                                           ControlIntent('comfort_skip'))
@@ -1919,6 +2163,7 @@ class AgentRuntime:
             comfort_decline_extra = None
             if comfort_pending and direct_control is None:
                 normalized = re.sub(r'^(?:i (?:mean|prefer|care about) )', '', message.casefold()).strip(' .!?')
+                normalized = re.sub(r'(?:,\s*|\s+)please$', '', normalized)
                 decline = re.fullmatch(
                     r'(?:no thanks|neither|none of those|no preference|not important|'
                     r'keep browsing|show me first)'
@@ -1952,8 +2197,24 @@ class AgentRuntime:
                     if chosen:
                         comfort_resolution = {'facet': chosen, **comfort_pending[chosen],
                                               'extra_message': extra}
+            if direct_control is not None and direct_control.action == 'preferences':
+                # A read-only recap is a conversational detour, not a new decision.
+                session.pending_comfort = comfort_pending
+                return self._control_turn(session_id, session, message, turn, direct_control)
             comparison_question = session.pending_comparison
-            session.pending_comparison = None  # Only the immediate next turn can answer it.
+            comparison_decline_extra = None
+            if comparison_question and direct_control is None:
+                clauses = re.split(r'\s*,\s*(?:(?:but|and)\s+)?|\s+(?:but|and)\s+',
+                                   conversation_message, maxsplit=1, flags=re.I)
+                if len(clauses) == 2 and declines_comparison_question(clauses[0], comparison_question):
+                    from intent_router.turn_router import TurnIntentRouter
+                    extra_intent = TurnIntentRouter().understand_turn(clauses[1])
+                    if (extra_intent.slot_updates and not parse_control_intent(clauses[1])
+                            and not extra_intent.decision_evidence.get('requirement_control')):
+                        comparison_decline_extra = clauses[1]
+            # Read-only detail paths restore this context after compound planning;
+            # a question bundled with a requirement edit must still invalidate it.
+            session.pending_comparison = None
             comparison_resolution = (resolve_comparison_reply(message, comparison_question)
                                      if direct_control is None or direct_control.action == 'detail' else None)
             if comparison_resolution:
@@ -1970,8 +2231,6 @@ class AgentRuntime:
                         extra_intent.decision_evidence.get('requirement_control') or
                         parse_control_intent(comparison_resolution['extra_message'])):
                     comparison_resolution = None
-            if direct_control is not None and direct_control.action == 'preferences':
-                return self._control_turn(session_id, session, message, turn, direct_control)
             if (direct_control is not None and
                     direct_control.action in {'undo_rejection', 'redo_rejection'} and
                     session.pending_similarity):
@@ -1979,6 +2238,8 @@ class AgentRuntime:
             if (direct_control is not None and direct_control.action == 'detail' and
                     session.pending_similarity and len(direct_control.ranks) == 1 and
                     direct_control.ranks[0] in {int(product['rank']) for product in session.last_products}):
+                session.pending_comparison = comparison_question
+                session.pending_comfort = comfort_pending
                 return self._control_turn(session_id, session, message, turn, direct_control)
             similarity_pending = session.pending_similarity
             facet_reply = (parse_facet_reply(message, similarity_pending['facets'])
@@ -2016,7 +2277,8 @@ class AgentRuntime:
                 return self._control_turn(session_id, session, message, turn,
                                           ControlIntent('similar_clarification'))
             session.pending_similarity = None  # Any new turn resolves or abandons that question.
-            compound = None if similarity_resolution or similarity_exclusion or comfort_decline_extra else plan_compound_turn(conversation_message)
+            compound = None if similarity_resolution or similarity_exclusion or comfort_decline_extra or comparison_decline_extra else plan_compound_turn(
+                conversation_message, detail_topic=session.pending_detail_attribute or session.last_detail_attribute)
             detail_answers: list[str] = []
             detail_contexts: list[dict[str, Any] | None] = []
             requirement_message = (f"avoid {similarity_exclusion['value']}, show me more"
@@ -2025,13 +2287,13 @@ class AgentRuntime:
                                    if similarity_resolution else
                                    ', '.join(part for part in (
                                        f"I prefer {comparison_resolution['value']}",
-                                       comparison_resolution['extra_message'],
-                                       None if comparison_resolution.get('kind') == 'decision_tradeoff' else 'show me more') if part)
+                                       comparison_resolution['extra_message']) if part)
                                    if comparison_resolution else
                                    ', '.join(part for part in (
                                        f"I prefer {comfort_resolution['value']}",
-                                       comfort_resolution['extra_message'], 'show me more') if part)
+                                       comfort_resolution['extra_message']) if part)
                                    if comfort_resolution else
+                                   comparison_decline_extra if comparison_decline_extra else
                                    comfort_decline_extra if comfort_decline_extra else
                                    compound.requirement_message if compound and compound.requirement_message else conversation_message)
             compound_focus = session.focused_product_id
@@ -2040,6 +2302,8 @@ class AgentRuntime:
                     targets = [p for p in session.last_products if
                                (p['parent_asin'] == compound_focus if detail_control.uses_focus
                                 else p['rank'] in detail_control.ranks)]
+                    if detail_control.uses_focus and not targets and len(session.last_products) == 1:
+                        targets = list(session.last_products)
                     if len(targets) == 1:
                         target = targets[0]
                         compound_focus = target['parent_asin']
@@ -2052,15 +2316,26 @@ class AgentRuntime:
                     else:
                         compound_focus = None
                         list_label = 'previous' if compound.requirement_message else 'current'
-                        detail_answers.append(f'I could not identify that item in the {list_label} list. Please use a displayed rank.')
+                        topic = {'care': 'care instructions', 'price': 'price', 'material': 'material',
+                                 'fit': 'fit'}.get(detail_control.attribute, 'details')
+                        if detail_control.attribute and detail_control.attribute.startswith('material_check:'):
+                            topic = 'material'
+                        detail_answers.append(
+                            f'I could not identify that item in the {list_label} list. '
+                            f"Which product's {topic} did you mean? Please use a displayed rank.")
                         detail_contexts.append(None)
             if compound and compound.requirement_message is None:
+                session.pending_comparison = comparison_question
+                session.pending_comfort = comfort_pending
+                unresolved = [control.attribute for control, context in zip(compound.details, detail_contexts)
+                              if context is None]
                 return self._control_turn(session_id, session, message, turn, ControlIntent('multi_detail'),
-                                          detail_answers, detail_contexts, compound_focus)
+                                          detail_answers, detail_contexts, compound_focus,
+                                          compound_pending_attribute=unresolved[0] if len(unresolved) == 1 else None)
             if compound and compound_focus:
                 previous_result_key = tuple(product['parent_asin'] for product in session.last_products)
                 session.focused_by_result_set[previous_result_key] = compound_focus
-            planning_message = comfort_decline_extra or conversation_message
+            planning_message = comparison_decline_extra or comfort_decline_extra or conversation_message
             rejection_similarity = (plan_rejection_and_similarity(planning_message)
                                     if compound is None and not similarity_resolution and not similarity_exclusion
                                     else None)
@@ -2159,13 +2434,25 @@ class AgentRuntime:
             selection_plan = (plan_selection_and_requirements(planning_message)
                               if compound is None and not similarity_resolution and not similarity_exclusion and not similarity_mixed else None)
             selection_target = None
+            comparison_target_asins = None
             if selection_plan:
                 selection_control, requirement_message = selection_plan
+                if selection_control.action == 'compare' and selection_control.attribute == 'displayed_pair':
+                    if len(session.last_products) != 2:
+                        session.pending_comparison_requirements = requirement_message if session.last_products else None
+                        return self._control_turn(session_id, session, message, turn, selection_control,
+                                                  preface=("I haven't changed your preferences yet. "
+                                                           "I'll apply that update once you tell me which items to compare."
+                                                           if session.last_products else
+                                                           "I haven't changed your preferences yet."))
+                    selection_control = ControlIntent('compare', tuple(int(product['rank'])
+                                                       for product in session.last_products), 'displayed_pair')
+                    selection_plan = (selection_control, requirement_message)
                 from intent_router.turn_router import TurnIntentRouter
                 parsed_requirement = TurnIntentRouter().understand_turn(requirement_message)
                 safe_selection = (
-                    selection_control.action in {'select', 'reject'}
-                    and bool(selection_control.ranks)
+                    selection_control.action in {'select', 'reject', 'compare'}
+                    and bool(selection_control.ranks or selection_control.action == 'compare' and session.selections)
                     and not any(update.slot == 'category' for update in parsed_requirement.slot_updates)
                     and not parsed_requirement.decision_evidence.get('requirement_control')
                     and (selection_control.action != 'reject' or
@@ -2174,6 +2461,13 @@ class AgentRuntime:
                 if safe_selection:
                     by_rank = {int(product['rank']): product for product in session.last_products}
                     selection_target = [(rank, by_rank.get(rank)) for rank in selection_control.ranks]
+                    if selection_control.action == 'compare':
+                        safe_selection = (len(selection_target) <= MAX_SELECTIONS
+                                          and all(product is not None for _, product in selection_target)
+                                          and bool(parsed_requirement.slot_updates))
+                        if safe_selection:
+                            comparison_target_asins = (tuple(product['parent_asin'] for _, product in selection_target)
+                                                       if selection_control.ranks else tuple(session.selections))
                     if selection_control.action == 'select' and any(
                         product and product['parent_asin'] in session.rejected_asins
                         for _, product in selection_target
@@ -2185,7 +2479,7 @@ class AgentRuntime:
             if compound is None and selection_plan is None and not similarity_exclusion and not similarity_mixed and has_unhandled_shortlist_mix(planning_message):
                 session.pending_detail_attribute = None
                 return self._control_turn(session_id, session, message, turn, ControlIntent('mixed_request'))
-            control = None if compound or similarity_resolution or similarity_exclusion or comparison_resolution else (parse_detail_reference(planning_message, session.pending_detail_attribute) or parse_control_intent(planning_message))
+            control = None if compound or similarity_resolution or similarity_exclusion or comparison_resolution else (parse_detail_reference(planning_message, session.pending_detail_attribute) or parse_detail_followup(planning_message, session.pending_detail_attribute or session.last_detail_attribute) or parse_control_intent(planning_message))
             if selection_plan or similarity_mixed:
                 control = None
             similarity_browse = None
@@ -2209,10 +2503,14 @@ class AgentRuntime:
                         requirement_message = 'show me more'
                         control = None
             if control is not None:
+                if control.action == 'detail':
+                    session.pending_comparison = comparison_question
+                    session.pending_comfort = comfort_pending
                 if control.action != 'detail':
                     session.pending_detail_attribute = None
                 return self._control_turn(session_id, session, message, turn, control)
             session.pending_detail_attribute = None
+            session.last_detail_attribute = None
             feedback_asins = tuple(dict.fromkeys(
                 product['parent_asin'] for _, product in selection_target or ()
                 if product and product['parent_asin'] not in session.rejected_asins
@@ -2258,6 +2556,8 @@ class AgentRuntime:
                 )
 
             receipt = build_receipt(trace)
+            if comparison_decline_extra:
+                receipt['comparison_declined'] = {'applied_request': comparison_decline_extra}
             if term_request:
                 receipt['term_question'] = {
                     'read_only_explanation': term_request[0],
@@ -2276,7 +2576,7 @@ class AgentRuntime:
             if comparison_resolution:
                 receipt['preference_comparison_answer'] = {
                     **comparison_resolution,
-                    'source': 'immediately preceding verified comparison question',
+                    'source': 'active verified comparison question',
                 }
             if comfort_resolution:
                 receipt['comfort_followup_answer'] = {
@@ -2606,6 +2906,8 @@ class AgentRuntime:
                 assistant['message'] = prefix + assistant['message']
             if detail_answers:
                 assistant['message'] = '\n\n'.join(detail_answers) + '\n\n' + assistant['message']
+            if comparison_decline_extra:
+                assistant['message'] = "No need to choose between those details. " + assistant['message']
             if comparison_resolution:
                 if comparison_resolution.get('kind') == 'decision_tradeoff':
                     assistant['message'], receipt['decision_followup'] = decision_followup(
@@ -2663,18 +2965,21 @@ class AgentRuntime:
                 changed_color = (receipt.get('hard', {}).get('color')
                                  if 'color' in similarity_mixed['updated_slots'] else None)
                 color_label = f" {changed_color}" if isinstance(changed_color, str) else ''
+                result_label = 'option' if len(products) == 1 else 'options'
                 if products and session.pending_similarity:
                     choices = ', '.join(session.pending_similarity['facets'])
                     assistant['message'] = (
-                        price_note + f"I found {len(products)}{color_label} options. "
+                        price_note + f"I found {len(products)}{color_label} {result_label}. "
                         f"What else did you like about #{source_rank}—its {choices}? "
                         "Pick one or more, or keep browsing."
                     )
                 elif products:
                     assistant['message'] = (
-                        price_note + f"I found {len(products)}{color_label} options. "
+                        price_note + f"I found {len(products)}{color_label} {result_label}. "
                         f"I haven't assumed which other part of #{source_rank} you liked. "
-                        "If a particular detail matters, tell me; we can also compare these as they are."
+                        + ("If a particular detail matters, tell me; we can also look at this item's details."
+                           if len(products) == 1 else
+                           "If a particular detail matters, tell me; we can also compare these as they are.")
                     )
                 elif (price_context and price_context['baseline'] is None
                       and price_context['requested_cap'] is not None
@@ -2716,6 +3021,33 @@ class AgentRuntime:
                 assistant['message'] = selection_prefix + '\n\n' + assistant['message']
             if term_request:
                 assistant['message'] = term_request[0] + '\n\n' + assistant['message']
+            comparison_handoff = None
+            if comparison_target_asins and not intent_reset:
+                if (receipt.get('question') or {}).get('correction'):
+                    assistant['message'] += " We can compare once that preference is clear."
+                else:
+                    comparison_handoff = self.selection_handoff(
+                        session_id, comparison_asins=comparison_target_asins,
+                        requirements_receipt=receipt, retry_partial=True)
+                    if not selection_control.ranks:
+                        comparison_handoff['comparison_scope'] = 'saved_options'
+                    assist = comparison_handoff.get('comparison_assist') or {}
+                    receipt['comparison_assist'] = assist or None
+                    receipt['comparison_scope'] = comparison_handoff['comparison_scope']
+                    usage = {key: int(assistant.get('usage', {}).get(key) or 0) +
+                             int(assist.get('usage_this_call', {}).get(key) or 0)
+                             for key in ('prompt_tokens', 'completion_tokens')}
+                    assistant['usage'] = usage
+                    receipt['model_usage'] = usage
+                    receipt['compound_comparison'] = {
+                        'parent_asins': list(comparison_target_asins),
+                        'requirements_message': requirement_message,
+                        'reference_scope': 'previously displayed products' if selection_control.ranks else 'saved options',
+                    }
+                    assistant['message'] += "\n\nI've compared those options below using your updated preferences."
+                    if assist.get('status') == 'partial':
+                        assistant['message'] += " Some explanations couldn't be completed. You can say 'try again' to retry these same products."
+                        receipt['suggested_replies'] = ['Try again']
             self._prune_reset_snapshots(session_id, session)
             audit_record = {
                 "turn": turn,
@@ -2734,6 +3066,8 @@ class AgentRuntime:
                 ],
                 "receipt": receipt,
             }
+            if comparison_handoff:
+                audit_record['selection_decision'] = deepcopy(comparison_handoff['decision'])
             digest = chain_digest(session.audit_head, audit_record)
             audit_record["integrity"] = {
                 "previous_sha256": session.audit_head,
@@ -2752,6 +3086,7 @@ class AgentRuntime:
             "receipt": receipt,
             "selection_state": self._selection_state(session),
             "shopping_guide": build_shopping_guide(products),
+            **({'handoff': comparison_handoff} if comparison_handoff else {}),
         }
 
 

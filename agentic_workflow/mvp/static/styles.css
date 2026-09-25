@@ -155,7 +155,7 @@ button { color: inherit; }
 .shortlist-item .shortlist-fit { color: #cde975; }
 .shortlist-item .shortlist-caution { color: #ff9b8e; }
 .shortlist-item .comparison-draft-label { display: block; margin-top: 7px; color: #9cafff; font: 7px var(--mono); }
-.shortlist-actions { display: flex; gap: 14px; margin-top: 10px; }
+.shortlist-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
 .shortlist-actions button { padding: 0; color: #999; border: 0; border-bottom: 1px solid #555; background: transparent; font: 8px var(--mono); cursor: pointer; }
 .shortlist-actions button:first-child { color: var(--acid); border-color: var(--acid); }
 .shortlist-actions button:disabled { color: #555; border-color: #444; cursor: not-allowed; }

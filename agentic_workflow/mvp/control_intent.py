@@ -35,6 +35,19 @@ class ControlIntent:
     uses_focus: bool = False
 
 
+def is_uncertain_reply(message: str) -> bool:
+    """Recognize a standalone hesitation, not a message with actionable details.
+
+    The runtime must supply a pending-question context before using this signal.
+    In particular, 'not sure, change to blue' must still reach turn planning.
+    """
+    return bool(re.fullmatch(
+        r"(?:i['’]?m not sure(?: yet)?|i am not sure(?: yet)?|not sure(?: yet)?|"
+        r"i don['’]?t know(?: yet)?|i do not know(?: yet)?|maybe later|"
+        r"let me think|i (?:haven['’]?t|have not) decided(?: yet)?)[.!?]*",
+        ' '.join(message.split()), re.I))
+
+
 def _ranks(message: str) -> tuple[int, ...]:
     lowered = message.casefold()
     found: list[int] = []
@@ -46,10 +59,47 @@ def _ranks(message: str) -> tuple[int, ...]:
     return tuple(dict.fromkeys(found))
 
 
+def _leading_comparison_ranks(message: str) -> tuple[int, ...] | None:
+    words = ('one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten')
+    match = re.fullmatch(
+        r'(?:please\s+)?(?:the\s+)?(?:first|top)\s+(' + '|'.join(words) +
+        r'|10|[1-9])(?:\s+(?:items?|products?|options?))?(?:,?\s+please)?[.!?]*',
+        message.strip(), re.I)
+    if not match:
+        return None
+    count = match.group(1).casefold()
+    count = int(count) if count.isdigit() else words.index(count) + 1
+    return tuple(range(1, count + 1))
+
+
+def parse_comparison_reference(message: str) -> ControlIntent | None:
+    """Accept item numbers alone only when repairing a comparison request."""
+    leading = _leading_comparison_ranks(message)
+    if leading:
+        return ControlIntent('compare', leading)
+    reference = (r'(?:#?\d+|(?:the\s+)?(?:first|second|third|fourth|fifth|sixth|'
+                 r'seventh|eighth|ninth|tenth)(?:\s+(?:one|item|option))?)')
+    if re.fullmatch(rf'(?:please\s+)?{reference}(?:\s*(?:,|and|&)\s*{reference})*(?:,?\s+please)?[.!?]*', message.strip(), re.I):
+        return parse_control_intent('Compare ' + message)
+    return None
+
+
 def parse_detail_reference(message: str, attribute: str | None) -> ControlIntent | None:
+    reference = (r'(?:#?\d+|(?:the\s+)?(?:first|second|third|fourth|fifth|sixth|'
+                 r'seventh|eighth|ninth|tenth)(?:\s+(?:one|item|product|option))?)')
+    if attribute and re.fullmatch(rf'{reference}(?:,?\s+please)?[.!?]*', message.strip(), re.I):
+        return ControlIntent('detail', _ranks(message), attribute)
     if attribute and re.fullmatch(r'(?:#?\d+|第[一二三四五六七八九十\d]+[款个件])[。.!]*', message.strip()):
         return ControlIntent('detail', _ranks(message), attribute)
     return None
+
+
+def parse_detail_followup(message: str, attribute: str | None) -> ControlIntent | None:
+    """Carry a known topic for another-item questions or explicit item repairs."""
+    match = re.fullmatch(
+        r'(?:what about|how about|and|(?:sorry[, ]+)?i (?:mean|meant)|'
+        r'actually,?|no,)\s+(.+)', message.strip(), re.I)
+    return parse_detail_reference(match.group(1), attribute) if match and attribute else None
 
 
 @dataclass(frozen=True)
@@ -64,7 +114,8 @@ def _clauses(message: str) -> list[str]:
         r'|(?<=[?!.;])\s*(?:and|also|plus|then)\s+'
         r'|(?<=[？。；])\s*(?:另外|顺便|同时)?\s*'
         r'|[,，]\s*(?:(?:and\s+)?also|and|but|then|另外|顺便|同时)\s*[,，]?\s*'
-        r'|[,，]\s*(?=(?:show|find|give|list|display|recommend)\b)'
+        r'|[,，]\s*(?=(?:show|find|give|list|display|recommend|compare|prefer|i prefer)\b)'
+        r"|,\s*(?=what(?: is|['’]s) the difference\b|what are the differences\b|how do\b)"
         r'|\s+(?:and|then|but)\s+(?=(?:is|what|how|change|switch|show|find|keep|select|choose|remove|drop|reject|hide|clear|empty|finalize|compare|undo|redo|don.t|do|i|not)\b)'
     )
     return [re.sub(r'^(?:(?:also|and|plus|then|but|另外|顺便|同时)\s*[,，]?\s*|[,，]\s*)',
@@ -86,7 +137,7 @@ def _actionable_requirements(parts: list[str]) -> str | None:
     return requirement_message
 
 
-def plan_compound_turn(message: str) -> CompoundTurnPlan | None:
+def plan_compound_turn(message: str, *, detail_topic: str | None = None) -> CompoundTurnPlan | None:
     """Plan separately phrased product questions and one requirement update."""
     parts = _clauses(message)
     if not 2 <= len(parts) <= 12 or any(not part for part in parts):
@@ -94,9 +145,10 @@ def plan_compound_turn(message: str) -> CompoundTurnPlan | None:
     details: list[ControlIntent] = []
     requirements: list[str] = []
     for part in parts:
-        control = parse_control_intent(part)
+        control = parse_control_intent(part) or parse_detail_followup(part, detail_topic)
         if control is not None and control.action == 'detail':
             details.append(control)
+            detail_topic = control.attribute
         elif control is not None:
             return None
         else:
@@ -244,6 +296,10 @@ def parse_control_intent(message: str) -> ControlIntent | None:
     text = " ".join(message.strip().split())
     if not text:
         return None
+    leading_request = re.fullmatch(r'(?:please\s+)?compare\s+(.+)', text, re.I)
+    leading = _leading_comparison_ranks(leading_request.group(1)) if leading_request else None
+    if leading:
+        return ControlIntent('compare', leading)
     if re.fullmatch(r'(?:no thanks|keep browsing)[.!?]*', text, re.I):
         return ControlIntent('decline')
     if re.fullmatch(
@@ -273,11 +329,45 @@ def parse_control_intent(message: str) -> ControlIntent | None:
     negated_edit = re.fullmatch(r"(?:please )?(?:don't|do not|never) (?:remove|delete|drop|deselect|clear|empty|select|choose|pick|reject|hide|export|generate|compare)\b[^;,.!?]*[.!?]*", text, re.I)
     if negated_edit:
         return ControlIntent('retain')
-    topic = re.fullmatch(r'(?:(?:what|how) about (?:its |the )?|(?:its |the ))?(material|fabric|price|cost|fit)(?:,? please)?[?.!]*', text, re.I)
+    topic = re.fullmatch(r'(?:(?:what|how) about (?:its |the )?|(?:its |the ))?(material|fabric|price|cost|fit|care|care instructions)(?:,? please)?[?.!]*', text, re.I)
     if topic:
-        attribute = {'fabric': 'material', 'cost': 'price'}.get(topic.group(1).casefold(), topic.group(1).casefold())
+        attribute = {'fabric': 'material', 'cost': 'price', 'care instructions': 'care'}.get(topic.group(1).casefold(), topic.group(1).casefold())
         return ControlIntent('detail', (), attribute, uses_focus=True)
     rank_ref = r'(?:it|this one|that one|#\d+|(?:the\s+)?(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)(?:\s+(?:one|item|product))?)'
+    comparison_ref = (r'(?:#\d+|(?:the\s+)?(?:first|second|third|fourth|fifth|sixth|'
+                      r'seventh|eighth|ninth|tenth)(?:\s+(?:one|item|product|option))?)')
+    if re.fullmatch(r"(?:how do these two differ|what(?: is|['’]s) the difference between these two|compare these two)[?.!]*", text, re.I):
+        return ControlIntent('compare', attribute='displayed_pair')
+    comparison_refs = rf'{comparison_ref}(?:\s*(?:,\s*(?:and\s+)?|and\s+|versus\s+|vs\.?\s+){comparison_ref})+'
+    comparison_refs = rf'(?:{comparison_refs}|(?:my|the) saved (?:options|items|products)|(?:the )?items in my shortlist)'
+    difference = (re.fullmatch(
+        rf"(?:what(?: is|['’]s) the difference|what are the differences) between (?P<refs>{comparison_refs})(?:,? please)?[?.!]*",
+        text, re.I) or re.fullmatch(rf'how do (?P<refs>{comparison_refs}) differ[?.!]*', text, re.I))
+    if difference:
+        return parse_control_intent('Compare ' + difference.group('refs'))
+    named_topic = re.fullmatch(
+        rf'(?:what about|how about|and) (?P<ref>{rank_ref})[\'’]s '
+        r'(?P<topic>material|fabric|price|cost|fit|care|care instructions)(?:,? please)?[?.!]*',
+        text, re.I)
+    if named_topic:
+        reference = named_topic.group('ref')
+        topic_name = named_topic.group('topic').casefold()
+        attribute = {'fabric': 'material', 'cost': 'price', 'care instructions': 'care'}.get(topic_name, topic_name)
+        return ControlIntent('detail', _ranks(reference), attribute,
+                             reference.casefold() in {'it', 'this one', 'that one'})
+    care = (re.fullmatch(rf'how (?:do|should|can) i (?:wash|clean|care for) (?P<ref>{rank_ref})[?.!]*', text, re.I)
+            or re.fullmatch(rf'can i (?:machine wash|hand wash|wash|tumble dry|iron) (?P<ref>{rank_ref})[?.!]*', text, re.I)
+            or re.fullmatch(rf'is (?P<ref>{rank_ref}) machine[ -]washable[?.!]*', text, re.I))
+    if care:
+        reference = care.group('ref')
+        return ControlIntent('detail', _ranks(reference), 'care',
+                             reference.casefold() in {'it', 'this one', 'that one'})
+    overview = (re.fullmatch(rf'(?:tell me more about|show me details (?:of|about|for)) (?P<ref>{rank_ref})(?:,? please)?[?.!]*', text, re.I)
+                or re.fullmatch(r"(?:show me|check|show) (?:its|the) details(?:,? please)?[?.!]*", text, re.I))
+    if overview:
+        reference = overview.groupdict().get('ref') or 'it'
+        return ControlIntent('detail', _ranks(reference), 'overview',
+                             reference.casefold() in {'it', 'this one', 'that one'})
     comfort_compare = re.fullmatch(
         r'which(?: one| item| product| of these)? (?:is|would be|feels?) (?:the )?(?:most comfortable|comfiest)(?: to wear)?[?.!]*',
         text, re.I)
@@ -379,6 +469,15 @@ def parse_control_intent(message: str) -> ControlIntent | None:
     for action in ("clear", "finalize", "handoff", "reject", "remove", "compare", "select"):
         if CONTROL_PATTERNS[action].search(text):
             ranks = _ranks(text)
+            if action == 'compare':
+                # Keep unavailable references so they cannot silently become
+                # a request to compare the existing saved selection.
+                references = [(match.start(), int(match.group(1))) for match in
+                              re.finditer(r'(?<![\w$.])#?(\d+)(?!\w|\.\d)', text)]
+                for word, rank in ORDINALS.items():
+                    references.extend((match.start(), rank) for match in
+                                      re.finditer(rf'(?<![a-z]){re.escape(word)}(?![a-z])', text, re.I))
+                ranks = tuple(dict.fromkeys(rank for _, rank in sorted(references)))
             if action in {'reject', 'remove', 'select'} and not ranks and re.search(
                 r'\$\s*\d|\b(?:budget|price|dollars?|usd|spending limit)\b', text, re.I
             ):

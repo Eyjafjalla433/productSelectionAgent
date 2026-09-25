@@ -765,7 +765,8 @@ class TurnIntentRouter(IntentRouter):
             scoped_text = text[:initial.end()]
         if override:
             scoped_text = ""  # The disclosed requirement above is the update.
-        scoped = self.understand(scoped_text)
+        # "Not only X but also Y" adds attributes; it does not exclude X.
+        scoped = self.understand(re.sub(r'\bnot\s+only\s+', 'also ', scoped_text))
         for name, raw in scoped.slots.items():
             if name in corrected_slots and name in {
                     'color', 'material', 'size', 'brand', 'style', 'use_case',
@@ -809,6 +810,17 @@ class TurnIntentRouter(IntentRouter):
                 extracted = extracted if isinstance(extracted, list) else [extracted]
                 return any(v in extracted or _contains(clause, str(v)) for v in values)
             value_clause = next((clause for clause in clauses if mentions_value(clause)), scoped_text)
+            # Resolve a local "it is optional" only when its preceding clause
+            # names one detail. Never guess between multiple possible referents.
+            meaningful_clauses = [clause.strip() for clause in clauses if clause.strip()]
+            if value_clause.strip() in meaningful_clauses:
+                clause_index = meaningful_clauses.index(value_clause.strip())
+                following = meaningful_clauses[clause_index + 1:clause_index + 2]
+                named_slots = {key for key, value in self.understand(value_clause).slots.items() if value}
+                if (named_slots == {name} and following and re.fullmatch(
+                        r"(?:it|that)(?:\s+is|['’]s)\s+(?:optional|not\s+(?:required|essential))",
+                        following[0])):
+                    value_clause += ' optional'
             soft = name in {"style", "use_case", "feature", "budget_target"} or bool(re.search(
                 r"\b(?:prefer|preferably|maybe|ideally|like|perhaps|probably|possibly|"
                 r"not sure|i think|i guess|i might|might)\b|"
@@ -820,10 +832,14 @@ class TurnIntentRouter(IntentRouter):
             # Ordinary tentative preferences still cannot silently erase it.
             optional = bool(re.search(r'\b(?:optional|not required|not essential)\b|(?:不是必须|不强求|非必需)', value_clause))
             mandatory = bool(re.search(r'\b(?:must|required|essential|non[ -]negotiable)\b|(?:必须|一定要|只接受)', value_clause))
+            exclusive = (not re.search(r'\bnot\s+only\b', value_clause) and any(
+                re.search(r'\bonly\s+(?:(?:want|need|accept|consider)\s+)?' + re.escape(str(value)) + r'\b',
+                          value_clause) for value in values))
+            mandatory = mandatory or exclusive
             if mandatory and not optional and name != 'budget_target':
                 soft = False
             revision = bool(re.search(r'\b(?:actually|instead|changed my mind|change my mind)\b|(?:改成|改为|换成|改主意)', scoped_text))
-            if name in {'color', 'material', 'size', 'brand', 'style', 'use_case'} and (optional or (soft and revision)):
+            if name in {'color', 'material', 'size', 'brand', 'style', 'use_case', 'feature'} and (optional or (soft and revision)):
                 add(name, 'clear')
                 soft = True
             add(name, "remove_exclusion", values)

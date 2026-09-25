@@ -4,6 +4,9 @@ A conversational shopping assistant that helps people compare products without f
 
 ## What it does
 
+- Evidence distinguishes accepted alternatives from actual matches. For “size M or L” or “black or white,” each listing's explanation names only the supported values. The complete requirement remains intact; a listed size does not establish live variant availability.
+- An optional comparison can be declined while adding a requirement: “Either is fine, but under $30” keeps the new budget without inventing a fit preference or rejecting products. The original message is retained in the audit, and Undo reverses the budget edit.
+- Keeps comparison choices open through read-only preference recaps and product-detail questions. For example: “Which should I buy?” → “How much is #2?” → “Fabric.” A new search or a requirement edit clears the old trade-off. Shoppers can also answer with a named option (“blue, please”) rather than an item number, or combine a choice with another constraint (“I prefer slim fit, but under $30”). These choices are undoable preferences, not automatic product selections or exclusive filters.
 - Extracts multiple requirements from a single message and remembers them.
 - Understands common singular and plural product names when the shopper starts or switches a search, including “dress” and “dresses.”
 - If a shopper considers or requests different product types (“a dress or a jacket,” “deciding between a dress and a jacket,” or “a dress and a jacket”), the MVP keeps any stated budget and asks which type to explore first instead of silently choosing one. “Show me both” explains the current one-category-at-a-time search boundary and keeps the choices available. A reply such as “Dress, preferably blue” selects a type and saves the added preference together.
@@ -78,6 +81,64 @@ for extraction, objective comparison and personalized explanations. See
 [Description integration](DESCRIPTION_INTEGRATION.md) for setup and data flow.
 The integration preserves both shared modules without edits and caches repeated
 comparisons and exports, refreshing when requirements, selections or catalog facts change.
+
+The shortlist has a **Compare saved options** button. A shopper can also say
+“Compare my saved options” after changing a preference or browsing another
+result page; the comparison uses saved product IDs and the current requirements.
+The button protects unfinished messages and prevents duplicate requests.
+This direct entry into decision help is informed by
+[Amazon's Help Me Decide](https://www.aboutamazon.com/news/retail/amazon-things-to-buy-help-me-decide-gen-ai).
+The saved-option journey passed 31 targeted runtime/integration tests and
+44 browser checks; this is session-level comparison, not account-wide personalization.
+
+Comparison also recovers from unavailable item numbers without substituting
+the existing shortlist. “Compare #2 and #99” asks which displayed items were
+intended, and “#1 and #2” can complete the correction. The shortlist stays
+unchanged and the description model is not called until the references resolve.
+This applies the brief, context-aware recovery principle described in
+[Google's conversation-design guidance](https://design.google/library/speaking-the-same-language-vui).
+The covered recovery and adjacent controls passed 63 targeted tests.
+
+When a shopper names comparison items, the table includes exactly that group
+in the requested order. A full shortlist does not prevent comparing an extra
+displayed item; the interface identifies items that have not been saved.
+Finalization and export still refer to the saved shortlist. Requests for more
+than three comparison items ask for a smaller group before changing anything.
+
+The table puts distinguishing details first and folds shared explicit values
+into an expandable section. Unknown cells and inferences stay visible, with
+source quotes available for inspection. This uses the scanning principle in
+[Baymard's comparison research](https://baymard.com/blog/user-friendly-comparison-tools).
+Product names remain visible when all available attributes match, without
+claiming the products are identical.
+
+The shopper's stated requirements and exclusions lead the table, followed by
+soft preferences. Relevant unknowns remain visible—for example, a price row
+for a stated budget—rather than disappearing into collapsed details. Shared
+attributes also remain visible when the shopper explicitly cares about them.
+This presentation behavior passed 53 browser checks and five showcase tests.
+
+If a model stage fails, the comparison keeps its available facts and offers
+“Try again.” That reply retries the immediately preceding failed comparison;
+an explicit repeated comparison also retries a partial result. Export and
+finalization reuse what is already available. The recovery path passed 37
+targeted tests, including ordinary search retries. This applies the transparent,
+context-specific recovery described in
+[Google's error-handling guidance](https://developers.google.com/assistant/conversation-design/errors).
+
+The shopper can update a preference and compare in one turn, for example
+“I prefer cotton, compare my saved options.” Both clause orders work. Named
+products remain tied to the previous display even when the refreshed search
+returns different products, and the comparison receives the new requirements.
+The preference edit remains undoable. This continues the conversational
+refinement direction described by
+[Google Shopping](https://blog.google/products-and-platforms/products/search/search-ai-updates-september-2025/).
+
+Comparison recovery also works after that combined turn changes the result
+page. “Try again” uses the failed comparison's product IDs and updated
+preferences, preserving the displayed page and saved shortlist. A second
+partial response can be retried explicitly without entering an automatic loop.
+This continuity passed 39 targeted runtime, description and search-recovery tests.
 
 Generate a standalone, English-language replay using synthetic products:
 
@@ -211,6 +272,23 @@ For a broad request such as “a gift for my dad under $50,” the assistant kee
 
 ## Verification
 
+### Reversible feature requirements
+
+After "Only breathable black T-shirts," a shopper can say "Breathable is
+optional" or "Breathable is not essential." This changes breathability into
+a preference while retaining the category and color. Other matching items
+become available again; explicit, non-negated catalog breathability evidence
+contributes to preference ranking, without claiming tested comfort. Equal
+evidence keeps the search order. Undo restores the strict requirement and
+previous results. Ordinary preference wording alone does not erase an existing
+requirement. "Breathable would be nice, but it's not essential" also relaxes
+that requirement: the adjacent pronoun is resolved only when its preceding
+clause names a single detail. Ambiguous references do not silently remove
+requirements. Replies confirm the saved relaxation and any newly required
+color, material, size, fit, or feature in the same turn.
+This implements the one-step correction principle in
+[Google's conversation-design guidance](https://developers.google.com/assistant/conversation-design/confirmations).
+
 ```sh
 python -B -m agentic_workflow.verify
 python -B -m agentic_workflow.mvp.ui_smoke
@@ -226,7 +304,7 @@ python -B -m agentic_workflow.live_smoke --conversation
 
 The live scenario covers 39 turns: initial search, grounded rank and review questions, material and price questions, an unpriced cheaper-items request, short follow-ups, a relative fit refinement and undo, mixed preference-and-question turns, a keep-and-refine turn with separate shortlist and requirement undo, a two-action shortlist edit and undo, an unsupported product question, a tentative color change, pause, confirmation, undo, uncertainty, redo, comparison, shortlist confirmation, removal, shortlist undo/redo, deferred confirmation, a negated clear command, and reconfirmation. A separate four-turn real-backend check confirms that rejecting #2 and requesting more results excludes that item before retrieval, then undoing and redoing the rejection leaves the displayed list unchanged. Another five-turn real-backend check binds “more like #1” to its catalog record, asks for a supported facet, searches from the shopper's answer, restores the prior results on undo, and retains the #1 reference for a follow-up question. Assistant replies and shopping-guide content are also checked for Chinese text.
 
-Latest verification: 505 regression tests, 38 browser checks, a real-backend blue-jeans replay returning ten subtype-verified candidates with a valid audit, a deferred-item correction replay where selecting green jeans returned two hard-matching candidates with a valid audit, a real-backend shared-budget edit that rechecked the active dress results and withheld unpriced matches with a valid audit, a four-turn real-backend item-only budget replay that restored the shared dress cap after switching back with a valid audit, a real-backend deferred soft-color replay that retained green-first and blue-acceptable preference across category switches with a valid audit, a real-backend deferred color-withdrawal replay that retained the dress page and returned ten unconstrained-color jeans with a valid audit, a real-backend jeans-only red-exclusion replay that preserved the dress page and returned ten jeans without a displayed red-title conflict, with a valid audit, a real-backend broad T-shirt replay in which “Either is fine” kept the same results and closed the optional color question with a valid audit, a real-backend browse-first replay that showed ten T-shirts without an optional question and honestly reported when a later fabric focus could not be distinguished, with a valid audit, an evidence-based question-utility replay on the real 46-candidate T-shirt pool with a valid audit, a real-backend browse-to-decision replay that kept the same ten-item page while asking a grounded color question, with a valid audit, a real-backend return-to-browsing replay that dismissed that question without changing the page and passed audit, a two-turn real-backend compound-product replay that retained the black T-shirt intent and returned ten verified products, a three-turn real-backend comfort-question and decline replay, a five-turn real-backend single- and multi-detail correction acknowledgement and Undo replay, a twelve-turn real-backend start-over, scoped/full-reset, Undo/Redo, shortlist, and hidden-product replay, synthetic comfort-choice, combined-budget, decline-with-budget, interruption, and Undo checks, an English four-turn synthetic replay, the 39-turn real-backend scenario (including natural candidate-question wording), six real-backend unpriced-budget turns covering both a cap and a range with Undo, a seven-turn real-backend gift-occasion correction covering both explicit and possessive phrasings, a three-turn real-backend soft-fit guidance and Undo replay, a three-turn real-backend tentative-size correction using “I wear L, not M” and Undo, a three-turn optional-question bypass and Undo replay, a real-backend shopper-focus replay with an honest catalog-evidence fallback, and separate feedback, similarity, preference-withdrawal, plain-language indifference, read-only comparison, optional-question-decline, unmatched-reply, unsure-category, and single-message-revision replays passed. The unsure-category replay also selects a suggested product type against the real index. Synthetic catalog tests cover reversible preferences, bounded ambiguity recovery, gift-context corrections, and comparisons without invented personal-fit claims. The product-facing runtime has no fixed turn cap; a separate test confirms refinement and undo beyond ten turns. All 19 files inside `search_tool` retained their original hashes. Direct material checks answer yes or no only when complete, consistent composition evidence supports the answer; otherwise they state the uncertainty. These checks establish the covered behavior, not unrestricted natural-language understanding or live price/inventory availability.
+Latest verification: 510 regression tests, 53 browser checks, a real-backend blue-jeans replay returning ten subtype-verified candidates with a valid audit, a deferred-item correction replay where selecting green jeans returned two hard-matching candidates with a valid audit, a real-backend shared-budget edit that rechecked the active dress results and withheld unpriced matches with a valid audit, a four-turn real-backend item-only budget replay that restored the shared dress cap after switching back with a valid audit, a real-backend deferred soft-color replay that retained green-first and blue-acceptable preference across category switches with a valid audit, a real-backend deferred color-withdrawal replay that retained the dress page and returned ten unconstrained-color jeans with a valid audit, a real-backend jeans-only red-exclusion replay that preserved the dress page and returned ten jeans without a displayed red-title conflict, with a valid audit, a real-backend broad T-shirt replay in which “Either is fine” kept the same results and closed the optional color question with a valid audit, a real-backend browse-first replay that showed ten T-shirts without an optional question and honestly reported when a later fabric focus could not be distinguished, with a valid audit, an evidence-based question-utility replay on the real 46-candidate T-shirt pool with a valid audit, a real-backend browse-to-decision replay that kept the same ten-item page while asking a grounded color question, with a valid audit, a real-backend return-to-browsing replay that dismissed that question without changing the page and passed audit, a two-turn real-backend compound-product replay that retained the black T-shirt intent and returned ten verified products, a three-turn real-backend comfort-question and decline replay, a five-turn real-backend single- and multi-detail correction acknowledgement and Undo replay, a twelve-turn real-backend start-over, scoped/full-reset, Undo/Redo, shortlist, and hidden-product replay, synthetic comfort-choice, combined-budget, decline-with-budget, interruption, and Undo checks, an English four-turn synthetic replay, the 39-turn real-backend scenario (including natural candidate-question wording), six real-backend unpriced-budget turns covering both a cap and a range with Undo, a seven-turn real-backend gift-occasion correction covering both explicit and possessive phrasings, a three-turn real-backend soft-fit guidance and Undo replay, a three-turn real-backend tentative-size correction using “I wear L, not M” and Undo, a three-turn optional-question bypass and Undo replay, a real-backend shopper-focus replay with an honest catalog-evidence fallback, and separate feedback, similarity, preference-withdrawal, plain-language indifference, read-only comparison, optional-question-decline, unmatched-reply, unsure-category, and single-message-revision replays passed. The unsure-category replay also selects a suggested product type against the real index. Synthetic catalog tests cover reversible preferences, bounded ambiguity recovery, gift-context corrections, and comparisons without invented personal-fit claims. The product-facing runtime has no fixed turn cap; a separate test confirms refinement and undo beyond ten turns. All 19 files inside `search_tool` retained their original hashes. Direct material checks answer yes or no only when complete, consistent composition evidence supports the answer; otherwise they state the uncertainty. These checks establish the covered behavior, not unrestricted natural-language understanding or live price/inventory availability.
 
 A two-turn replay against the actual unpriced `search_tool` also confirmed that “Show me more like #1 but cheaper” kept the same ten-item page, did not add a price cap, explained the missing catalog price, and passed the conversation audit.
 The mixed “Show me more like #1 but cheaper and blue” replay against that backend applied blue, preserved #1 as the reference, left price uncapped, explained that #1 has no catalog price, returned ten results, and passed audit.

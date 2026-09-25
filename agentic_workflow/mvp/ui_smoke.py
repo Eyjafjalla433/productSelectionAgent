@@ -51,6 +51,23 @@ def main():
           check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Reset search only|Reset everything|Cancel', 'reset scope choices');
           renderReplyOptions({suggested_replies:['T-shirt','Dress']});
           check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'T-shirt|Dress', 'reoffered starting points');
+          renderReplyOptions({question:{target_slot:'color',options:['black','white']},
+            comparison_reference_question:{displayed_ranks:[1,2,3,4],pending_requirements:'I prefer cotton'},
+            suggested_replies:['Never mind']});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Never mind',
+            'comparison reference clarification offers dismissal instead of stale refinement');
+          renderReplyOptions({question:{target_slot:'color',options:['black','white']},
+            detail_question:{attribute:'care',ranks:[1,2,3]}, suggested_replies:['#1','#2','#3','Never mind']});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === '#1|#2|#3|Never mind',
+            'product reference choices take priority over older search question');
+          renderReplyOptions({question:{target_slot:'color', options:['black','white']},
+            preference_comparison:{question:{slot:'style', options:[{value:'slim fit'},{value:'regular fit'}]}},
+            suggested_replies:['slim fit','regular fit','Either is fine']});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'slim fit|regular fit|Either is fine',
+            'active comparison takes priority over earlier refinement');
+          renderReplyOptions({suggested_replies:['black','blue','Either is fine'], can_undo_requirements:true});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'black|blue|Either is fine|Undo',
+            'comparison choices retain undo');
           renderReplyOptions({question:{target_slot:'color', options:['black','white']}, can_undo_requirements:true});
           ui.message.value = 'my draft'; ui.message.dispatchEvent(new Event('input'));
           check([...ui.replyOptions.children].every(b=>b.disabled), 'protect draft');
@@ -76,6 +93,9 @@ def main():
           check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'Undo rejection|Redo rejection', 'product feedback corrections');
           renderReplyOptions({question:{target_slot:'similarity_attribute', options:['fit','color','fabric']}});
           check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'fit|color|fabric|Show me first', 'grounded similarity choices');
+          renderReplyOptions({question:{target_slot:'comfort', options:['breathability','relaxed fit']}});
+          check([...ui.replyOptions.children].map(b=>b.textContent).join('|') === 'breathability|relaxed fit|Show me first',
+            'comfort choices and a browsing escape remain available');
           renderReplyOptions({question:{target_slot:'material', options:['fleece'], option_labels:{fleece:'抓绒'}}});
           check(ui.replyOptions.firstChild.textContent === 'fleece', 'English options regardless of legacy labels');
           shortlisted.clear();
@@ -145,6 +165,7 @@ def main():
             {parent_asin:'A',title:'Cotton dress'}, {parent_asin:'B',title:'Second dress'}],
             comparison_assist:{schema_version:'description-comparison.v1',status:'completed',
               objective_comparison:{comparison_matrix:[
+                {dimension:'brand',values:{A:{value:'Example',source_type:'explicit',evidence:'Example'},B:{value:'Example',source_type:'explicit',evidence:'Example'}}},
                 {dimension:'material',values:{A:{value:'Cotton',source_type:'inferred',evidence:'Cotton blend'},B:{value:null}}},
                 {dimension:'warranty',values:{A:{value:null},B:{value:null}}}],
                 product_assessments:[{parent_asin:'A',pros:[{text:'Soft fabric <img src=x>',evidence_refs:[{quote:'Cotton blend'}]}]}],
@@ -157,13 +178,99 @@ def main():
           check(ui.comparisonTable.textContent.includes('Details not supplied (1)'), 'missing dimensions grouped');
           check(ui.comparisonDetails.querySelector('.personalized-comparison').textContent.includes('cotton preference'), 'personal advice separate from facts');
           check(ui.comparisonDetails.textContent.includes('<img src=x>') && !ui.comparisonDetails.querySelector('img'), 'model prose rendered as text');
+          check(!ui.comparisonTable.querySelector(':scope > table').textContent.includes('Brand') && ui.comparisonTable.textContent.includes('Shared details (1)'), 'shared facts are expandable');
+          check(ui.comparisonTable.querySelector(':scope > table').textContent.includes('Unknown'), 'partly missing details remain visible');
+          const sameValue = structuredClone(descriptionHandoff);
+          sameValue.comparison_assist.objective_comparison.comparison_matrix[1].values.B = {value:'Cotton',source_type:'explicit',evidence:'Cotton'};
+          renderComparison(sameValue);
+          check(ui.comparisonTable.querySelector(':scope > table').textContent.includes('Inference'), 'same value with inferred evidence remains visible');
+          sameValue.comparison_assist.objective_comparison.comparison_matrix[1].values.A.source_type = 'explicit';
+          renderComparison(sameValue);
+          check(ui.comparisonTable.querySelector(':scope > table thead').textContent.includes('Cotton dressSecond dress') && ui.comparisonTable.querySelector(':scope > table tbody').textContent.includes('available listed values are the same'), 'all-shared comparison keeps names visible without implying a winner');
+          sameValue.selected_products = [sameValue.selected_products[0]];
+          renderComparison(sameValue);
+          check(ui.comparisonTable.querySelector(':scope > table').textContent.includes('Brand') && !ui.comparisonTable.textContent.includes('Shared details'), 'single item keeps facts visible');
+          const prioritized = structuredClone(descriptionHandoff);
+          prioritized.requirements = {hard:{price_max:30},soft:{material:['cotton']}};
+          prioritized.comparison_assist.objective_comparison.comparison_matrix[1].values = {
+            A:{value:'Cotton',source_type:'explicit'},B:{value:'Cotton',source_type:'explicit'}};
+          prioritized.comparison_assist.objective_comparison.comparison_matrix.push({dimension:'price',values:{A:{value:null},B:{value:null}}});
+          const beforePriorityRender = JSON.stringify(prioritized);
+          renderComparison(prioritized);
+          const priorityRows = ui.comparisonTable.querySelectorAll(':scope > table tbody tr');
+          check(priorityRows[0].textContent.includes('PriceYour requirement') && priorityRows[0].textContent.includes('Unknown'), 'requested unknown price stays first and visible');
+          check(priorityRows[1].textContent.includes('MaterialYour preferenceCottonCotton'), 'requested shared fabric stays visible');
+          check(JSON.stringify(prioritized) === beforePriorityRender, 'presentation does not mutate comparison evidence');
+          descriptionHandoff.comparison_scope = 'requested_products';
+          descriptionHandoff.saved_asins = ['A'];
+          renderComparison(descriptionHandoff);
+          check(ui.comparisonNote.textContent.includes('Some compared items are not saved'), 'comparison scope distinct from shortlist');
           descriptionHandoff.comparison_assist.status = 'partial';
           renderComparison(descriptionHandoff);
           check(ui.comparisonNote.textContent.includes('could not be completed'), 'partial comparison explained');
           renderComparison(null);
           check(ui.comparison.hidden && !ui.comparisonDetails.children.length, 'old description cleared');
-          return {passed:true, labels, checks:38};
+          ui.message.value = 'an unfinished preference';
+          ui.message.dispatchEvent(new Event('input'));
+          check(ui.compareSelection.disabled, 'saved comparison protects draft');
+          ui.compareSelection.click();
+          check(ui.message.value === 'an unfinished preference', 'comparison does not replace draft');
+          ui.message.value = ''; ui.message.dispatchEvent(new Event('input'));
+          let comparisonCalls = 0; let comparisonMessage; let completeComparison;
+          window.fetch = async (path, options) => {
+            comparisonCalls++; comparisonMessage = JSON.parse(options.body).message;
+            await new Promise(resolve => { completeComparison = resolve; });
+            return {ok:false,status:503,json:async()=>({error:'simulated comparison retry'})};
+          };
+          ui.compareSelection.click(); ui.compareSelection.click();
+          check(comparisonCalls === 1 && comparisonMessage === 'Compare my saved options', 'one click compares saved IDs without displayed ranks');
+          check(ui.compareSelection.disabled, 'comparison disabled in flight');
+          completeComparison(); await new Promise(resolve => setTimeout(resolve,20));
+          check(!ui.compareSelection.disabled, 'comparison can retry');
+          shortlisted.clear(); renderShortlist();
+          check(ui.compareSelection.disabled, 'no comparison for an empty shortlist');
+          return {passed:true, labels, checks:58};
         })()''')
+        from agentic_workflow.showcase import render, run_case
+        replay = render(run_case('demo', 'flexible'))
+        script = re.findall(r'<script\b[^>]*>(.*?)</script>', replay, flags=re.S)[-1]
+        evaluate('document.open(); document.write(' + json.dumps(replay) + '); document.close();')
+        evaluate('(function(){' + script + '''
+          if (steps.length !== 7 || tabs.length !== 7) throw Error('Seven replay steps required');
+          tabs[3].click();
+          if (document.querySelector('#progress').textContent.includes('Shortlist confirmed'))
+            throw Error('Preference reply must not appear finalized');
+          tabs[6].click();
+          if (!document.querySelector('#progress').textContent.includes('Shortlist confirmed') || !next.disabled)
+            throw Error('Final replay step must confirm the saved shortlist');
+        })()''')
+        report['checks'] += 3
+        revision_replay = render(run_case('demo', 'revisions'))
+        revision_script = re.findall(r'<script\b[^>]*>(.*?)</script>', revision_replay, flags=re.S)[-1]
+        evaluate('document.open(); document.write(' + json.dumps(revision_replay) + '); document.close();')
+        evaluate('(function(){' + revision_script + '''
+          if (steps.length !== 6 || tabs.length !== 6) throw Error('Six revision steps required');
+          tabs[2].click();
+          if (document.querySelector('#progress').textContent.includes('Shortlist confirmed'))
+            throw Error('Undo must not appear finalized');
+          tabs[5].click();
+          if (!document.querySelector('#progress').textContent.includes('Shortlist confirmed') || !next.disabled)
+            throw Error('Final revision step must confirm the saved shortlist');
+        })()''')
+        report['checks'] += 3
+        clarification_replay = render(run_case('demo', 'clarification'))
+        clarification_script = re.findall(r'<script\b[^>]*>(.*?)</script>', clarification_replay, flags=re.S)[-1]
+        evaluate('document.open(); document.write(' + json.dumps(clarification_replay) + '); document.close();')
+        evaluate('(function(){' + clarification_script + '''
+          if (steps.length !== 10 || tabs.length !== 10) throw Error('Ten clarification steps required');
+          tabs[6].click();
+          if (document.querySelector('#progress').textContent.includes('Shortlist confirmed'))
+            throw Error('Comparison must not appear finalized');
+          tabs[9].click();
+          if (!document.querySelector('#progress').textContent.includes('Shortlist confirmed') || !next.disabled)
+            throw Error('Final clarification step must confirm the saved shortlist');
+        })()''')
+        report['checks'] += 3
         print(json.dumps(report, ensure_ascii=False))
     finally:
         connection.close()

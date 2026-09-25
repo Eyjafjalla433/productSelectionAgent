@@ -6,10 +6,10 @@
 .remaining{margin:28px 0}.other-option{padding:20px 0;border-bottom:1px solid var(--line)}.other-option b{font-size:14px}.other-option p{font-size:14px;margin:8px 0}td{vertical-align:top;overflow-wrap:anywhere}td:first-child{width:32%}.table-wrap table{min-width:650px}
 </style></head><body>
 <header><span class="brand">SHOW ME YOUR AGENT ↗</span><span class="tag">CASE STUDY 01 · INTERACTIVE REPLAY</span></header>
-<main><section class="hero"><div class="eyebrow">LET'S FIND YOUR KIND OF LOVELY</div><h1>Take your time.<br>Find <em>your kind of lovely.</em></h1><p class="intro">Alex is looking for a blue dress and prefers cotton. Follow the conversation from the first request to a side-by-side comparison and a saved shortlist.</p></section>
-<div class="notice"><!--NOTICE--> Explore four executed conversation turns. No orders are placed.</div>
+<main><section class="hero"><div class="eyebrow">LET'S FIND YOUR KIND OF LOVELY</div><h1>Take your time.<br>Find <em>your kind of lovely.</em></h1><p class="intro"><!--OVERVIEW--></p></section>
+<div class="notice"><!--NOTICE--> Explore <!--TURN_COUNT--> executed conversation turns. No orders are placed.</div>
 <nav class="controls" aria-label="Choose a demo step"><!--TABS--><div class="toolbar"><button class="play" id="play" type="button">▶ Play replay</button><button id="next" type="button">Next →</button></div></nav>
-<p class="progress" id="progress" aria-live="polite">All four turns are shown below. Enable JavaScript for step-by-step playback.</p>
+<p class="progress" id="progress" aria-live="polite">All <!--TURN_COUNT--> turns are shown below. Enable JavaScript for step-by-step playback.</p>
 <!--STEPS-->
 <button class="download" id="download" type="button" hidden>Download conversation and shortlist ↓</button>
 </main><footer>Workflow: request → preference memory → search and constraint checks → product evidence → comparison → confirmation.<br>Exports include execution receipts and a SHA-256 audit chain. Confirmation saves a shortlist; it does not place an order.</footer>
@@ -20,7 +20,7 @@ const steps=[...document.querySelectorAll('.step')], tabs=[...document.querySele
 let current=0,timer=null;
 const play=document.querySelector('#play'),next=document.querySelector('#next');
 function stop(){clearInterval(timer);timer=null;play.textContent='▶ Play replay';}
-function show(index){current=index;steps.forEach((s,i)=>s.classList.toggle('hidden',i!==index));tabs.forEach((t,i)=>{t.classList.toggle('active',i===index);t.setAttribute('aria-current',i===index?'step':'false');});next.disabled=index===steps.length-1;document.querySelector('#progress').textContent=`Turn ${index+1} / ${steps.length} · ${index===3?'Shortlist confirmed':'Choose a step to explore'} · Audit verified`;}
+function show(index){current=index;steps.forEach((s,i)=>s.classList.toggle('hidden',i!==index));tabs.forEach((t,i)=>{t.classList.toggle('active',i===index);t.setAttribute('aria-current',i===index?'step':'false');});next.disabled=index===steps.length-1;const finalized=report.turns[index].result.handoff?.status==='finalized';document.querySelector('#progress').textContent=`Turn ${index+1} / ${steps.length} · ${finalized?'Shortlist confirmed':'Choose a step to explore'} · Audit verified`;}
 tabs.forEach((t,i)=>t.onclick=()=>{stop();show(i);});next.onclick=()=>{stop();show(Math.min(current+1,steps.length-1));};
 play.onclick=()=>{if(timer){stop();return;}if(current===steps.length-1)show(0);play.textContent='Ⅱ Pause';timer=setInterval(()=>{show(current+1);if(current===steps.length-1)stop();},5000);};
 const download=document.querySelector('#download');download.hidden=false;download.onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='shopping-case.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};show(0);

@@ -3,10 +3,35 @@ import unittest
 from agentic_workflow import Agent
 from intent_router.turn_router import TurnIntentRouter
 from mvp.audit import verify_audit
-from mvp.server import AgentRuntime
+from mvp.server import AgentRuntime, _preference_summary
 
 
 class PreferenceWithdrawalTests(unittest.TestCase):
+    def test_preference_recap_leads_with_shopping_details_without_empty_inventory(self):
+        runtime = self.runtime()
+        sid = runtime.new_session()['session_id']
+        before = runtime.chat(sid, 'black tshirt, preferably cotton')
+        recap = runtime.chat(sid, 'What are my preferences?')
+        text = recap['assistant']['message']
+        self.assertIn('in this session', text)
+        self.assertIn('Prefer: cotton.', text)
+        self.assertNotIn('cotton material', text)
+        self.assertNotIn('account-wide', text)
+        self.assertNotIn('No products are saved', text)
+        self.assertEqual(recap['products'], before['products'])
+        self.assertEqual(recap['receipt']['hard'], before['receipt']['hard'])
+        self.assertEqual(recap['receipt']['soft'], before['receipt']['soft'])
+        self.assertEqual(recap['receipt']['session_choice_summary'], {'saved_asins': [], 'hidden_asins': []})
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_recap_uses_plain_labels_without_changing_preference_data(self):
+        receipt = {'hard': {'category': 't-shirt'},
+                   'soft': {'material': ['cotton'], 'style': ['regular fit'],
+                            'use_case': ['travel'], 'brand': ['Example']}, 'excluded': {}}
+        text, state = _preference_summary(receipt)
+        self.assertIn('Prefer: cotton, regular fit, for travel, by Example.', text)
+        self.assertEqual(state, receipt)
+
     def test_natural_memory_question_preserves_an_open_choice(self):
         calls = []
 

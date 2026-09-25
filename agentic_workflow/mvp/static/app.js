@@ -12,6 +12,7 @@ const ui = {
   undoShortlist: document.querySelector("#undo-shortlist"),
   redoShortlist: document.querySelector("#redo-shortlist"),
   finalizeSelection: document.querySelector("#finalize-selection"),
+  compareSelection: document.querySelector("#compare-selection"),
   exportSelection: document.querySelector("#export-selection"),
   comparison: document.querySelector("#comparison"),
   comparisonTable: document.querySelector("#comparison-table"),
@@ -113,7 +114,10 @@ function formatValue(value) {
 
 function renderReplyOptions(receipt = {}) {
   ui.replyOptions.replaceChildren();
-  const question = receipt.question;
+  // A comparison can stay open through a recap or a product question. Its
+  // choices take precedence over an older, still-stored search refinement.
+  const question = (receipt.detail_question || receipt.comparison_reference_question || receipt.preference_comparison?.question) &&
+    Array.isArray(receipt.suggested_replies) ? null : receipt.question;
   const choices = [];
   if (question?.correction) {
     choices.push("Replace", "Keep both", "Keep original");
@@ -151,6 +155,8 @@ function renderReplyOptions(receipt = {}) {
 
 function syncReplyOptions() {
   const draft = Boolean(ui.message.value.trim());
+  ui.compareSelection.disabled = !sessionUsable || ui.submit.disabled || !shortlisted.size || draft;
+  ui.compareSelection.title = draft ? 'Send or clear your draft first' : 'Compare saved products using your current preferences';
   ui.replyOptions.querySelectorAll("button").forEach((button) => {
     button.disabled = !sessionUsable || ui.submit.disabled || draft;
     button.title = draft ? "Send or clear your draft first" : "Click to send, or type your own reply";
@@ -486,6 +492,7 @@ function renderProducts(products, retained = false, guide = null) {
 }
 
 function renderShortlist() {
+  syncReplyOptions();
   ui.shortlist.hidden = shortlisted.size === 0 && !currentSelectionState.can_undo_selection && !currentSelectionState.can_redo_selection;
   ui.undoShortlist.hidden = !currentSelectionState.can_undo_selection;
   ui.redoShortlist.hidden = !currentSelectionState.can_redo_selection;
@@ -597,6 +604,18 @@ function renderDescriptionComparison(handoff) {
     parent.append(details);
   };
   const matrix = result.objective_comparison?.comparison_matrix || [];
+  const dimensionsBySlot = {
+    price_min:['price'], price_max:['price'], budget_min:['price'], budget_max:['price'], budget_target:['price'],
+    material:['material','fabric_composition'], style:['fit'], fit_avoid:['fit'], use_case:['intended_use'],
+  };
+  const priorities = new Map();
+  [['hard',0], ['excluded',0], ['soft',1]].forEach(([tier, importance]) => {
+    Object.entries(handoff.requirements?.[tier] || {}).forEach(([slot, value]) => {
+      if (value == null || value === '' || Array.isArray(value) && !value.length) return;
+      (dimensionsBySlot[slot] || [slot]).forEach(dimension =>
+        priorities.set(dimension, Math.min(priorities.get(dimension) ?? 2, importance)));
+    });
+  });
   const tableFor = rows => {
     const table = document.createElement('table');
     const head = table.createTHead().insertRow();
@@ -607,6 +626,10 @@ function renderDescriptionComparison(handoff) {
     rows.forEach(row => {
       const tr = body.insertRow();
       const th = document.createElement('th'); th.scope = 'row'; th.textContent = label(row.dimension); tr.append(th);
+      if (priorities.has(row.dimension)) {
+        const marker = document.createElement('small'); marker.className = 'inference-label';
+        marker.textContent = priorities.get(row.dimension) === 0 ? 'Your requirement' : 'Your preference'; th.append(marker);
+      }
       products.forEach(product => {
         const cell = tr.insertCell();
         const attribute = row.values?.[product.parent_asin];
@@ -621,9 +644,32 @@ function renderDescriptionComparison(handoff) {
     return table;
   };
   const known = matrix.filter(row => products.some(p => row.values?.[p.parent_asin]?.value != null));
-  const missing = matrix.filter(row => !products.some(p => row.values?.[p.parent_asin]?.value != null));
-  heading(ui.comparisonTable, 'Listed facts');
-  if (known.length) ui.comparisonTable.append(tableFor(known));
+  const missing = matrix.filter(row => !priorities.has(row.dimension) && !products.some(p => row.values?.[p.parent_asin]?.value != null));
+  const normalizedValue = value => typeof value === 'string'
+    ? value.trim().replace(/\s+/g, ' ').toLowerCase() : JSON.stringify(value);
+  const shared = known.filter(row => {
+    const attributes = products.map(product => row.values?.[product.parent_asin]);
+    return !priorities.has(row.dimension) && products.length > 1 && attributes.every(attribute => attribute?.value != null && attribute.source_type === 'explicit') &&
+      attributes.every(attribute => normalizedValue(attribute.value) === normalizedValue(attributes[0].value));
+  });
+  const distinctive = matrix.filter(row => priorities.has(row.dimension) || known.includes(row) && !shared.includes(row))
+    .sort((a,b) => (priorities.get(a.dimension) ?? 2) - (priorities.get(b.dimension) ?? 2));
+  heading(ui.comparisonTable, products.length > 1 ? 'Details to compare' : 'Listed facts');
+  if (distinctive.length) ui.comparisonTable.append(tableFor(distinctive));
+  else {
+    const table = tableFor([]);
+    const note = table.tBodies[0].insertRow().insertCell();
+    note.colSpan = products.length + 1;
+    note.textContent = shared.length
+      ? 'The available listed values are the same across these options. Expand shared details to review them.'
+      : 'These listings do not supply comparable attributes.';
+    ui.comparisonTable.append(table);
+  }
+  if (shared.length) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary'); summary.textContent = `Shared details (${shared.length})`;
+    details.append(summary, tableFor(shared)); ui.comparisonTable.append(details);
+  }
   if (missing.length) {
     const details = document.createElement('details');
     const summary = document.createElement('summary'); summary.textContent = `Details not supplied (${missing.length})`;
@@ -664,8 +710,12 @@ function renderDescriptionComparison(handoff) {
   ui.comparisonNote.textContent = result.status === 'offline_preview'
     ? 'Showing direct catalog facts. Personalized explanations are available when a model is configured.'
     : result.status === 'partial'
-      ? 'Some explanations could not be completed. The available details are shown; missing values remain unknown.'
+      ? 'Some explanations could not be completed. The available details are shown; compare again to retry.'
       : 'Based on the supplied listings. Inferences are labeled; unknown details still need checking.';
+  if (handoff.comparison_scope === 'requested_products' &&
+      products.some(product => !(handoff.saved_asins || []).includes(product.parent_asin))) {
+    ui.comparisonNote.textContent += ' Some compared items are not saved. Your saved shortlist is shown separately above.';
+  }
   return true;
 }
 
@@ -963,6 +1013,11 @@ ui.finalizeSelection.addEventListener("click", () => {
   if (!sessionId || shortlisted.size === 0) return;
   ui.message.value = "Finalize my selection.";
   ui.message.focus();
+});
+ui.compareSelection.addEventListener('click', () => {
+  if (!sessionUsable || ui.submit.disabled || !shortlisted.size || ui.message.value.trim()) return;
+  ui.message.value = 'Compare my saved options';
+  ui.composer.requestSubmit();
 });
 function loadSelectionHistoryCommand(direction) {
   if (!sessionUsable || ui.submit.disabled || !currentSelectionState[`can_${direction}_selection`]) return;

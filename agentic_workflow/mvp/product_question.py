@@ -42,6 +42,88 @@ def composition_summary(snippets, locale='zh'):
 
 def answer_product_question(product, rank, attribute, locale):
     prefix = f'第 {rank} 款：' if locale == 'zh' else f'#{rank}: '
+    if attribute == 'overview':
+        def clean(value):
+            if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+                return ''
+            if isinstance(value, float) and not math.isfinite(value):
+                return ''
+            text = ' '.join(str(value).split())
+            return '' if text.casefold() in {'', '-', 'n/a', 'na', 'none', 'null', 'unknown',
+                                             'not specified', 'not provided'} else text
+
+        def excerpt(value, limit):
+            return value if len(value) <= limit else value[:limit - 3].rstrip() + '...'
+
+        title = excerpt(clean(product.get('title')) or 'Untitled listing', 300)
+        facts = []
+        details = product.get('details') or {}
+        if isinstance(details, dict):
+            facts.extend(f'{clean(key)}: {clean(value)}' for key, value in details.items()
+                         if clean(key) and clean(value))
+        features = product.get('features') or []
+        facts.extend([features] if isinstance(features, str) else
+                     [value for value in features if isinstance(value, str)]
+                     if isinstance(features, (list, tuple)) else [])
+        description = product.get('description') or []
+        facts.extend([description] if isinstance(description, str) else
+                     [value for value in description if isinstance(value, str)]
+                     if isinstance(description, (list, tuple)) else [])
+        facts = list(dict.fromkeys(clean(fact) for fact in facts if clean(fact)))[:3]
+        answer = prefix + title
+        if facts:
+            answer += '\nListing details:\n' + '\n'.join('- ' + excerpt(fact, 240) for fact in facts)
+        else:
+            answer += '\nNo additional detail fields are available in this listing.'
+        try:
+            if isinstance(product.get('price'), bool):
+                raise ValueError('A boolean is not a catalog price')
+            price = float(product.get('price'))
+            if math.isfinite(price) and price >= 0:
+                answer += f'\nCatalog price: ${price:g} (not a live price).'
+        except (TypeError, ValueError):
+            pass
+        return answer
+    if attribute == 'care':
+        snippets = []
+        details = product.get('details') or {}
+        if isinstance(details, dict):
+            snippets.extend(value for key, value in details.items()
+                            if re.fullmatch(r'care(?: instructions)?|washing instructions',
+                                            str(key).strip(), re.I) and isinstance(value, str))
+        for field in ('features', 'description'):
+            raw = product.get(field) or []
+            for snippet in ([raw] if isinstance(raw, str) else raw if isinstance(raw, (list, tuple)) else []):
+                if isinstance(snippet, str) and re.search(
+                        r'\b(?:wash(?:able|ing)?|dry[ -]clean(?:ing)?|tumble[ -]dry|bleach|iron(?:ing)?)\b', snippet, re.I):
+                    snippets.append(snippet)
+        quotes = list(dict.fromkeys(' '.join(value.split()) for value in snippets
+                                    if value.strip().casefold() not in
+                                    {'', '-', 'n/a', 'unknown', 'none', 'null', 'not provided', 'not specified'}))
+        if not quotes:
+            return prefix + "The listing doesn't provide care instructions. Check the garment label before washing."
+        # Quote supplied instructions, including negation and qualifications;
+        # fabric alone does not establish that a washing method is safe.
+        # Never cut off a warning or variant qualification at an arbitrary
+        # character boundary. Very long entries require reading the source.
+        shown = [quote for quote in quotes if len(quote) <= 2000][:3]
+        clauses = [clause for quote in quotes for clause in re.split(r'[.;\n]', quote)]
+        machine_allowed = any(
+            re.search(r'\bmachine[ -]wash(?:able|ing)?\b', clause, re.I)
+            and not re.search(r"\b(?:not|never|no|don't|do not|cannot|can't|avoid)\b", clause, re.I)
+            for clause in clauses)
+        machine_restricted = any(re.search(
+            r"\b(?:hand[ -]wash(?:ing)?\s+only|dry[ -]clean(?:ing)?\s+only|"
+            r"(?:do not|don't|never|not|avoid)\s+machine[ -]wash(?:able|ing)?)\b", clause, re.I)
+            for clause in clauses)
+        answer = prefix + ('The listing gives these care details:\n' + '\n'.join('- ' + quote for quote in shown)
+                           if shown else 'The care text is too long to quote reliably here.')
+        if machine_allowed and machine_restricted:
+            answer = (prefix + "The care details may conflict or refer to different variants. "
+                      "I can't confirm machine washing is suitable.\n" + answer[len(prefix):])
+        if len(shown) < len(quotes):
+            answer += '\nAdditional care text is not shown; check the full listing for restrictions.'
+        return answer + '\nFollow the care label on the specific item.'
     if attribute.startswith('material_check:'):
         wanted = attribute.removeprefix('material_check:')
         pure = wanted.startswith('pure ')

@@ -158,6 +158,79 @@ class PreferenceComparisonTests(unittest.TestCase):
         self.assertNotIn('price_max', reverted['receipt']['hard'])
         self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
+    def test_preference_recap_keeps_tradeoff_answerable_without_search(self):
+        calls = []
+
+        def search(query, top_k):
+            calls.append(query)
+            return [{'product_id': str(i), 'score': 3-i} for i in range(3)]
+
+        def details(ids):
+            titles = ['Black regular fit T-shirt', 'Black T-shirt', 'Black 100% cotton T-shirt']
+            return [dict(product_id=i, found=True, title=titles[int(i)]) for i in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        runtime.chat(sid, 'black T-shirt')
+        advice = runtime.chat(sid, 'Which one should I buy?')
+        count = len(calls)
+        for _ in range(2):
+            recap = runtime.chat(sid, 'What are my preferences?')
+            self.assertEqual(len(calls), count)
+            self.assertEqual(recap['products'], advice['products'])
+            self.assertEqual(recap['receipt']['suggested_replies'],
+                             ['regular fit', '100% cotton', 'Either is fine'])
+        answer = runtime.chat(sid, 'fabric')
+        self.assertEqual(answer['receipt']['preference_comparison_answer']['slot'], 'material')
+        self.assertIn('cotton', str(answer['receipt']['soft']['material']).lower())
+        self.assertNotIn('material', runtime.chat(sid, 'Undo')['receipt']['soft'])
+        runtime.chat(sid, 'Which one should I buy?')
+        runtime.chat(sid, 'What are my preferences?')
+        declined = runtime.chat(sid, 'Either is fine')
+        self.assertEqual(declined['receipt']['pre_reason'], 'preference_comparison_skip')
+        self.assertEqual(declined['receipt']['soft'], {})
+        runtime.chat(sid, 'Which one should I buy?')
+        runtime.chat(sid, 'What are my preferences?')
+        runtime.chat(sid, 'Change to blue')
+        unrelated = runtime.chat(sid, 'fabric')
+        self.assertFalse(unrelated['receipt'].get('preference_comparison_answer'))
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_product_question_detours_keep_tradeoff_but_edits_invalidate_it(self):
+        for detour in ('How much is #2?', 'How much is #2? Is it pure cotton?'):
+            with self.subTest(detour=detour):
+                calls = []
+
+                def search(query, top_k):
+                    calls.append(query)
+                    return [{'product_id': str(i), 'score': 3-i} for i in range(3)]
+
+                def details(ids):
+                    titles = ['Black regular fit T-shirt', 'Black T-shirt', 'Black 100% cotton T-shirt']
+                    return [dict(product_id=i, found=True, title=titles[int(i)]) for i in ids]
+
+                runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                             trace_enabled=True), orchestration_mode='adaptive')
+                sid = runtime.new_session()['session_id']
+                runtime.chat(sid, 'black T-shirt')
+                advice = runtime.chat(sid, 'Which one should I buy?')
+                count = len(calls)
+                answer = runtime.chat(sid, detour)
+                self.assertEqual(answer['products'], advice['products'])
+                self.assertEqual(len(calls), count)
+                self.assertIn('#2:', answer['assistant']['message'])
+                self.assertEqual(answer['receipt']['suggested_replies'],
+                                 ['regular fit', '100% cotton', 'Either is fine'])
+                chosen = runtime.chat(sid, 'fabric')
+                self.assertEqual(chosen['receipt']['preference_comparison_answer']['slot'], 'material')
+                runtime.chat(sid, 'Undo')
+                runtime.chat(sid, 'Which one should I buy?')
+                runtime.chat(sid, 'How much is #2? Also change to blue')
+                stale = runtime.chat(sid, 'fabric')
+                self.assertFalse(stale['receipt'].get('preference_comparison_answer'))
+                self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
     def test_decision_followup_does_not_pick_without_verified_facet(self):
         products = [{'rank': 1, 'parent_asin': 'a', 'title': 'Black tee'}]
         message, evidence = decision_followup(
@@ -249,6 +322,16 @@ class PreferenceComparisonTests(unittest.TestCase):
                          explained['assistant']['message'])
         self.assertEqual([row['parent_asin'] for row in explained['products']],
                          [row['parent_asin'] for row in after['products']])
+        comparison = runtime.chat(sid, 'Which is better, #1 or #2?')
+        self.assertEqual(comparison['receipt']['preference_comparison']['tentative_winner_rank'], 1)
+        self.assertEqual(comparison['receipt']['preference_comparison']['winner_basis'], 'explicit_priority')
+        self.assertIn('higher-priority', comparison['assistant']['message'])
+        self.assertIn('preferences for fit', comparison['assistant']['message'])
+        self.assertEqual(comparison['receipt']['preference_comparison']['decision_slots'], ['style'])
+        self.assertEqual(comparison['products'], after['products'])
+        runtime.chat(sid, 'Undo')
+        unweighted = runtime.chat(sid, 'Which is better, #1 or #2?')
+        self.assertIsNone(unweighted['receipt']['preference_comparison']['tentative_winner_rank'])
         self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
     def test_material_preference_does_not_reward_negated_listing(self):
@@ -312,11 +395,42 @@ class PreferenceComparisonTests(unittest.TestCase):
         ]
         message, metadata = compare_preferences(products, lambda asin: {'parent_asin': asin})
         self.assertEqual(metadata['tentative_winner_rank'], 1)
-        self.assertIn('tentative match', message)
+        self.assertIn("I'd start with #1", message)
+        self.assertIn('not a guarantee of quality or fit', message)
+        self.assertIn('matches your black preference', message)
         products[1]['match']['signals'] = [
             {'slot': 'fit', 'value': 'regular', 'tier': 'soft', 'status': 'supported'}]
         message, metadata = compare_preferences(products, lambda asin: {'parent_asin': asin})
         self.assertIsNone(metadata['tentative_winner_rank'])
+
+    def test_priority_comparison_does_not_count_duplicates_or_override_hard_evidence(self):
+        def signal(slot, value):
+            return {'slot': slot, 'value': value, 'tier': 'soft', 'status': 'supported'}
+
+        products = [
+            {'rank': 1, 'parent_asin': 'a', 'title': 'A', 'match': {'hard_supported': 1,
+                'signals': [signal('style', 'regular fit')]}},
+            {'rank': 2, 'parent_asin': 'b', 'title': 'B', 'match': {'hard_supported': 1,
+                'signals': [signal('material', 'cotton'), signal('material', 'cotton'),
+                            signal('color', 'black')]}},
+        ]
+        priorities = {'style': 1.5, 'material': .35, 'color': .35}
+        _, data = compare_preferences(products, lambda _: {}, priorities=priorities)
+        self.assertEqual(data['tentative_winner_rank'], 1)
+        self.assertEqual(data['priority_scores'], {'a': [1, 0], 'b': [0, 2]})
+        products[0]['match']['signals'].append(signal('color', 'black'))
+        _, shared = compare_preferences(products, lambda _: {}, priorities={**priorities, 'color': 1.5})
+        self.assertEqual(shared['decision_slots'], ['style'])
+        products[0]['match']['signals'].pop()
+        products[0]['match']['hard_supported'] = 0
+        _, data = compare_preferences(products, lambda _: {}, priorities=priorities)
+        self.assertIsNone(data['tentative_winner_rank'])
+        products[0]['match']['hard_supported'] = 1
+        _, data = compare_preferences(products, lambda _: {}, priorities={'style': 1, 'material': 1, 'color': 1})
+        self.assertIsNone(data['tentative_winner_rank'])
+        products[0]['match']['signals'][0]['status'] = 'unknown'
+        _, data = compare_preferences(products, lambda _: {}, priorities=priorities)
+        self.assertNotEqual(data['tentative_winner_rank'], 1)
 
     def test_only_verified_difference_prompts_optional_preference(self):
         products = [
@@ -334,6 +448,23 @@ class PreferenceComparisonTests(unittest.TestCase):
         message, metadata = compare_preferences(products, records.get)
         self.assertIsNone(metadata['next_question'])
 
+    def test_feature_and_preference_evidence_is_not_repeated_in_comparison(self):
+        products = [{'rank': rank, 'parent_asin': str(rank), 'title': 'Black tee',
+                     'match': {'signals': [{'slot': 'color', 'value': 'black',
+                                            'tier': 'soft', 'status': 'supported'}]}}
+                    for rank in (1, 2)]
+        records = {str(rank): {'title': 'Black tee', 'color': 'black'} for rank in (1, 2)}
+        text, evidence = compare_preferences(products, records.get)
+        self.assertEqual(text.count('black'), 1)
+        self.assertIn('matches your black preference', text)
+        self.assertEqual(evidence['rows'][0]['verified_facets']['color'], 'black')
+        products[1]['match']['signals'] = []
+        records['2'] = {'title': 'T-shirt'}
+        text, evidence = compare_preferences(products, records.get)
+        self.assertEqual(text.count('black'), 1)
+        self.assertIn('#1: matches your black preference', text)
+        self.assertEqual(evidence['tentative_winner_rank'], 1)
+
     def test_shared_facts_and_missing_prices_do_not_repeat_as_two_caveats(self):
         products = [
             {'rank': 1, 'parent_asin': 'a', 'title': 'A', 'match': {'signals': []}},
@@ -345,6 +476,7 @@ class PreferenceComparisonTests(unittest.TestCase):
         }
         message, metadata = compare_preferences(products, records.get)
         self.assertIn("can't confidently", message)
+        self.assertNotIn('match signals', message)
         self.assertNotIn('no verified fit, color, fabric, or price difference', message)
         self.assertNotIn('Prices are missing', message)
         self.assertIsNone(metadata['next_question'])
@@ -381,6 +513,37 @@ class PreferenceComparisonTests(unittest.TestCase):
         restored = runtime.chat(sid, 'undo')
         self.assertNotIn('style', restored['receipt']['soft'])
         self.assertNotIn('price_max', restored['receipt']['hard'])
+        runtime.chat(sid, 'Which is better, #1 or #2?')
+        named = runtime.chat(sid, 'I prefer slim fit, but under $30')
+        self.assertEqual(named['receipt']['preference_comparison_answer']['value'], 'slim fit')
+        self.assertEqual(named['receipt']['soft'].get('style'), ['slim fit'])
+        self.assertEqual(named['receipt']['hard'].get('price_max'), 30.0)
+        restored = runtime.chat(sid, 'undo')
+        self.assertNotIn('style', restored['receipt']['soft'])
+        self.assertNotIn('price_max', restored['receipt']['hard'])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_named_color_answer_is_a_preference_not_an_exclusive_filter(self):
+        def search(query, top_k):
+            return [{'product_id': value, 'score': 2-i} for i, value in enumerate(('black', 'blue'))]
+
+        def details(ids):
+            return [dict(product_id=value, found=True, title=f'{value} T-shirt', color=value)
+                    for value in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        runtime.chat(sid, 'T-shirt')
+        question = runtime.chat(sid, 'Which is better, #1 or #2?')
+        self.assertEqual(question['receipt']['preference_comparison']['question']['slot'], 'color')
+        self.assertEqual(question['receipt']['suggested_replies'], ['black', 'blue', 'Either is fine'])
+        reply = runtime.chat(sid, 'blue, please')
+        self.assertEqual(reply['receipt']['soft']['color'], ['blue'])
+        self.assertNotIn('color', reply['receipt']['hard'])
+        self.assertEqual({p['parent_asin'] for p in reply['products']}, {'black', 'blue'})
+        self.assertEqual(reply['receipt']['preference_comparison_answer']['value'], 'blue')
+        self.assertNotIn('color', runtime.chat(sid, 'Undo')['receipt']['soft'])
         self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
     def test_parser_does_not_capture_normal_requirement(self):
@@ -408,6 +571,122 @@ class PreferenceComparisonTests(unittest.TestCase):
         self.assertIsNone(resolve_comparison_reply('I want the first one in red', question))
         self.assertIsNone(resolve_comparison_reply('undo', question))
         self.assertIsNone(resolve_comparison_reply('the first one', None))
+        for text in ('blue', 'I prefer blue', 'blue, please'):
+            self.assertEqual(resolve_comparison_reply(text, question)['parent_asin'], 'b')
+        for text in ('not blue', 'blue or black', 'Is blue available?', 'blue instead of black'):
+            self.assertIsNone(resolve_comparison_reply(text, question))
+        duplicate = {**question, 'options': [question['options'][0], dict(question['options'][1], value='black')]}
+        self.assertIsNone(resolve_comparison_reply('black', duplicate))
+
+    def test_comparison_reply_uses_displayed_rank_not_option_position(self):
+        question = {'slot': 'color', 'options': [
+            {'rank': 10, 'value': 'blue', 'parent_asin': 'ten'},
+            {'rank': 3, 'value': 'black', 'parent_asin': 'three'},
+        ]}
+        for text, asin in (('#10', 'ten'), ('#3', 'three'), ('the first one', 'ten'),
+                           ('the second one', 'three')):
+            self.assertEqual(resolve_comparison_reply(text, question)['parent_asin'], asin)
+        self.assertEqual(resolve_comparison_reply('#10, but under $30', question)['extra_message'], 'under $30')
+        for text in ('#1', '#2', '#0', '#11', '#3 or #10'):
+            self.assertIsNone(resolve_comparison_reply(text, question))
+
+    def test_later_rank_preference_reply_survives_recap_and_is_undoable(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 20-i} for i in range(10)]
+
+        def details(ids):
+            return [dict(product_id=i, found=True,
+                         title=('Slim fit' if int(i) % 2 == 0 else 'Regular fit') + ' T-shirt')
+                    for i in ids]
+
+        runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                     trace_enabled=True), orchestration_mode='adaptive')
+        sid = runtime.new_session()['session_id']
+        first = runtime.chat(sid, 'T-shirt')
+        runtime.chat(sid, 'Which is better, #4 or #3?')
+        runtime.chat(sid, 'What are my preferences?')
+        reply = runtime.chat(sid, '#4')
+        self.assertEqual(reply['receipt']['soft']['style'], ['regular fit'])
+        self.assertEqual(reply['receipt']['preference_comparison_answer']['parent_asin'],
+                         first['products'][3]['parent_asin'])
+        self.assertEqual(reply['selection_state']['selected_asins'], [])
+        restored = runtime.chat(sid, 'Undo')
+        self.assertNotIn('style', restored['receipt']['soft'])
+        self.assertEqual(restored['products'], first['products'])
+        runtime.chat(sid, 'Which is better, #4 or #3?')
+        corrected = runtime.chat(sid, 'Not the first one—the second')
+        self.assertEqual(corrected['receipt']['soft']['style'], ['slim fit'])
+        self.assertEqual(corrected['receipt']['preference_comparison_answer']['parent_asin'],
+                         first['products'][2]['parent_asin'])
+        self.assertEqual(corrected['selection_state']['selected_asins'], [])
+        self.assertEqual(corrected['receipt']['excluded'], {})
+        self.assertFalse(corrected['receipt']['rejected_asins'])
+        self.assertNotIn('style', runtime.chat(sid, 'Undo')['receipt']['soft'])
+        runtime.chat(sid, 'Which is better, #4 or #3?')
+        polite = runtime.chat(sid, 'the second, please')
+        self.assertEqual(polite['receipt']['soft']['style'], ['slim fit'])
+        self.assertIsNone(polite['receipt']['preference_comparison_answer']['extra_message'])
+        self.assertEqual(polite['selection_state']['selected_asins'], [])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
+
+    def test_explicit_comparison_correction_requires_two_different_known_choices(self):
+        question = {'slot': 'color', 'options': [
+            {'rank': 4, 'value': 'blue', 'parent_asin': 'blue-item'},
+            {'rank': 3, 'value': 'black', 'parent_asin': 'black-item'},
+        ]}
+        for text in ('not blue, black', 'not #4 but #3', 'not the first one—the second'):
+            result = resolve_comparison_reply(text, question)
+            self.assertEqual(result['value'], 'black')
+            self.assertIsNone(result['extra_message'])
+        for text in ('not blue', 'not blue, blue', 'not #99, #3', 'not blue, black or red',
+                     'not blue, maybe black', 'not blue, black and under $30'):
+            self.assertIsNone(resolve_comparison_reply(text, question))
+        tradeoff = {'kind': 'decision_tradeoff', 'options': [
+            {'rank': 4, 'value': 'regular fit', 'parent_asin': 'fit-item', 'facet': 'fit', 'slot': 'style'},
+            {'rank': 3, 'value': '100% cotton', 'parent_asin': 'fabric-item', 'facet': 'fabric', 'slot': 'material'},
+        ]}
+        correction = resolve_comparison_reply('not fit, fabric', tradeoff)
+        self.assertEqual(correction['slot'], 'material')
+        self.assertEqual(correction['value'], '100% cotton')
+        self.assertEqual(correction['kind'], 'decision_tradeoff')
+        self.assertEqual(resolve_comparison_reply('the fabric, please', tradeoff)['slot'], 'material')
+        for question in (question, tradeoff):
+            for wording in ('the second, please', 'I prefer the second one', '#3 please'):
+                with self.subTest(wording=wording, kind=question.get('kind')):
+                    reply = resolve_comparison_reply(wording, question)
+                    self.assertEqual(reply['parent_asin'], question['options'][1]['parent_asin'])
+                    self.assertIsNone(reply['extra_message'])
+            for wording in ('not the second', 'maybe the second', 'the first or second',
+                            'Is the second better?'):
+                self.assertIsNone(resolve_comparison_reply(wording, question))
+
+    def test_declining_comparison_keeps_new_budget_and_supports_undo(self):
+        def search(query, top_k):
+            return [{'product_id': str(i), 'score': 3-i} for i in range(3)]
+
+        def details(ids):
+            return [dict(product_id=i, found=True, price=20 + 10*int(i),
+                         title=('Slim fit' if i == '0' else 'Regular fit') + ' T-shirt') for i in ids]
+
+        for message in ('Either is fine, but under $30', 'No preference and under $30',
+                        'Neither, under $30'):
+            with self.subTest(message=message):
+                runtime = AgentRuntime(Agent(search_function=search, details_function=details,
+                                             trace_enabled=True), orchestration_mode='adaptive')
+                sid = runtime.new_session()['session_id']
+                initial = runtime.chat(sid, 'T-shirt')
+                runtime.chat(sid, 'Which is better, #1 or #2?')
+                reply = runtime.chat(sid, message)
+                self.assertEqual(reply['receipt']['hard']['price_max'], 30.0)
+                self.assertNotIn('style', reply['receipt']['soft'])
+                self.assertFalse(reply['receipt']['excluded'])
+                self.assertFalse(reply['receipt']['rejected_asins'])
+                self.assertIn('comparison_declined', reply['receipt'])
+                self.assertEqual(runtime.audit(sid)['turns'][-1]['user_message'], message)
+                undone = runtime.chat(sid, 'Undo')
+                self.assertNotIn('price_max', undone['receipt']['hard'])
+                self.assertEqual(undone['products'], initial['products'])
+                self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
     def test_declining_optional_comparison_question_keeps_current_list(self):
         calls = []

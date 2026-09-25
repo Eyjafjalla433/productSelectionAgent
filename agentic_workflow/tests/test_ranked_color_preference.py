@@ -1,11 +1,23 @@
 import unittest
+from copy import deepcopy
 
 from agentic_workflow import Agent
 from mvp.audit import verify_audit
-from mvp.server import AgentRuntime
+from mvp.server import AgentRuntime, _soft_values
 
 
 class RankedColorPreferenceTests(unittest.TestCase):
+    def test_grouped_alternatives_are_normalized_without_parsing_literal_strings(self):
+        state = {'color': [{'value': ('black', 'white')}, {'value': 'black'}],
+                 'size': [{'value': ['m', 'l']}],
+                 'brand': [{'value': "('Example', 'Other')"}],
+                 'material': [{'value': 'cotton'}]}
+        original = deepcopy(state)
+        self.assertEqual(_soft_values(state), {
+            'color': ['black', 'white'], 'size': ['m', 'l'],
+            'brand': ["('Example', 'Other')"], 'material': ['cotton']})
+        self.assertEqual(state, original)
+
     @staticmethod
     def runtime():
         calls = []
@@ -45,6 +57,15 @@ class RankedColorPreferenceTests(unittest.TestCase):
         self.assertIn('first choice', explained['assistant']['message'])
         recap = runtime.chat(sid, 'What are my preferences?')
         self.assertIn('black first; white also okay', recap['assistant']['message'])
+        count = len(calls)
+        compared = runtime.chat(sid, 'Which is better, #1 or #2?')
+        self.assertEqual(compared['receipt']['preference_comparison']['tentative_winner_rank'], 1)
+        self.assertEqual(compared['receipt']['preference_comparison']['winner_basis'], 'first_choice')
+        self.assertIn('first-choice', compared['assistant']['message'])
+        self.assertIn('first-choice preference for black', compared['assistant']['message'])
+        self.assertEqual(compared['receipt']['preference_comparison']['decision_slots'], ['color'])
+        self.assertEqual(len(calls), count)
+        self.assertEqual(compared['products'], result['products'])
         undone = runtime.chat(sid, 'Undo')
         self.assertNotIn('color', undone['receipt']['soft'])
         self.assertEqual([item['parent_asin'] for item in undone['products']],
@@ -56,10 +77,28 @@ class RankedColorPreferenceTests(unittest.TestCase):
         sid = runtime.new_session()['session_id']
         runtime.chat(sid, 'I need a tshirt')
         result = runtime.chat(sid, 'Black or white is fine')
-        self.assertEqual(result['receipt']['soft']['color'], ["('black', 'white')"])
+        self.assertEqual(result['receipt']['soft']['color'], ['black', 'white'])
         self.assertEqual([item['parent_asin'] for item in result['products']][:2],
                          ['WHITE', 'BLACK'])
         self.assertEqual(result['receipt']['ranking_method'], 'search_tool')
+        signals = {item['parent_asin']: next(signal for signal in item['match']['signals']
+                                            if signal['tier'] == 'soft' and signal['slot'] == 'color')
+                   for item in result['products']}
+        self.assertEqual(signals['WHITE']['matched_values'], ['white'])
+        self.assertEqual(signals['BLACK']['matched_values'], ['black'])
+        self.assertEqual(signals['UNKNOWN']['matched_values'], [])
+        recap = runtime.chat(sid, 'What are my preferences?')
+        self.assertIn('black or white', recap['assistant']['message'])
+        self.assertNotIn("('black', 'white')", recap['assistant']['message'])
+        comparison = runtime.chat(sid, 'Which is better, #1 or #2?')
+        self.assertIsNone(comparison['receipt']['preference_comparison']['tentative_winner_rank'])
+        undone = runtime.chat(sid, 'Undo')
+        self.assertNotIn('color', undone['receipt']['soft'])
+        redone = runtime.chat(sid, 'Redo')
+        self.assertEqual(redone['receipt']['soft']['color'], ['black', 'white'])
+        self.assertEqual([item['parent_asin'] for item in redone['products']],
+                         [item['parent_asin'] for item in result['products']])
+        self.assertEqual(verify_audit(runtime.audit(sid)), [])
 
     def test_primary_color_comes_from_utterance_not_lexicon_order(self):
         runtime, _ = self.runtime()
