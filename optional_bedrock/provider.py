@@ -13,6 +13,11 @@ import agentic_workflow  # Initializes the existing project's import paths.
 from shopping_agent.model_provider import ModelProviderError, StructuredModelResult
 
 
+# Larger generation budgets produced concatenated JSON through the team gateway.
+# 1024 was validated with the full parser and up to ten response cards.
+MAX_OUTPUT_TOKENS = 1024
+
+
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None  # Never forward a team key to another endpoint.
@@ -70,12 +75,10 @@ class GatewayProvider:
 
     @classmethod
     def from_environment(cls):
-        if any(not os.environ.get(key, '').strip() for key in
-               ('LLM_GATEWAY_URL', 'LLM_GATEWAY_API_KEY', 'LLM_MODEL')):
-            raise ValueError('Configure LLM_GATEWAY_URL, LLM_GATEWAY_API_KEY and LLM_MODEL first')
-        return cls(base_url=os.environ.get('LLM_GATEWAY_URL', ''),
-                   api_key=os.environ.get('LLM_GATEWAY_API_KEY', ''),
-                   model=os.environ.get('LLM_MODEL', ''),
+        from shopping_agent.hackathon_config import GATEWAY_URL, GATEWAY_MODEL, get_gateway_api_key
+        return cls(base_url=os.environ.get('LLM_GATEWAY_URL', '').strip() or GATEWAY_URL,
+                   api_key=os.environ.get('LLM_GATEWAY_API_KEY', '').strip() or get_gateway_api_key(),
+                   model=os.environ.get('LLM_MODEL', '').strip() or GATEWAY_MODEL,
                    timeout=float(os.environ.get('LLM_TIMEOUT_SECONDS', '20')),
                    turn_budget=float(os.environ.get('LLM_TURN_BUDGET_SECONDS', '35')),
                    max_calls=int(os.environ.get('LLM_MAX_CALLS', '100')),
@@ -110,7 +113,7 @@ class GatewayProvider:
         payload = {'model': self.model, 'stream': False,
                    'messages': [{'role': 'system', 'content': system},
                                 {'role': 'user', 'content': content}],
-                   'options': {'num_predict': max_tokens, 'temperature': 0}}
+                   'options': {'num_predict': min(max_tokens, MAX_OUTPUT_TOKENS), 'temperature': 0}}
         body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
         if len(body) > self.max_request_bytes:
             raise ModelProviderError('Gateway request exceeds configured size limit')

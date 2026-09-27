@@ -547,11 +547,14 @@ class AgentRuntime:
         self.model_cloud = model_provider not in {"off", "local"} if model_cloud is None else bool(model_cloud)
         self.comparison_enhancer = comparison_enhancer
         self.response_writer = None
-        if model_provider == 'deepseek' and getattr(comparison_enhancer, 'provider', None):
+        if model_provider in {'deepseek', 'aws_bedrock_gateway'} and getattr(comparison_enhancer, 'provider', None):
             from copy import copy
             from shopping_agent.response_writer import ResponseWriter
-            writer_provider = copy(comparison_enhancer.provider)
-            if hasattr(writer_provider, 'timeout_seconds'):
+            # The gateway owns the shared call counter and operation deadline.
+            # Copying it would let the writer bypass both process/turn budgets.
+            writer_provider = (comparison_enhancer.provider if model_provider == 'aws_bedrock_gateway'
+                               else copy(comparison_enhancer.provider))
+            if model_provider == 'deepseek' and hasattr(writer_provider, 'timeout_seconds'):
                 writer_provider.timeout_seconds = min(writer_provider.timeout_seconds, 12.0)
             self.response_writer = ResponseWriter(writer_provider)
         self.session_ttl_seconds = float(session_ttl_seconds)
@@ -567,7 +570,7 @@ class AgentRuntime:
         from shopping_agent.requirement_enhancer import RequirementEnhancer
         from shopping_agent.requirement_parser import PrimaryRequirementParser
 
-        enhancer = (PrimaryRequirementParser(provider) if provider.name == 'deepseek'
+        enhancer = (PrimaryRequirementParser(provider) if provider.name in {'deepseek', 'aws_bedrock_gateway'}
                     else RequirementEnhancer(provider)) if provider is not None else None
         agent_options.setdefault('trace_enabled', True)
         agent_options.setdefault('requirement_enhancer', enhancer)
@@ -681,6 +684,11 @@ class AgentRuntime:
             "scenarios": deepcopy(self.scenarios),
         }
 
+    def _model_operation(self):
+        from contextlib import nullcontext
+        provider = getattr(getattr(self.agent, 'requirement_enhancer', None), 'provider', None)
+        return provider.operation() if self.model_provider == 'aws_bedrock_gateway' else nullcontext()
+
     def _model_disclosure(self) -> dict[str, str | bool]:
         if self.model_provider == "off" and getattr(getattr(self.agent, 'retriever', None), 'mode', None) == 'search_tool':
             return {
@@ -701,6 +709,12 @@ class AgentRuntime:
                 "cloud_model": False,
                 "data_boundary": "configured_local_endpoint",
                 "data_disclosure": "Local model: shopper messages and selected catalog excerpts go only to the configured localhost endpoint.",
+            }
+        if self.model_provider == "aws_bedrock_gateway":
+            return {
+                "cloud_model": True,
+                "data_boundary": "aws_bedrock_gateway",
+                "data_disclosure": "AWS Bedrock gateway receives shopper messages and selected catalog excerpts. Gateway token counters may be unavailable; zero is not proof of no charge.",
             }
         if self.model_provider == "deepseek":
             return {
@@ -910,7 +924,7 @@ class AgentRuntime:
         }
 
     def selection_handoff(self, session_id: str, *, comparison_asins: tuple[str, ...] | None = None, retry_partial: bool = False, requirements_receipt: dict[str, Any] | None = None) -> dict[str, Any]:
-        with self.lock:
+        with self.lock, self._model_operation():
             session = self._session(session_id)
             if comparison_asins is not None:
                 displayed = set().union(*session.shown_by_intent.values())
@@ -2064,7 +2078,7 @@ class AgentRuntime:
                 f"Message must be {MAX_MESSAGE_CHARS:,} characters or fewer.",
                 "message_too_long",
             )
-        with self.lock:
+        with self.lock, self._model_operation():
             session = self._session(session_id)
             session.locale = message_locale(message, session.locale)
             turn_limit = getattr(self.agent, 'max_turns', 10)
@@ -3267,7 +3281,7 @@ def main() -> None:
         default="adaptive",
         help="adaptive is the product-facing default; score_compat reproduces the submission policy",
     )
-    parser.add_argument("--model-provider", choices=("off", "local", "deepseek"), default="off")
+    parser.add_argument("--model-provider", choices=("off", "local", "deepseek", "gateway", "auto"), default="auto")
     parser.add_argument("--model", help="override the provider's model name")
     parser.add_argument("--model-base-url", help="override the OpenAI-compatible API base URL")
     parser.add_argument("--model-timeout", type=float, default=20.0)

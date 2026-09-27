@@ -1,8 +1,7 @@
 """Optional structured model providers for the C-layer orchestrator.
 
-The submission remains model-free by default. Providers are opt-in and use only
-Python's standard library so local OpenAI-compatible servers and DeepSeek share
-one narrow JSON contract.
+CLI startup selects an available cloud provider by default; explicit off mode
+remains model-free. Providers share a narrow JSON contract and use the standard library.
 """
 
 from __future__ import annotations
@@ -130,6 +129,18 @@ def create_model_provider(
     model: str | None = None,
     timeout_seconds: float = 20.0,
 ) -> StructuredModelProvider | None:
+    if mode == "auto":
+        if base_url or model:
+            raise ValueError("Auto mode uses LLM_GATEWAY_URL/LLM_MODEL and DEEPSEEK_MODEL; do not pass shared endpoint/model overrides")
+        from .startup_provider import select_startup_provider
+        return select_startup_provider(timeout_seconds=timeout_seconds)
+    if mode == "gateway":
+        from optional_bedrock.provider import GatewayProvider, load_environment
+        from pathlib import Path
+        load_environment(Path(__file__).resolve().parents[2] / "optional_bedrock" / ".env")
+        provider = GatewayProvider.from_environment()
+        provider.timeout = timeout_seconds
+        return provider
     if mode == "off":
         return None
     if mode == "deepseek":
@@ -151,4 +162,4 @@ def create_model_provider(
             api_key=os.environ.get("LOCAL_MODEL_API_KEY"),
             timeout_seconds=timeout_seconds,
         )
-    raise ValueError("model provider must be one of: off, local, deepseek")
+    raise ValueError("model provider must be one of: off, local, deepseek, gateway, auto")

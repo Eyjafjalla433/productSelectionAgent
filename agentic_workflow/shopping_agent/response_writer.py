@@ -7,11 +7,12 @@ from .model_provider import ModelProviderError
 
 PROMPT = '''You are a helpful shopping assistant. Return JSON only:
 {"reply":"...", "products":[{"parent_asin":"...","why":"...","evidence_ids":["e0"]}]}.
-Reply in the user's language, naturally, in 1-2 short sentences (maximum 220 characters).
+Write the reply and every product's why in English, naturally, in 1-2 short sentences
+for the reply (maximum 220 characters).
 Do not use a fixed opening such as "Got it" or "I've pulled together 10 options".
 Vary your wording with the situation. Do not announce the result count routinely.
 Put product-specific detail in the cards, not in the conversational reply.
-Aim for roughly 15-30 English words, or 20-50 Chinese characters. A useful acknowledgment
+Aim for roughly 15-30 English words. A useful acknowledgment
 can be enough: "Let's look beyond cotton and keep the blue." Do not repeat catalog
 disclaimers in every reply; put item-specific limitations in the cards.
 Use ordinary language in replies AND card reasons. Never say "hard requirements",
@@ -147,10 +148,10 @@ class ResponseWriter:
             for p in products[:10]:
                 why, quotes = accepted[p['parent_asin']]
                 p['advice']['fit_reason'] = why
-                p['advice']['fit_reason_source'] = 'deepseek'
+                p['advice']['fit_reason_source'] = result.provider
                 p['advice']['catalog_highlights'] = [
                     {k: q[k] for k in ('source', 'evidence')} for q in quotes]
             assistant['message'] = reply.strip()
-            return {'status': 'applied', 'usage': usage, 'model': result.model}
+            return {'status': 'applied', 'usage': usage, 'model': result.model, 'provider': result.provider}
         except (ModelProviderError, ValueError, TypeError, KeyError) as exc:
             return {'status': 'fallback', 'usage': usage, 'warning': type(exc).__name__}

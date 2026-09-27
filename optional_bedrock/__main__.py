@@ -8,18 +8,7 @@ from mvp.server import AgentRuntime, create_server
 
 
 class GatewayRuntime(AgentRuntime):
-    def _model_disclosure(self):
-        return {'cloud_model': True, 'data_boundary': 'aws_bedrock_gateway',
-                'data_disclosure': 'AWS Bedrock gateway receives shopper messages and selected catalog excerpts. '
-                'Gateway token counters may be unavailable; zero is not proof of no charge.'}
-
-    def chat(self, *args, **kwargs):
-        with self.agent.requirement_enhancer.provider.operation():
-            return super().chat(*args, **kwargs)
-
-    def selection_handoff(self, *args, **kwargs):
-        with self.agent.requirement_enhancer.provider.operation():
-            return super().selection_handoff(*args, **kwargs)
+    """Compatibility entry point; the shared runtime handles gateway budgets and disclosure."""
 
 
 def main():
@@ -33,8 +22,8 @@ def main():
     args = parser.parse_args()
     try:
         load_environment(args.env_file)
-        provider = GatewayProvider.from_environment()
         if args.check:
+            provider = GatewayProvider.from_environment()
             result = provider.complete_json(system='Return a JSON object with ok set to true.',
                                             user='Connectivity test. No product or personal data.', max_tokens=64)
             if result.data.get('ok') is not True:
@@ -42,16 +31,19 @@ def main():
             print(json.dumps({'ok': True, 'provider': provider.name, 'model': provider.model,
                               'usage': result.usage, 'latency_ms': result.latency_ms}))
             return
+        from shopping_agent.startup_provider import select_startup_provider
+        provider = select_startup_provider()
+        runtime_class = GatewayRuntime if getattr(provider, 'name', None) == 'aws_bedrock_gateway' else AgentRuntime
         if args.demo:
             from mvp.demo import DEMO_CATALOG, DEMO_WEB_SCENARIOS
-            runtime = GatewayRuntime.create(DEMO_CATALOG, provider=provider, scenarios=DEMO_WEB_SCENARIOS)
+            runtime = runtime_class.create(DEMO_CATALOG, provider=provider, scenarios=DEMO_WEB_SCENARIOS)
         else:
             from agentic_workflow.preflight import check_search_tool
             from agentic_workflow.runtime import SEARCH_SCENARIOS
             errors = check_search_tool()
             if errors:
                 raise ValueError('; '.join(errors))
-            runtime = GatewayRuntime.create(None, provider=provider, scenarios=SEARCH_SCENARIOS)
+            runtime = runtime_class.create(None, provider=provider, scenarios=SEARCH_SCENARIOS)
             if args.warmup:
                 print('Warming local search; no cloud call is made for warmup.', flush=True)
                 search, _ = runtime.agent.retriever._functions()
@@ -60,7 +52,8 @@ def main():
     except (ValueError, ModelProviderError) as exc:
         parser.error(str(exc))
     print(f'Optional Bedrock workflow: http://{args.host}:{args.port}', flush=True)
-    print('Cloud generation enabled. Gateway limit: ' + str(provider.max_calls) + ' attempts per process.', flush=True)
+    if hasattr(provider, 'max_calls'):
+        print(f'Gateway limit: {provider.max_calls} attempts per process (including startup probe).', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -64,9 +64,14 @@ class PrimaryRequirementTests(unittest.TestCase):
         self.assertNotIn('material', cleared['receipt']['hard'])
         self.assertNotIn('material', cleared['receipt']['excluded'])
 
-    def test_provider_factory_selects_primary_only_for_deepseek(self):
-        provider = FakeProvider()
-        provider.name = 'deepseek'
+    def test_provider_factory_selects_full_cloud_parsers(self):
         from mvp.demo import DEMO_CATALOG
-        runtime = AgentRuntime.create(DEMO_CATALOG, provider=provider)
-        self.assertIsInstance(runtime.agent.requirement_enhancer, PrimaryRequirementParser)
+        from shopping_agent.requirement_enhancer import RequirementEnhancer
+        for name in ('deepseek', 'aws_bedrock_gateway', 'local'):
+            with self.subTest(provider=name):
+                provider = FakeProvider()
+                provider.name = name
+                runtime = AgentRuntime.create(DEMO_CATALOG, provider=provider)
+                self.assertIsInstance(runtime.agent.requirement_enhancer,
+                                      RequirementEnhancer if name == 'local' else PrimaryRequirementParser)
+                self.assertEqual(runtime.response_writer is not None, name != 'local')

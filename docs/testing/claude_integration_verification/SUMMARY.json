@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "test_overrides": false,
+  "requirements_parser": {
+    "passed": 16,
+    "total": 16
+  },
+  "response_writer": {
+    "passed": 9,
+    "total": 9
+  },
+  "current_runtime_turns": 6,
+  "all_current_runtime_sources": "aws_bedrock_gateway",
+  "shared_gateway_provider": true,
+  "cards": [
+    5,
+    10
+  ],
+  "unit_suites": {
+    "workflow": 544,
+    "shopping_agent": 47,
+    "server": 33,
+    "gateway": 15
+  },
+  "gateway_api_attempts_in_paired_run": 45
+}

@@ -9,7 +9,7 @@ def main():
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--demo', action='store_true', help='explicit synthetic offline catalog')
-    parser.add_argument('--model-provider', choices=('off', 'local', 'deepseek'), default='off')
+    parser.add_argument('--model-provider', choices=('off', 'local', 'deepseek', 'gateway', 'auto'), default='auto')
     parser.add_argument('--model', help='model name for requirement and description assistance')
     parser.add_argument('--model-base-url', help='override the configured model endpoint')
     parser.add_argument('--model-timeout', type=float, default=20.0)

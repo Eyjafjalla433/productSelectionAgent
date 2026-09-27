@@ -1,1 +1,1 @@
-"""Optional Bedrock gateway integration. Nothing in the core imports this package."""
+"""Optional gateway adapter, lazily loaded by automatic cloud selection."""

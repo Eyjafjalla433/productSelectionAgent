@@ -25,6 +25,22 @@ class ResponseWriterTests(unittest.TestCase):
         self.assertTrue(all(len(r['evidence']) <= 160 for r in rows))
         self.assertFalse(any('Marketing' in r['evidence'] for r in rows))
 
+    def test_source_tracks_actual_completion_provider(self):
+        for name in ('deepseek', 'aws_bedrock_gateway'):
+            with self.subTest(provider=name):
+                args = self.fixture()
+                provider = FakeProvider({'reply': 'Here is a linen option.', 'products': [
+                    {'parent_asin': 'a', 'why': 'The fabric is linen.', 'evidence_ids': ['e0']}]})
+                provider.name = name
+                out = ResponseWriter(provider).write(**args)
+                self.assertEqual(out['status'], 'applied')
+                self.assertEqual(out['provider'], name)
+                self.assertEqual(args['products'][0]['advice']['fit_reason_source'], name)
+                provider.error = True
+                out = ResponseWriter(provider).write(**args)
+                self.assertEqual(out['status'], 'fallback')
+                self.assertNotIn('fit_reason_source', args['products'][0]['advice'])
+
     def test_valid_copy_preserves_facts_and_selects_only_source_quotes(self):
         args = self.fixture()
         provider = FakeProvider({'reply': 'Linen it is—take a look at this one. Want more?', 'products': [

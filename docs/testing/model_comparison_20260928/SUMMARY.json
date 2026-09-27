@@ -1,0 +1,105 @@
+{
+  "scope": "English-only; 16 parser cases x2, 9 writer cases x2, six-turn runtime, 5/10-card stress x2",
+  "production_changed": false,
+  "providers": {
+    "deepseek": {
+      "model": "deepseek-flash",
+      "gateway_token_cap": null,
+      "recorded_api_attempts_in_paired_run": 80,
+      "reported_usage_in_paired_run": {
+        "prompt_tokens": 63567,
+        "completion_tokens": 16832
+      },
+      "parser": {
+        "passed": 32,
+        "total": 32,
+        "median_latency_ms": 1051.6,
+        "max_latency_ms": 3484.2,
+        "failures": []
+      },
+      "writer": {
+        "passed": 15,
+        "total": 18,
+        "median_latency_ms": 1546.5,
+        "max_latency_ms": 3077.1,
+        "failures": [
+          {
+            "case": "grounded_en",
+            "repeat": 1
+          },
+          {
+            "case": "material_reversal",
+            "repeat": 1
+          },
+          {
+            "case": "no_results",
+            "repeat": 1
+          }
+        ],
+        "schema_applied": 17,
+        "english_only": 16
+      },
+      "aligned_runtime": {
+        "state_passed": 6,
+        "products_passed": 6,
+        "writer_applied": 6,
+        "total": 6,
+        "median_turn_ms": 2930.7,
+        "audit_errors": []
+      },
+      "stress": {
+        "5": {
+          "passed": 2,
+          "total": 2
+        },
+        "10": {
+          "passed": 2,
+          "total": 2
+        }
+      }
+    },
+    "claude_candidate_1024": {
+      "model": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "gateway_token_cap": 1024,
+      "recorded_api_attempts_in_paired_run": 64,
+      "reported_usage_in_paired_run": {
+        "prompt_tokens": 84810,
+        "completion_tokens": 7055
+      },
+      "parser": {
+        "passed": 32,
+        "total": 32,
+        "median_latency_ms": 2526.2,
+        "max_latency_ms": 3909.0,
+        "failures": []
+      },
+      "writer": {
+        "passed": 18,
+        "total": 18,
+        "median_latency_ms": 3063.8,
+        "max_latency_ms": 4280.9,
+        "failures": [],
+        "schema_applied": 18,
+        "english_only": 18
+      },
+      "aligned_runtime": {
+        "state_passed": 6,
+        "products_passed": 6,
+        "writer_applied": 6,
+        "total": 6,
+        "median_turn_ms": 5066.9,
+        "audit_errors": []
+      },
+      "stress": {
+        "5": {
+          "passed": 2,
+          "total": 2
+        },
+        "10": {
+          "passed": 2,
+          "total": 2
+        }
+      }
+    }
+  }
+}
