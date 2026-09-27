@@ -16,6 +16,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from .hackathon_config import get_deepseek_api_key
+
 
 MAX_RESPONSE_BYTES = 1_000_000
 
@@ -131,7 +133,7 @@ def create_model_provider(
     if mode == "off":
         return None
     if mode == "deepseek":
-        api_key = os.environ.get("DEEPSEEK_API_KEY")
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip() or get_deepseek_api_key()
         if not api_key:
             raise ValueError("DEEPSEEK_API_KEY is required for --model-provider deepseek")
         return OpenAICompatibleJsonProvider(

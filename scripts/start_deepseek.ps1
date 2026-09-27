@@ -7,9 +7,6 @@ $ErrorActionPreference = 'Stop'
 if (-not $env:DEEPSEEK_API_KEY) {
     $env:DEEPSEEK_API_KEY = [Environment]::GetEnvironmentVariable('DEEPSEEK_API_KEY', 'User')
 }
-if (-not $env:DEEPSEEK_API_KEY) {
-    throw 'Set DEEPSEEK_API_KEY in your local environment before starting the backend.'
-}
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location -LiteralPath $projectRoot
