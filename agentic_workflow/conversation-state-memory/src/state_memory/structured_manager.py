@@ -130,11 +130,11 @@ class StructuredStateMemoryManager:
                         state.hard_slots[slot] = deepcopy(state.shared_price_slots[slot])
             # A new product target retains explicit monetary limits, not old
             # product-specific material, color, brand or feature requirements.
-            state.hard_slots = {k: v for k, v in state.hard_slots.items() if k in {"price_min", "price_max"}}
+            state.hard_slots = {k: v for k, v in state.hard_slots.items() if k in {"price_min", "price_max", "audience"}}
             state.soft_slots = {k: v for k, v in state.soft_slots.items()
                                 if k in {'budget_target', 'budget_floor_target',
-                                         'shopping_purpose', 'shopping_occasion'}}
-            state.rejected_values.clear()
+                                         'shopping_purpose', 'shopping_occasion', 'audience'}}
+            state.rejected_values = {k: v for k, v in state.rejected_values.items() if k == 'audience'}
             # Shown products belong to the previous shopping task. Clearing
             # them creates an intent-scoped novelty window for the new target.
             state.shown_asins.clear()

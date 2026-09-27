@@ -251,10 +251,6 @@ __marimo__/
 /docs/integration/sync-manifest-*.json
 /scripts/debug_integrated_session.py
 /scripts/debug_single_session.py
-# Python cache
-__pycache__/
-*.py[cod]
-
 # Runtime model and search artifacts are tracked through Git LFS.
 
 /search_tool/models/task_1_us_title_bullet/model.safetensors
@@ -275,3 +271,16 @@ node_modules/
 /ranking/models/
 /ranking/hypothesis/
 /checkpoints/
+
+# Local build, test, and document-rendering outputs
+/.dist/
+coverage/
+.vite/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Windows and temporary Office files
+Thumbs.db
+Desktop.ini
+~$*

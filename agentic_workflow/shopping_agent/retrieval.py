@@ -12,6 +12,7 @@ from techjam_agent.contracts_v2 import RetrievalResultV2, RetrievalStats
 from techjam_agent.query import tokenize, parse_text
 from techjam_agent.retrieval import LiteTop50CandidateGenerator, build_retrieval_plan, _text
 from state_memory.contracts import StateSnapshotV2
+from intent_router.audience import audience_matches
 
 
 def sequence(value):
@@ -317,6 +318,8 @@ class StateAwareRetriever:
             # Alternatives within a slot are OR; different slots are AND.
             def matches(v):
                 required = terms(v)
+                if name == 'audience':
+                    return audience_matches(product, v)
                 if name == "category":
                     return category_matches(product, v)[0]
                 if name == 'subtype':
@@ -341,6 +344,10 @@ class StateAwareRetriever:
             if not any(matches(v) for v in sequence(value)):
                 return False
         for name, values in state.exclusions.items():
+            if name == 'audience':
+                if any(audience_matches(product, value) for value in values):
+                    return False
+                continue
             if name == 'style':
                 if any(style_matches(product, value) for value in values):
                     return False

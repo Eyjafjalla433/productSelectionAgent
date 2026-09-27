@@ -198,8 +198,21 @@ class FinalAgent:
             uncertainty_only = intent_result.decision_evidence.get('uncertain_preference') and not intent_result.slot_updates
             if self.requirement_enhancer is not None and intent_result.decision_evidence.get('requirement_control') not in {'undo', 'redo'} and not intent_result.decision_evidence.get('search_reset') and not intent_result.decision_evidence.get('conversation_act') and not intent_result.decision_evidence.get('declined_options') and not uncertainty_only and not intent_result.decision_evidence.get('retry_search'):
                 stage = "1_model_enhancement"
-                enhancement = self.requirement_enhancer.enhance(user_message, intent_result.slot_updates or ())
-                combined = tuple(intent_result.slot_updates or ()) + enhancement.updates
+                model_context = {}
+                if getattr(self.requirement_enhancer, 'primary', False):
+                    current = self.memory.sessions[session_id]
+                    model_context['context'] = {
+                        'current_state': {
+                            'hard': {k: v.value for k, v in current.hard_slots.items()},
+                            'soft': {k: v.value for k, v in current.soft_slots.items()},
+                            'excluded': current.rejected_values,
+                        },
+                        'pending_question': self.memory.pending[session_id],
+                    }
+                enhancement = self.requirement_enhancer.enhance(
+                    user_message, intent_result.slot_updates or (), **model_context)
+                combined = (enhancement.updates if enhancement.replaces_rules else
+                            tuple(intent_result.slot_updates or ()) + enhancement.updates)
                 intent_result = replace(
                     intent_result,
                     slot_updates=combined,
@@ -210,6 +223,7 @@ class FinalAgent:
                             "model": enhancement.model,
                             "accepted_updates": len(enhancement.updates),
                             "warning": enhancement.warning,
+                            "replaces_rules": enhancement.replaces_rules,
                         },
                     },
                 )

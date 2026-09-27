@@ -99,7 +99,9 @@ PRICE_OR_LESS_RE = re.compile(r"\$?\s*(\d+(?:\.\d+)?)\s*(?:or less|or below|or u
 SIZE_WORD_RE = re.compile(r"\b(xxs|xs|xl|xxl|xxxl|small|medium|large|extra large)\b", re.I)
 SIZE_LETTER_RE = re.compile(r"\bsize\s*(s|m|l)\b", re.I)
 NEGATION_RE = re.compile(
-    r"\b(?:no|not|without|avoid|except|excluding)\s+(?:a |an |any )?([a-z][a-z -]{1,30}?)(?=\s+(?:and|but|for|with)\b|[,.;]|$)",
+    r"\b(?:(?:don['’]t|do\s+not|no\s+longer)\s+want|no|not|without|avoid|except|excluding)"
+    r"\s+(?:a |an |any )?([a-z][a-z -]{1,30}?)"
+    r"(?=\s+(?:anymore|any\s+more|and|but|for|with)\b|[,.;!?]|$)",
     re.I,
 )
 KEY_REQUIREMENT_RE = re.compile(r"\bkey requirement is:\s*(.+)$", re.I)

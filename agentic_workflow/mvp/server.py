@@ -546,6 +546,14 @@ class AgentRuntime:
         self.model_name = model_name
         self.model_cloud = model_provider not in {"off", "local"} if model_cloud is None else bool(model_cloud)
         self.comparison_enhancer = comparison_enhancer
+        self.response_writer = None
+        if model_provider == 'deepseek' and getattr(comparison_enhancer, 'provider', None):
+            from copy import copy
+            from shopping_agent.response_writer import ResponseWriter
+            writer_provider = copy(comparison_enhancer.provider)
+            if hasattr(writer_provider, 'timeout_seconds'):
+                writer_provider.timeout_seconds = min(writer_provider.timeout_seconds, 12.0)
+            self.response_writer = ResponseWriter(writer_provider)
         self.session_ttl_seconds = float(session_ttl_seconds)
         self.max_sessions = int(max_sessions)
         self.scenarios = tuple(deepcopy(scenarios))
@@ -557,8 +565,10 @@ class AgentRuntime:
         from agent import Agent
         from shopping_agent.description_adapter import DescriptionComparisonAdapter
         from shopping_agent.requirement_enhancer import RequirementEnhancer
+        from shopping_agent.requirement_parser import PrimaryRequirementParser
 
-        enhancer = RequirementEnhancer(provider) if provider is not None else None
+        enhancer = (PrimaryRequirementParser(provider) if provider.name == 'deepseek'
+                    else RequirementEnhancer(provider)) if provider is not None else None
         agent_options.setdefault('trace_enabled', True)
         agent_options.setdefault('requirement_enhancer', enhancer)
         return cls(
@@ -579,6 +589,26 @@ class AgentRuntime:
             max_sessions=max_sessions,
             scenarios=scenarios,
         )
+
+    def _write_shopper_response(self, session, message, assistant, products, receipt):
+        if self.response_writer is None:
+            return
+        catalogs = {p['parent_asin']: self.agent.get_catalog_product(p['parent_asin']) or {}
+                    for p in products[:10]}
+        history = [{'user': t['user_message'], 'assistant': t['assistant']['message']}
+                   for t in session.audit_turns[-3:]]
+        assist = self.response_writer.write(
+            message=message, assistant=assistant, products=products, receipt=receipt,
+            catalogs=catalogs, history=history,
+            selection={'saved_asins': list(session.selections),
+                       'hidden_asins': list(session.rejected_asins)})
+        receipt['response_assist'] = assist
+        usage = {k: int(assistant.get('usage', {}).get(k) or 0) +
+                    int(assist.get('usage', {}).get(k) or 0)
+                 for k in ('prompt_tokens', 'completion_tokens')}
+        assistant['usage'] = usage
+        receipt['model_usage'] = usage
+        session.last_products = deepcopy(products)
 
     def _drop_session(self, session_id: str) -> None:
         self.sessions.pop(session_id, None)
@@ -1980,6 +2010,9 @@ class AgentRuntime:
             "ask_attribute": None,
             "usage": response["usage"],
         }
+        receipt['search_execution'] = {'retrieved': False, 'requirements_reset': False,
+                                       'category_changed': False}
+        self._write_shopper_response(session, message, assistant, products, receipt)
         audit_record = {
             "turn": turn,
             "user_message": message,
@@ -2568,6 +2601,11 @@ class AgentRuntime:
                 )
 
             receipt = build_receipt(trace)
+            receipt['search_execution'] = {
+                'retrieved': any(e.get('stage') in {'2_retrieval', '2_retrieval_retry'} for e in trace.get('events', [])),
+                'requirements_reset': bool(receipt.get('search_reset')),
+                'category_changed': bool(receipt.get('category_changed')),
+            }
             if comparison_decline_extra:
                 receipt['comparison_declined'] = {'applied_request': comparison_decline_extra}
             if term_request:
@@ -3061,6 +3099,7 @@ class AgentRuntime:
                         assistant['message'] += " Some explanations couldn't be completed. You can say 'try again' to retry these same products."
                         receipt['suggested_replies'] = ['Try again']
             self._prune_reset_snapshots(session_id, session)
+            self._write_shopper_response(session, message, assistant, products, receipt)
             audit_record = {
                 "turn": turn,
                 "user_message": message,

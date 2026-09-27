@@ -33,6 +33,7 @@ class EnhancementOutcome:
     usage: dict[str, int]
     latency_ms: float
     warning: str | None = None
+    replaces_rules: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {**asdict(self), "updates": [asdict(update) for update in self.updates]}

@@ -3,7 +3,7 @@ export type Requirements = Record<string, string | string[] | number | null>;
 export interface Signal { tier: string; slot: string; value: string; status: string; evidence?: string }
 export interface Match { hard_supported: number; hard_total: number; soft_supported?: number; soft_total?: number; hard_coverage?: number; signals?: Signal[]; disclaimer?: string }
 export interface AdviceItem {text:string;source?:string;evidence?:string}
-export interface Advice {pros?:AdviceItem[];cons?:AdviceItem[];catalog_highlights?:{source?:string;evidence:string}[];disclaimer?:string}
+export interface Advice {fit_reason?:string;fit_reason_source?:string;pros?:AdviceItem[];cons?:AdviceItem[];catalog_highlights?:{source?:string;evidence:string}[];disclaimer?:string}
 export interface ProductLink {product_url?:string|null;url_verified?:boolean}
 export interface ProductCard extends ProductLink {parent_asin:string;rank:number;title:string;store?:string;price:CatalogValue;rating:CatalogValue;rating_count?:CatalogValue;category?:string;features?:string[];match?:Match;advice?:Advice;shopper_notes?:{feature?:string;detail?:string;fit?:string;caution?:string}}
 export interface ProductDetail extends ProductLink {parent_asin:string;title:string;store?:string;price:CatalogValue;average_rating:CatalogValue;rating_number?:CatalogValue;categories?:string[];product_description?:string[];product_bullet_points?:string[];details?:Record<string,unknown>;requirement_match?:Match;advice?:Advice;source_note?:string;last_observed_rank?:number}

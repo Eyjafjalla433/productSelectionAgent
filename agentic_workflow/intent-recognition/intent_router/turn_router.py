@@ -922,6 +922,18 @@ class TurnIntentRouter(IntentRouter):
                 if resumed:
                     updates.extend(resumed)
                     evidence['resumed_category_details'] = chosen_categories[0]
+        from .audience import mentions
+        wanted_audiences = []
+        for audience, mention in mentions(text):
+            prefix = text[max(0, mention.start() - 35):mention.start()]
+            if re.search(r"(?:\bnot|\bno|\bavoid|\bexclude|\bdon['’]t want|\bdo not want)\s+(?:a\s+|any\s+)?$", prefix):
+                add('audience', 'exclude', [audience])
+            else:
+                wanted_audiences.append(audience)
+        if wanted_audiences:
+            wanted_audiences = list(dict.fromkeys(wanted_audiences))
+            add('audience', 'remove_exclusion', wanted_audiences)
+            add('audience', 'set', wanted_audiences, 'hard')
         if ((pending.get('evidence') or {}).get('expected_reduction') is not None
                 and updates and not any(update.slot == pending.get('target_slot') for update in updates)
                 and not any(update.slot == 'category' for update in updates)

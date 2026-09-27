@@ -9,6 +9,7 @@ from typing import Any, Iterable
 from shopping_agent.retrieval import category_matches, subtype_matches, material_matches, size_matches, color_matches, style_matches
 from shopping_agent.retrieval import breathable_matches
 from techjam_agent.query import parse_text
+from intent_router.audience import audience_matches
 
 
 TEXT_FIELDS = ("title", "features", "description", "details", "categories")
@@ -96,6 +97,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
             )
             matched_values = [raw_value for raw_value, value in zip(values, evidence_values)
                     if (breathable_matches(product) if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+                    else audience_matches(product, value) if slot == 'audience'
                     else material_matches(product, value) if slot == 'material'
                     else subtype_matches(product, value) if slot == 'subtype'
                     else size_matches(product, value) if slot == 'size'
@@ -124,6 +126,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
             continue
         matched = [value for value in values if (
             breathable_matches(product) if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+            else audience_matches(product, value) if slot == 'audience'
             else material_matches(product, value) if slot == 'material'
             else size_matches(product, value) if slot == 'size'
             else color_matches(product, value) if slot == 'color'
@@ -146,6 +149,7 @@ def explain_product(product: dict[str, Any], receipt: dict[str, Any]) -> dict[st
         values = _values(raw_values)
         conflicts = [value for value in values if (breathable_matches(product)
                      if (slot == 'feature' or slot.startswith('feature_')) and _terms(value) == {'breathable'}
+                     else audience_matches(product, value) if slot == 'audience'
                      else material_matches(product, value)
                      if slot == 'material'
                      else color_matches(product, value) if slot == 'color'
