@@ -26,7 +26,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-search_tool/
 reference/
 
 # PyInstaller
@@ -256,8 +255,7 @@ __marimo__/
 __pycache__/
 *.py[cod]
 
-# Generated search artifacts
-/search_tool/artifacts/
+# Runtime model and search artifacts are tracked through Git LFS.
 
 /search_tool/models/task_1_us_title_bullet/model.safetensors
 
@@ -268,3 +266,12 @@ __pycache__/
 /reference/retrieval-and-reranking/resources/
 /reference/ranking_pipeline/checkpoints/
 /reference/extracted_extras/
+
+# Local dependencies, secrets, and training outputs
+node_modules/
+.env.*
+!.env.example
+/shopping_queries_dataset/*.parquet
+/ranking/models/
+/ranking/hypothesis/
+/checkpoints/

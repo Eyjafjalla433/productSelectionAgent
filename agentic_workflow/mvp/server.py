@@ -89,6 +89,16 @@ def _known_catalog_price(product: dict[str, Any]) -> Decimal | None:
     return price if price.is_finite() and price >= 0 else None
 
 
+def product_link_fields(product: dict[str, Any]) -> dict[str, Any]:
+    """Expose only the expected Amazon US product URL, without verifying it online."""
+    url = product.get("product_url")
+    if not isinstance(url, str) or not re.fullmatch(
+        r"https://(?:www\.)?amazon\.com/dp/[A-Z0-9]{10}/?", url
+    ):
+        return {"product_url": None, "url_verified": False}
+    return {"product_url": url, "url_verified": product.get("url_verified") is True}
+
+
 class ApiError(Exception):
     def __init__(self, status: int, message: str, code: str = "request_failed"):
         super().__init__(message)
@@ -721,6 +731,7 @@ class AgentRuntime:
             "title": str(product.get("title") or "Untitled catalog product")[:500],
             "store": str(product.get("store") or "Independent seller")[:200],
             "price": product.get("price"),
+            **product_link_fields(product),
             "average_rating": product.get("average_rating"),
             "rating_number": product.get("rating_number"),
             "categories": [str(value)[:200] for value in (product.get("categories") or ())[:10]],
@@ -2549,6 +2560,7 @@ class AgentRuntime:
                         "price": product.get("price"),
                         "rating": product.get("average_rating"),
                         "rating_count": product.get("rating_number"),
+                        **product_link_fields(product),
                         "category": (product.get("categories") or ["Catalog"])[-1],
                         "features": [str(value) for value in (product.get("features") or ())[:3]],
                         "evidence": evidence_by_asin.get(row["parent_asin"], []),
